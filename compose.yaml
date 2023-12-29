@@ -1,0 +1,44 @@
+version: '3.8'
+
+name: antarctica-explorer
+
+volumes:
+  db-data:
+
+services:
+  elasticsearch:
+    image: elasticsearch:8.11.3
+    environment:
+      - 'ELASTIC_PASSWORD=secret'
+      - 'discovery.type=single-node'
+      - 'xpack.security.enabled=false'
+    ports:
+      - "9201:9200"
+      - "9301:9300"
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_HOST_PORT}:${DB_CONTAINER_PORT}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  api:
+    container_name: antarctica-explorer-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${API_PORT}:${API_PORT}
+    env_file: .env
+    environment:
+      - spring.datasource.url=${DB_URL}
+      - spring.datasource.username=${DB_USER}
+      - spring.datasource.password=${DB_PASSWORD}
+    depends_on:
+      - db
+      - elasticsearch
