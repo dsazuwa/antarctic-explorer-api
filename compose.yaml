@@ -2,10 +2,19 @@ version: '3.8'
 
 name: antarctica-explorer
 
-volumes:
-  db-data:
-
 services:
+  db:
+     image: postgres:latest
+     environment:
+       POSTGRES_USER: ${DB_USER}
+       POSTGRES_PASSWORD: ${DB_PASSWORD}
+       POSTGRES_DB: ${DB_NAME}
+     ports:
+       - ${DB_HOST_PORT}:${DB_CONTAINER_PORT}
+     volumes:
+       - ./postgresql/data:/var/lib/postgresql/data
+       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
   elasticsearch:
     image: elasticsearch:8.11.3
     environment:
@@ -16,24 +25,13 @@ services:
       - "9201:9200"
       - "9301:9300"
 
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - ${DB_HOST_PORT}:${DB_CONTAINER_PORT}
-    volumes:
-      - db-data:/var/lib/postgresql/data
-
   api:
     container_name: antarctica-explorer-api
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - ${API_PORT}:${API_PORT}
+      - ${API_HOST_PORT}:${API_CONTAINER_PORT}
     env_file: .env
     environment:
       - spring.datasource.url=${DB_URL}

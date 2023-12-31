@@ -1,0 +1,48 @@
+TABLE antarctica.cruise_lines {
+  cruise_line_id SERIAL
+  name VARCHAR [NOT NULL]
+  website VARCHAR [NOT NULL]
+  PRIMARY KEY (cruise_line_id)
+}
+
+TABLE antarctica.expeditions {
+  expedition_id SERIAL
+  cruise_line_id INTEGER [NOT NULL]
+  website VARCHAR [NOT NULL]
+  title VARCHAR [NOT NULL]
+  description TEXT [NOT NULL]
+  starting_price DECIMAL(10, 4) [NOT NULL]
+  num_days INTEGER [NOT NULL]
+  num_countries INTEGER [NOT NULL]
+  created_at TIMESTAMP [NOT NULL]
+  updated_at TIMESTAMP [NOT NULL]
+  PRIMARY KEY (expedition_id)
+}
+
+ref: antarctica.expeditions.cruise_line_id > antarctica.cruise_lines.cruise_line_id
+
+TABLE antarctica.cruises {
+  cruise_id SERIAL
+  expedition_id INTEGER [NOT NULL]
+  start_date DATE [NOT NULL]
+  end_date DATE [NOT NULL]
+  created_at TIMESTAMP [NOT NULL]
+  updated_at TIMESTAMP [NOT NULL]
+  PRIMARY KEY (cruise_id)
+}
+
+ref: antarctica.cruises.expedition_id > antarctica.expeditions.expedition_id
+
+TABLE antarctica.activities {
+  activity_id SERIAL
+  expedition_id INTEGER [NOT NULL]
+  name VARCHAR [NOT NULL]
+  description TEXT
+  is_included BOOLEAN [NOT NULL]
+  price DECIMAL(10, 4)
+  created_at TIMESTAMP [NOT NULL]
+  updated_at TIMESTAMP [NOT NULL]
+  PRIMARY KEY (activity_id)
+}
+
+ref: antarctica.activities.expedition_id > antarctica.expeditions.expedition_id
