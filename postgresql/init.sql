@@ -13,8 +13,8 @@ CREATE SCHEMA antarctica;
 
 CREATE TABLE antarctica.cruise_lines (
   cruise_line_id SERIAL,
-  name VARCHAR(50) NOT NULL,
-  website VARCHAR(255) NOT NULL,
+  name VARCHAR(50) NOT NULL UNIQUE,
+  website VARCHAR(255) NOT NULL UNIQUE,
   PRIMARY KEY (cruise_line_id)
 );
 
