@@ -16,6 +16,9 @@ public class CruiseLine {
   @Column(name = "website", nullable = false, unique = true)
   private String website;
 
+  @Column(name = "expedition_website", nullable = false, unique = true)
+  private String expeditionWebsite;
+
   protected CruiseLine() {}
 
   public CruiseLine(String name, String website) {
@@ -33,5 +36,9 @@ public class CruiseLine {
 
   public String getWebsite() {
     return website;
+  }
+
+  public String getExpeditionWebsite() {
+    return expeditionWebsite;
   }
 }

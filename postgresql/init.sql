@@ -15,6 +15,7 @@ CREATE TABLE antarctica.cruise_lines (
   cruise_line_id SERIAL,
   name VARCHAR(50) NOT NULL UNIQUE,
   website VARCHAR(255) NOT NULL UNIQUE,
+  expedition_website TEXT NOT NULL UNIQUE,
   PRIMARY KEY (cruise_line_id)
 );
 
@@ -71,11 +72,28 @@ CREATE TABLE antarctica.activities (
 DO $$
 DECLARE
   cruise_lines VARCHAR[] := ARRAY['Lindblad Expeditions', 'Quark Expeditions', 'Viking Expeditions', 'Aurora Expeditions', 'Seaborn Expeditions', 'Ponant', 'Hurtigruten Expeditions'];
-  websites VARCHAR[] := ARRAY['https://world.expeditions.com/', 'https://www.quarkexpeditions.com/', 'https://www.vikingcruises.com/expeditions', 'https://www.aurora-expeditions.com/destination/', 'https://www.seabourn.com/en/cruise-destinations/expedition', 'https://us.ponant.com/', 'https://www.hurtigruten.com/en-us/expeditions/'];
+  home_websites VARCHAR[] := ARRAY[
+    'https://world.expeditions.com',
+    'https://www.quarkexpeditions.com',
+    'https://www.vikingcruises.com/expeditions',
+    'https://www.aurora-expeditions.com/destination',
+    'https://www.seabourn.com/en/cruise-destinations/expedition',
+    'https://us.ponant.com/ponant-expeditions',
+    'https://www.hurtigruten.com/en-us/expeditions'
+   ];
+  expedition_websites VARCHAR[] := ARRAY[
+    'https://world.expeditions.com/book?destinations.name=Antarctica',
+    'https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic',
+    'https://www.vikingcruises.com/expeditions/search-cruises/index.html?Regions=Antarctica',
+    'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle',
+    'https://www.seabourn.com/en/find-a-cruise?destinationIds:(S)',
+    'https://us.ponant.com/cruises/themes/polar-expedition?pred-facet-destination%5B%5D=ANTARCTI',
+    'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises'
+   ];
   i INTEGER;
 BEGIN
   FOR i IN 1..array_length(cruise_lines, 1) LOOP
-    INSERT INTO antarctica.cruise_lines (name, website)
-    VALUES (cruise_lines[i], websites[i]);
+    INSERT INTO antarctica.cruise_lines (name, website, expedition_website)
+    VALUES (cruise_lines[i], home_websites[i], expedition_websites[i]);
   END LOOP;
 END $$;
