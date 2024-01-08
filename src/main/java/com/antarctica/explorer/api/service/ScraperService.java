@@ -1,8 +1,10 @@
 package com.antarctica.explorer.api.service;
 
+import com.antarctica.explorer.api.scraper.LindbladScraper;
 import com.antarctica.explorer.api.scraper.QuarkScraper;
 import com.antarctica.explorer.api.scraper.Scraper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,7 +24,10 @@ public class ScraperService {
   @Scheduled(cron = "0 0 0 */7 * ?")
   public void scrapeData() {
     List<Scraper> scrapers =
-        new ArrayList<>(List.of(new QuarkScraper(cruiseLineService, expeditionService)));
+        new ArrayList<>(
+            Arrays.asList(
+                new LindbladScraper(cruiseLineService, expeditionService),
+                new QuarkScraper(cruiseLineService, expeditionService)));
     scrapers.forEach(Scraper::scrape);
   }
 }

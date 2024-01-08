@@ -24,13 +24,15 @@ public class QuarkScraper implements Scraper {
   private final ExpeditionService expeditionService;
 
   public QuarkScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
+    String cruiseLineName = "Quark Expeditions";
+
     System.setProperty("webdriver.chrome.driver", "C:\\dev\\tools\\chromedriver\\chromedriver.exe");
     this.driver = new ChromeDriver();
     this.cruiseLine =
         cruiseLineService
-            .findByName("Quark Expeditions")
+            .findByName(cruiseLineName)
             .orElseThrow(
-                () -> new RuntimeException(("CruiseLine \"Quark Expeditions\" not found")));
+                () -> new RuntimeException(("CruiseLine \"" + cruiseLineName + "\" not found")));
     this.expeditionService = expeditionService;
   }
 
@@ -75,7 +77,8 @@ public class QuarkScraper implements Scraper {
         BigDecimal price =
             startingPrice.isEmpty() ? null : new BigDecimal(startingPrice.replace(",", ""));
         String photoUrl =
-            cruiseLine.getWebsite() + item.select("div.hero-banner__image > picture > img").attr("src");
+            cruiseLine.getWebsite()
+                + item.select("div.hero-banner__image > picture > img").attr("src");
 
         expeditionService.saveIfNotExist(
             cruiseLine, website, name, description, port, port, duration, price, photoUrl);
