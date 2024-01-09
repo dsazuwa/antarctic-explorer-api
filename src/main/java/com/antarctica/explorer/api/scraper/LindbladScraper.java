@@ -1,6 +1,5 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.pojo.LindbladHit;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
@@ -10,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Optional;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,42 +21,24 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class LindbladScraper implements Scraper {
+public class LindbladScraper extends Scraper {
   private static final String ALGOLIA_URL =
       "https://prru6fnc68-dsn.algolia.net/1/indexes/*/queries";
   private static final String FORM_DATA =
       "{\"requests\":[{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=true&clickAnalytics=true&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=%5B%22departureDates.dateFromTimestamp%22%2C%22destinations.name%22%2C%22ships.name%22%2C%22duration%22%2C%22productType%22%5D&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&tagFilters=&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facets=destinations.name&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=departureDates.dateFromTimestamp&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&page=0&userToken=00000000-0000-0000-0000-000000000000\"}]}";
 
-  private final WebDriver driver;
-  private final WebDriverWait wait;
   private final CloseableHttpClient httpClient;
   private final ObjectMapper objectMapper;
-  private final CruiseLine cruiseLine;
-  private final ExpeditionService expeditionService;
 
   private boolean cookieAccepted = false;
 
   public LindbladScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
+    super(cruiseLineService, expeditionService, "Lindblad Expeditions");
+
     this.httpClient = HttpClients.createDefault();
     this.objectMapper = new ObjectMapper();
-
-    System.setProperty("webdriver.chrome.driver", "C:\\dev\\tools\\chromedriver\\chromedriver.exe");
-    this.driver = new ChromeDriver();
-    this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-    String cruiseLineName = "Lindblad Expeditions";
-    this.cruiseLine =
-        cruiseLineService
-            .findByName(cruiseLineName)
-            .orElseThrow(
-                () -> new RuntimeException(("CruiseLine \"" + cruiseLineName + "\" not found")));
-    this.expeditionService = expeditionService;
   }
 
   public void scrape() {
@@ -73,9 +53,11 @@ public class LindbladScraper implements Scraper {
 
       processHits(hits);
 
-      closeResources();
+      httpClient.close();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      quitDriver();
     }
   }
 
@@ -132,17 +114,9 @@ public class LindbladScraper implements Scraper {
     }
   }
 
-  private void waitForElement(By locator) {
-    wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-  }
-
-  private void navigateTo(String website) {
-    driver.get(website);
-  }
-
   private void acceptCookie() {
     String selector = "button.sc-baf605bd-1.hOSsqd";
-    waitForElement(By.cssSelector(selector));
+    waitForPresenceOfElement(By.cssSelector(selector));
     WebElement acceptCookieButton = driver.findElement(By.cssSelector(selector));
     acceptCookieButton.click();
     cookieAccepted = true;
@@ -150,13 +124,13 @@ public class LindbladScraper implements Scraper {
 
   private String extractDescription(Document doc) {
     String selector = "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
-    waitForElement(By.cssSelector(selector));
+    waitForPresenceOfElement(By.cssSelector(selector));
     return doc.select(selector).text();
   }
 
   private String[] extractPorts(Document doc) {
     String selector = "div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
-    waitForElement(By.cssSelector(selector));
+    waitForPresenceOfElement(By.cssSelector(selector));
     return doc.select(selector).stream().map(Element::text).toArray(String[]::new);
   }
 
@@ -171,10 +145,5 @@ public class LindbladScraper implements Scraper {
         hit.durationUS + " days",
         new BigDecimal(hit.priceFromUSD),
         hit.thumbnail);
-  }
-
-  private void closeResources() throws IOException {
-    httpClient.close();
-    driver.quit();
   }
 }

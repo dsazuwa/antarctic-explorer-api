@@ -29,7 +29,7 @@ CREATE TABLE antarctica.expeditions (
   arriving_at VARCHAR(100),
   duration VARCHAR(50) NOT NULL,
   starting_price DECIMAL(10, 4),
-  photo_url VARCHAR(255),
+  photo_url TEXT,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   PRIMARY KEY (expedition_id),
@@ -75,7 +75,7 @@ DECLARE
   home_websites VARCHAR[] := ARRAY[
     'https://world.expeditions.com',
     'https://www.quarkexpeditions.com',
-    'https://www.vikingcruises.com/expeditions',
+    'https://www.vikingcruises.com',
     'https://www.aurora-expeditions.com/destination',
     'https://www.seabourn.com/en/cruise-destinations/expedition',
     'https://us.ponant.com/ponant-expeditions',
