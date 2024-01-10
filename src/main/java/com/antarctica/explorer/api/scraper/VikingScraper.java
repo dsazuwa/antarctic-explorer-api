@@ -46,7 +46,7 @@ public class VikingScraper extends Scraper {
       String endingPort = ports.length > 1 ? ports[1] : null;
 
       Elements infoElement = item.select("section.info > div.detail > div");
-      String duration = infoElement.get(0).select("div.item > span.value").text();
+      String duration = infoElement.get(0).select("div.item > span.value").text() + " days";
       String startingPrice =
           infoElement.get(2).select("div.item > span.value").text().replaceAll("[^\\d.]", "");
 
