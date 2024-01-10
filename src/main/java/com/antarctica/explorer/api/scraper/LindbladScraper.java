@@ -129,7 +129,9 @@ public class LindbladScraper extends Scraper {
   }
 
   private String[] extractPorts(Document doc) {
-    String selector = "div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
+    String selector =
+        "div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
+
     waitForPresenceOfElement(By.cssSelector(selector));
     return doc.select(selector).stream().map(Element::text).toArray(String[]::new);
   }
