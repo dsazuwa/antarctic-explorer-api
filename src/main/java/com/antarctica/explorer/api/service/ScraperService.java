@@ -1,9 +1,6 @@
 package com.antarctica.explorer.api.service;
 
-import com.antarctica.explorer.api.scraper.LindbladScraper;
-import com.antarctica.explorer.api.scraper.QuarkScraper;
-import com.antarctica.explorer.api.scraper.Scraper;
-import com.antarctica.explorer.api.scraper.VikingScraper;
+import com.antarctica.explorer.api.scraper.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +26,8 @@ public class ScraperService {
             Arrays.asList(
                 new LindbladScraper(cruiseLineService, expeditionService),
                 new QuarkScraper(cruiseLineService, expeditionService),
-                new VikingScraper(cruiseLineService, expeditionService)));
+                new VikingScraper(cruiseLineService, expeditionService),
+                new AuroraScraper(cruiseLineService, expeditionService)));
     scrapers.forEach(Scraper::scrape);
   }
 }

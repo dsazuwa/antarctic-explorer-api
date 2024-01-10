@@ -7,6 +7,7 @@ import java.time.Duration;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -18,9 +19,11 @@ public abstract class Scraper {
 
   public Scraper(
       CruiseLineService cruiseLineService, ExpeditionService expeditionService, String name) {
-    System.setProperty("webdriver.chrome.driver", "C:\\dev\\tools\\chromedriver\\chromedriver.exe");
-    this.driver = new ChromeDriver();
-    this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--headless");
+    this.driver = new ChromeDriver(options);
+
+    this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 
     this.cruiseLine =
         cruiseLineService
@@ -31,6 +34,7 @@ public abstract class Scraper {
 
   protected void navigateTo(String website) {
     driver.get(website);
+    System.out.println("Loaded website: " + website);
   }
 
   protected void waitForPresenceOfElement(By locator) {
