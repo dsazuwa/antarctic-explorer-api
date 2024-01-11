@@ -3,7 +3,9 @@ package com.antarctica.explorer.api.scraper;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
+import java.math.BigDecimal;
 import java.time.Duration;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -43,6 +45,17 @@ public abstract class Scraper {
 
   protected void waitForInvisibilityOfElement(By locator) {
     wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+  }
+
+  protected BigDecimal extractPrice(Element element, String selector) {
+    String priceText = element.select(selector).text().replaceAll("[^\\d.]", "");
+
+    try {
+      return new BigDecimal(priceText);
+    } catch (NumberFormatException e) {
+      System.err.println("Failed to parse price: " + priceText);
+      return null;
+    }
   }
 
   protected void quitDriver() {

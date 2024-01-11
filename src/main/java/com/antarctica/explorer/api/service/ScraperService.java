@@ -27,7 +27,9 @@ public class ScraperService {
                 new LindbladScraper(cruiseLineService, expeditionService),
                 new QuarkScraper(cruiseLineService, expeditionService),
                 new VikingScraper(cruiseLineService, expeditionService),
-                new AuroraScraper(cruiseLineService, expeditionService)));
+                new AuroraScraper(cruiseLineService, expeditionService),
+                new PonantScraper(cruiseLineService, expeditionService)));
+
     scrapers.forEach(Scraper::scrape);
   }
 }
