@@ -19,16 +19,16 @@ public class Expedition {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private CruiseLine cruiseLine;
 
-  @Column(name = "website", nullable = false)
+  @Column(name = "website")
   private String website;
 
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+  @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
-  @Column(name = "departing_from", nullable = false)
+  @Column(name = "departing_from")
   private String departingFrom;
 
   @Column(name = "arriving_at")
@@ -40,7 +40,7 @@ public class Expedition {
   @Column(name = "starting_price")
   private BigDecimal startingPrice;
 
-  @Column(name = "photo_url")
+  @Column(name = "photo_url", columnDefinition = "TEXT")
   private String photoUrl;
 
   @CreationTimestamp(source = SourceType.DB)
@@ -114,16 +114,8 @@ public class Expedition {
     return departingFrom;
   }
 
-  public void setDepartingFrom(String departingFrom) {
-    this.departingFrom = departingFrom;
-  }
-
   public String getArrivingAt() {
     return arrivingAt;
-  }
-
-  public void setArrivingAt(String arrivingAt) {
-    this.arrivingAt = arrivingAt;
   }
 
   public String getDuration() {
@@ -138,24 +130,8 @@ public class Expedition {
     return startingPrice;
   }
 
-  public void setStartingPrice(BigDecimal startingPrice) {
-    this.startingPrice = startingPrice;
-  }
-
   public String getPhotoUrl() {
     return photoUrl;
-  }
-
-  public void setPhotoUrl(String photoUrl) {
-    this.photoUrl = photoUrl;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
   }
 
   @Override

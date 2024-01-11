@@ -1,9 +1,9 @@
 ALTER TABLE IF EXISTS antarctica.activities DROP CONSTRAINT fk_expedition_id;
-ALTER TABLE IF EXISTS antarctica.cruises DROP CONSTRAINT fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.expedition_trips DROP CONSTRAINT fk_expedition_id;
 ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT fk_cruise_line_id;
 
 DROP TABLE IF EXISTS antarctica.activities;
-DROP TABLE IF EXISTS antarctica.cruises;
+DROP TABLE IF EXISTS antarctica.expedition_trips;
 DROP TABLE IF EXISTS antarctica.expeditions;
 DROP TABLE IF EXISTS antarctica.cruise_lines;
 
@@ -22,10 +22,11 @@ CREATE TABLE antarctica.cruise_lines (
 CREATE TABLE antarctica.expeditions (
   expedition_id SERIAL,
   cruise_line_id INTEGER NOT NULL,
-  website VARCHAR(255) NOT NULL,
+  website TEXT,
   name VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  departing_from VARCHAR(100) NOT NULL,
+  description TEXT,
+--  highlights TEXT[],
+  departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
   duration VARCHAR(50) NOT NULL,
   starting_price DECIMAL(10, 4),
@@ -36,11 +37,17 @@ CREATE TABLE antarctica.expeditions (
   CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
-CREATE TABLE antarctica.cruises (
+CREATE TABLE antarctica.expedition_trips (
   cruise_id SERIAL,
+--  ship_id INTEGER,
   expedition_id INTEGER NOT NULL,
+  departing_from VARCHAR(100),
+  arriving_at VARCHAR(100),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
+  startingPrice DECIMAL(10, 4),
+  duration VARCHAR(50) NOT NULL,
+  website TEXT,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   PRIMARY KEY (cruise_id),
@@ -78,7 +85,7 @@ DECLARE
     'https://www.vikingcruises.com',
     'https://www.aurora-expeditions.com/destination',
     'https://www.seabourn.com/en/cruise-destinations/expedition',
-    'https://us.ponant.com/ponant-expeditions',
+    'https://us.ponant.com',
     'https://www.hurtigruten.com/en-us/expeditions'
    ];
   expedition_websites VARCHAR[] := ARRAY[
