@@ -5,14 +5,13 @@ import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
+import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class PonantScraper extends Scraper {
@@ -80,14 +79,22 @@ public class PonantScraper extends Scraper {
   }
 
   private Elements scrapeExpeditions() {
-    if (!cookieAccepted) acceptCookie();
+    if (!cookieAccepted && isCookieElementVisible()) acceptCookie();
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(EXPEDITION_SELECTOR)));
     Document doc = Jsoup.parse(driver.getPageSource());
     return doc.select(EXPEDITION_SELECTOR);
   }
 
+  private boolean isCookieElementVisible() {
+    try {
+      WebElement element = driver.findElement(By.cssSelector(COOKIE_SELECTOR));
+      return element.isDisplayed();
+    } catch (NoSuchElementException | StaleElementReferenceException e) {
+      return false;
+    }
+  }
+
   private void acceptCookie() {
-    waitForPresenceOfElement(By.cssSelector(COOKIE_SELECTOR));
     WebElement acceptCookieButton = driver.findElement(By.cssSelector(COOKIE_SELECTOR));
     acceptCookieButton.click();
     cookieAccepted = true;
@@ -139,7 +146,6 @@ public class PonantScraper extends Scraper {
   }
 
   private void processElements(String name, List<Element> elements) {
-    System.out.println(name + " " + elements.size());
     Element element = elements.get(0);
     String photoUrl = extractPhotoUrl(element);
     String website = cruiseLine.getWebsite() + element.select(WEBSITE_SELECTOR).attr("href");
@@ -149,15 +155,8 @@ public class PonantScraper extends Scraper {
     String description = doc.select(DESCRIPTION_SELECTOR).text();
     List<PonantExpeditionTrip> trips = extractTrips(doc);
 
-    String commonDepartingPort =
-        trips.stream().map(PonantExpeditionTrip::arrivingAt).distinct().count() == 1
-            ? trips.get(0).departingFrom()
-            : null;
-
-    String commonArrivalPort =
-        trips.stream().map(PonantExpeditionTrip::arrivingAt).distinct().count() == 1
-            ? trips.get(0).arrivingAt()
-            : null;
+    String commonDepartingPort = getCommonPort(trips, PonantExpeditionTrip::departingFrom);
+    String commonArrivalPort = getCommonPort(trips, PonantExpeditionTrip::arrivingAt);
 
     BigDecimal cheapestTrip =
         trips.stream()
@@ -267,5 +266,12 @@ public class PonantScraper extends Scraper {
 
     if (dates.length != 2) throw new NoSuchElementException("Dates not found");
     return dates;
+  }
+
+  private String getCommonPort(
+      List<PonantExpeditionTrip> trips, Function<PonantExpeditionTrip, String> portExtractor) {
+    return trips.stream().map(portExtractor).distinct().count() == 1
+        ? trips.get(0).arrivingAt()
+        : null;
   }
 }
