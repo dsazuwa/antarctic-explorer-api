@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ScraperService {
+  private static final int MAX_RETRIES = 3;
+
   private final CruiseLineService cruiseLineService;
   private final ExpeditionService expeditionService;
 
@@ -30,6 +32,19 @@ public class ScraperService {
                 new AuroraScraper(cruiseLineService, expeditionService),
                 new PonantScraper(cruiseLineService, expeditionService)));
 
-    scrapers.forEach(Scraper::scrape);
+    scrapers.forEach(this::scrapeWithRetry);
+  }
+
+  private void scrapeWithRetry(Scraper scraper) {
+    for (int attempt = 0; true; attempt++)
+      try {
+        scraper.scrape();
+        break;
+      } catch (Exception e) {
+        if (attempt == MAX_RETRIES - 1)
+          throw new RuntimeException("Failed to scrape after " + MAX_RETRIES + " attempts", e);
+
+        System.out.println("Retrying scraper (attempt " + attempt + ")");
+      }
   }
 }
