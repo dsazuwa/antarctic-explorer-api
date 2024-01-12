@@ -40,7 +40,9 @@ public class ScraperService {
       try {
         scraper.scrape();
         break;
-      } catch (Exception e) {
+      } catch (RuntimeException e) {
+        System.out.println(e.getMessage());
+
         if (attempt == MAX_RETRIES - 1)
           throw new RuntimeException("Failed to scrape after " + MAX_RETRIES + " attempts", e);
 
