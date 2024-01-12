@@ -134,7 +134,6 @@ public class LindbladScraper extends Scraper {
         "div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
 
     waitForPresenceOfElement(By.cssSelector(portSelector));
-    String portsText = doc.select(portSelector).text();
     String[] ports = doc.select(portSelector).stream().map(Element::text).toArray(String[]::new);
 
     if (ports.length != 2) throw new NoSuchElementException("Ports not found");
