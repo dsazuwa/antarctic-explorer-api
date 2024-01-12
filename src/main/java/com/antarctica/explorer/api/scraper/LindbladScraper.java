@@ -21,6 +21,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 public class LindbladScraper extends Scraper {
@@ -115,25 +116,29 @@ public class LindbladScraper extends Scraper {
   }
 
   private void acceptCookie() {
-    String selector = "button.sc-baf605bd-1.hOSsqd";
-    waitForPresenceOfElement(By.cssSelector(selector));
-    WebElement acceptCookieButton = driver.findElement(By.cssSelector(selector));
+    String cookieSelector = "button.sc-baf605bd-1.hOSsqd";
+    waitForPresenceOfElement(By.cssSelector(cookieSelector));
+    WebElement acceptCookieButton = driver.findElement(By.cssSelector(cookieSelector));
     acceptCookieButton.click();
     cookieAccepted = true;
   }
 
   private String extractDescription(Document doc) {
-    String selector = "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
-    waitForPresenceOfElement(By.cssSelector(selector));
-    return doc.select(selector).text();
+    String descriptionSelector = "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
+    waitForPresenceOfElement(By.cssSelector(descriptionSelector));
+    return doc.select(descriptionSelector).text();
   }
 
   private String[] extractPorts(Document doc) {
-    String selector =
+    String portSelector =
         "div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
 
-    waitForPresenceOfElement(By.cssSelector(selector));
-    return doc.select(selector).stream().map(Element::text).toArray(String[]::new);
+    waitForPresenceOfElement(By.cssSelector(portSelector));
+    String portsText = doc.select(portSelector).text();
+    String[] ports = doc.select(portSelector).stream().map(Element::text).toArray(String[]::new);
+
+    if (ports.length != 2) throw new NoSuchElementException("Ports not found");
+    return ports;
   }
 
   private void saveExpedition(LindbladHit hit, String website, String description, String[] ports) {
