@@ -26,11 +26,12 @@ public class ScraperService {
     List<Scraper> scrapers =
         new ArrayList<>(
             Arrays.asList(
-                new LindbladScraper(cruiseLineService, expeditionService),
-                new QuarkScraper(cruiseLineService, expeditionService),
-                new VikingScraper(cruiseLineService, expeditionService),
                 new AuroraScraper(cruiseLineService, expeditionService),
-                new PonantScraper(cruiseLineService, expeditionService)));
+                new HurtigrutenScraper(cruiseLineService, expeditionService),
+                new LindbladScraper(cruiseLineService, expeditionService),
+                new PonantScraper(cruiseLineService, expeditionService),
+                new QuarkScraper(cruiseLineService, expeditionService),
+                new VikingScraper(cruiseLineService, expeditionService)));
 
     scrapers.forEach(this::scrapeWithRetry);
   }
