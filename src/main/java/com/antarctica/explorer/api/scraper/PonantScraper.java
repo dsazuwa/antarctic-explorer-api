@@ -6,13 +6,11 @@ import com.antarctica.explorer.api.service.ExpeditionService;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class PonantScraper extends Scraper {
   private static final String EXPEDITION_SELECTOR = "div > div.fiche_produit";
@@ -62,7 +60,7 @@ public class PonantScraper extends Scraper {
 
   @Override
   public void scrape() {
-    navigateTo(cruiseLine.getExpeditionWebsite());
+    navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
 
     try {
       Elements expeditions = scrapeExpeditions();
@@ -78,16 +76,31 @@ public class PonantScraper extends Scraper {
     }
   }
 
+  @Override
+  protected String getCurrentPageText() {
+    return findElement(CURRENT_PAGE_SELECTOR).getText();
+  }
+
+  private boolean hasNextPage() {
+    return !findElements(NEXT_PAGE_SELECTOR).isEmpty();
+  }
+
+  private void navigateToNextPage() {
+    String prevPage = getCurrentPageText();
+    String href = findElement(NEXT_PAGE_SELECTOR + " > a").getAttribute("href");
+
+    navigateTo(href, () -> waitForPageChange(prevPage));
+  }
+
   private Elements scrapeExpeditions() {
     if (!cookieAccepted && isCookieElementVisible()) acceptCookie();
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(EXPEDITION_SELECTOR)));
-    Document doc = Jsoup.parse(driver.getPageSource());
-    return doc.select(EXPEDITION_SELECTOR);
+    waitForPresenceOfElement(EXPEDITION_SELECTOR);
+    return getParsedPageSource().select(EXPEDITION_SELECTOR);
   }
 
   private boolean isCookieElementVisible() {
     try {
-      WebElement element = driver.findElement(By.cssSelector(COOKIE_SELECTOR));
+      WebElement element = findElement(COOKIE_SELECTOR);
       return element.isDisplayed();
     } catch (NoSuchElementException | StaleElementReferenceException e) {
       return false;
@@ -95,40 +108,9 @@ public class PonantScraper extends Scraper {
   }
 
   private void acceptCookie() {
-    WebElement acceptCookieButton = driver.findElement(By.cssSelector(COOKIE_SELECTOR));
+    WebElement acceptCookieButton = findElement(COOKIE_SELECTOR);
     acceptCookieButton.click();
     cookieAccepted = true;
-  }
-
-  private String getCurrentPageText() {
-    return driver.findElement(By.cssSelector(CURRENT_PAGE_SELECTOR)).getText();
-  }
-
-  private boolean hasNextPage() {
-    return !driver.findElements(By.cssSelector(NEXT_PAGE_SELECTOR)).isEmpty();
-  }
-
-  private void navigateToNextPage() {
-    String prevPage = getCurrentPageText();
-    WebElement nextPageElement = driver.findElement(By.cssSelector(NEXT_PAGE_SELECTOR + " > a"));
-    String href = nextPageElement.getAttribute("href");
-
-    navigateTo(href);
-    waitForPageChange(prevPage);
-  }
-
-  private Document navigateToExpedition(String website) {
-    navigateTo(website);
-    waitForPresenceOfElement(EXPEDITION_TITLE_SELECTOR);
-    return Jsoup.parse(driver.getPageSource());
-  }
-
-  private void waitForPageChange(String prevPage) {
-    wait.until(
-        (WebDriver wd) -> {
-          String currentPage = getCurrentPageText();
-          return !currentPage.equals(prevPage);
-        });
   }
 
   private Map<String, List<Element>> groupExpeditions(Elements expeditions) {
@@ -147,10 +129,13 @@ public class PonantScraper extends Scraper {
 
   private void processElements(String name, List<Element> elements) {
     Element element = elements.get(0);
-    String photoUrl = extractPhotoUrl(element);
+
+    String photoUrl = extractPhotoUrl(element, PHOTO_URL_SELECTOR, PHOTO_URL_ATTR, "url(", ")");
     String website = cruiseLine.getWebsite() + element.select(WEBSITE_SELECTOR).attr("href");
 
-    Document doc = navigateToExpedition(website);
+    navigateTo(website, EXPEDITION_TITLE_SELECTOR);
+    Document doc = getParsedPageSource();
+
     String duration = extractDuration(doc);
     String description = doc.select(DESCRIPTION_SELECTOR).text();
     List<PonantExpeditionTrip> trips = extractTrips(doc);
@@ -180,7 +165,7 @@ public class PonantScraper extends Scraper {
     List<PonantExpeditionTrip> trips = new ArrayList<>(List.of(extractMainTrip(doc)));
 
     try {
-      WebElement link = driver.findElement(By.cssSelector(OTHER_TRIPS_LINK_SELECTOR));
+      WebElement link = findElement(OTHER_TRIPS_LINK_SELECTOR);
       link.click();
       waitForPresenceOfElement(MODAL_CONTAINER_SELECTOR);
 
@@ -207,13 +192,7 @@ public class PonantScraper extends Scraper {
     element.select(MAIN_TRIP_SHIP_SELECTOR).text();
 
     return new PonantExpeditionTrip(
-        departingFrom,
-        arrivingAt,
-        startDate,
-        endDate,
-        startingPrice,
-        shipName,
-        driver.getCurrentUrl());
+        departingFrom, arrivingAt, startDate, endDate, startingPrice, shipName, getCurrentUrl());
   }
 
   private PonantExpeditionTrip extractOtherTrip(Element element) {
@@ -230,17 +209,6 @@ public class PonantScraper extends Scraper {
 
     return new PonantExpeditionTrip(
         departingFrom, arrivingAt, startDate, endDate, startingPrice, shipName, website);
-  }
-
-  private String extractPhotoUrl(Element element) {
-    String attr = element.select(PHOTO_URL_SELECTOR).attr(PHOTO_URL_ATTR);
-
-    int startIndex = attr.indexOf("url(") + 4;
-    int endIndex = attr.indexOf(")", startIndex);
-
-    if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex)
-      throw new NoSuchElementException("Invalid/missing URL in element attribute");
-    return attr.substring(startIndex, endIndex);
   }
 
   private String extractDuration(Document doc) {

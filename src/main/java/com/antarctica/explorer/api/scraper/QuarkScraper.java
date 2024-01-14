@@ -3,27 +3,34 @@ package com.antarctica.explorer.api.scraper;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.math.BigDecimal;
-import java.util.List;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 public class QuarkScraper extends Scraper {
   private static final String EXPEDITION_SELECTOR = ".views-row";
   private static final String AJAX_PROGRESS_SELECTOR = "div.ajax-progress-fullscreen";
+  private static final String CURRENT_PAGE_SELECTOR =
+      "ul.pagination > li.page-item.is-active.active";
   private static final String NEXT_PAGE_SELECTOR =
-      "li.page-item.pager__item.pager__item--next > a.page-link";
+      "ul.pagination > li.page-item.pager__item--next > a.page-link";
+
+  private static final String WEBSITE_SELECTOR = "div.expedition__info > div > a";
+  private static final String NAME_SELECTOR = "div.expedition__info > h2";
+  private static final String DESCRIPTION_SELECTOR = "div.expedition__info > .expedition__body";
+  private static final String PORT_SELECTOR = "div.detail--departing-from > ul > li";
+  private static final String DURATION_SELECTOR = "div.detail--duration > p.detail__value";
+  private static final String PRICE_SELECTOR = "span.detail__price";
+  private static final String PHOTO_SELECTOR = "div.hero-banner__image > picture > img";
 
   public QuarkScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
     super(cruiseLineService, expeditionService, "Quark Expeditions");
   }
 
+  @Override
   public void scrape() {
-    navigateTo(cruiseLine.getExpeditionWebsite());
+    navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
 
     try {
       scrapeData();
@@ -37,92 +44,36 @@ public class QuarkScraper extends Scraper {
     }
   }
 
-  private void scrapeData() {
-    try {
-      waitForInvisibilityOfElement(AJAX_PROGRESS_SELECTOR);
-      waitForPresenceOfElement(EXPEDITION_SELECTOR);
-
-      Document doc = Jsoup.parse(driver.getPageSource());
-      Elements expeditionItems = doc.select(EXPEDITION_SELECTOR);
-
-      for (Element item : expeditionItems) {
-        String website = extractWebsite(item);
-        String name = extractName(item);
-        String description = extractDescription(item);
-        String port = extractPort(item);
-        String duration = extractDuration(item);
-        BigDecimal price = extractPrice(item);
-        String photoUrl = extractPhotoUrl(item);
-
-        saveExpedition(website, name, description, port, duration, price, photoUrl);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  @Override
+  protected String getCurrentPageText() {
+    return findElement(CURRENT_PAGE_SELECTOR).getText();
   }
 
   private boolean hasNextPage() {
-    List<WebElement> pages = driver.findElements(By.cssSelector("ul.pagination > li"));
-
-    for (int i = 0; i < pages.size(); i++) {
-      WebElement page = pages.get(i);
-      String classes = page.getAttribute("class");
-
-      if (classes != null && classes.contains("is-active") && classes.contains("active"))
-        return i < pages.size() - 1;
-    }
-
-    return false;
+    return !findElements(NEXT_PAGE_SELECTOR).isEmpty();
   }
 
   private void navigateToNextPage() {
-    WebElement element = driver.findElement(By.cssSelector(NEXT_PAGE_SELECTOR));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-
-    element.click();
+    WebElement element = findElement(NEXT_PAGE_SELECTOR);
+    String website = element.getAttribute("href");
+    navigateTo(website, () -> waitForInvisibilityOfElement(AJAX_PROGRESS_SELECTOR));
   }
 
-  private String extractWebsite(Element item) {
-    return cruiseLine.getWebsite() + item.select("div.expedition__info > div > a").attr("href");
-  }
+  private void scrapeData() {
+    Document doc = getParsedPageSource();
+    Elements expeditionItems = doc.select(EXPEDITION_SELECTOR);
 
-  private String extractName(Element item) {
-    return item.select("div.expedition__info > h2").text();
-  }
+    for (Element item : expeditionItems) {
+      String website = cruiseLine.getWebsite() + item.select(WEBSITE_SELECTOR).attr("href");
+      String name = item.select(NAME_SELECTOR).text();
+      String description = item.select(DESCRIPTION_SELECTOR).text();
+      String port = item.select(PORT_SELECTOR).text();
+      String duration = item.select(DURATION_SELECTOR).get(0).text();
+      BigDecimal price = extractPrice(item, PRICE_SELECTOR);
+      String photoUrl = cruiseLine.getWebsite() + item.select(PHOTO_SELECTOR).attr("src");
 
-  private String extractDescription(Element item) {
-    return item.select("div.expedition__info > .expedition__body").text();
-  }
-
-  private String extractPort(Element item) {
-    return item.select(".expedition__summary > section.summary-bar > div")
-        .select(".detail--departing-from > ul > li")
-        .text();
-  }
-
-  private String extractDuration(Element item) {
-    return item.select(".detail--duration > .detail__value").get(0).text();
-  }
-
-  private BigDecimal extractPrice(Element item) {
-    String startingPrice = item.select("span.detail__price").text().replaceAll("[^\\d.]", "");
-    return startingPrice.isEmpty() ? null : new BigDecimal(startingPrice.replace(",", ""));
-  }
-
-  private String extractPhotoUrl(Element item) {
-    return cruiseLine.getWebsite()
-        + item.select("div.hero-banner__image > picture > img").attr("src");
-  }
-
-  private void saveExpedition(
-      String website,
-      String name,
-      String description,
-      String port,
-      String duration,
-      BigDecimal price,
-      String photoUrl) {
-    expeditionService.saveIfNotExist(
-        cruiseLine, website, name, description, port, port, duration, price, photoUrl);
+      expeditionService.saveIfNotExist(
+          cruiseLine, website, name, description, port, port, duration, price, photoUrl);
+    }
   }
 }

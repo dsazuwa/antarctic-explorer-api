@@ -17,10 +17,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -29,6 +27,8 @@ public class LindbladScraper extends Scraper {
       "https://prru6fnc68-dsn.algolia.net/1/indexes/*/queries";
   private static final String FORM_DATA =
       "{\"requests\":[{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=true&clickAnalytics=true&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=%5B%22departureDates.dateFromTimestamp%22%2C%22destinations.name%22%2C%22ships.name%22%2C%22duration%22%2C%22productType%22%5D&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&tagFilters=&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facets=destinations.name&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=departureDates.dateFromTimestamp&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&page=0&userToken=00000000-0000-0000-0000-000000000000\"}]}";
+  private static final String DESCRIPTION_SELECTOR =
+      "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
 
   private final CloseableHttpClient httpClient;
   private final ObjectMapper objectMapper;
@@ -42,6 +42,7 @@ public class LindbladScraper extends Scraper {
     this.objectMapper = new ObjectMapper();
   }
 
+  @Override
   public void scrape() {
     try {
       HttpPost httpPost = createHttpPost();
@@ -60,6 +61,11 @@ public class LindbladScraper extends Scraper {
     } finally {
       quitDriver();
     }
+  }
+
+  @Override
+  protected String getCurrentPageText() {
+    return "1";
   }
 
   private HttpPost createHttpPost() throws UnsupportedEncodingException {
@@ -103,12 +109,12 @@ public class LindbladScraper extends Scraper {
   private void processHits(LindbladHit[] hits) {
     for (LindbladHit hit : hits) {
       String website = cruiseLine.getWebsite() + "/en/expeditions/" + hit.pageSlug;
-      navigateTo(website);
+      navigateTo(website, DESCRIPTION_SELECTOR);
       if (!cookieAccepted) acceptCookie();
 
-      Document doc = Jsoup.parse(driver.getPageSource());
+      Document doc = getParsedPageSource();
 
-      String description = extractDescription(doc);
+      String description = doc.select(DESCRIPTION_SELECTOR).text();
       String[] ports = extractPorts(doc);
 
       saveExpedition(hit, website, description, ports);
@@ -117,16 +123,11 @@ public class LindbladScraper extends Scraper {
 
   private void acceptCookie() {
     String cookieSelector = "button.sc-baf605bd-1.hOSsqd";
+
     waitForPresenceOfElement(cookieSelector);
-    WebElement acceptCookieButton = driver.findElement(By.cssSelector(cookieSelector));
+    WebElement acceptCookieButton = findElement(cookieSelector);
     acceptCookieButton.click();
     cookieAccepted = true;
-  }
-
-  private String extractDescription(Document doc) {
-    String descriptionSelector = "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
-    waitForPresenceOfElement(descriptionSelector);
-    return doc.select(descriptionSelector).text();
   }
 
   private String[] extractPorts(Document doc) {

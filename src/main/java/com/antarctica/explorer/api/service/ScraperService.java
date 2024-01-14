@@ -36,19 +36,19 @@ public class ScraperService {
   }
 
   private void scrapeWithRetry(Scraper scraper) {
-    for (int attempt = 0; true; attempt++)
+    for (int attempt = 1; true; attempt++)
       try {
-        scraper.initializeDriver();
         scraper.scrape();
-        System.out.println(scraper.getClass() + ": finished scraping");
+        System.out.println(scraper.getClass().getSimpleName() + " finished scraping");
         break;
       } catch (RuntimeException e) {
-        System.out.println(e.getMessage());
+        e.printStackTrace();
 
-        if (attempt == MAX_RETRIES - 1)
+        if (attempt == MAX_RETRIES)
           throw new RuntimeException("Failed to scrape after " + MAX_RETRIES + " attempts", e);
 
         System.out.println("Retrying scraper (attempt " + attempt + ")");
+        scraper.restartDriver();
       }
   }
 }
