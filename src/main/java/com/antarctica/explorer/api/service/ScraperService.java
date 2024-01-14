@@ -38,7 +38,9 @@ public class ScraperService {
   private void scrapeWithRetry(Scraper scraper) {
     for (int attempt = 0; true; attempt++)
       try {
+        scraper.initializeDriver();
         scraper.scrape();
+        System.out.println(scraper.getClass() + ": finished scraping");
         break;
       } catch (RuntimeException e) {
         System.out.println(e.getMessage());

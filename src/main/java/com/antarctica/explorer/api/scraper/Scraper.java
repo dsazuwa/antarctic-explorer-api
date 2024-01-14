@@ -21,17 +21,20 @@ public abstract class Scraper {
 
   public Scraper(
       CruiseLineService cruiseLineService, ExpeditionService expeditionService, String name) {
-    ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
-    this.driver = new ChromeDriver(options);
-
-    this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+    initializeDriver();
+    this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
     this.cruiseLine =
         cruiseLineService
             .findByName(name)
             .orElseThrow(() -> new RuntimeException("CruiseLine \"" + name + "\" not found"));
     this.expeditionService = expeditionService;
+  }
+
+  public void initializeDriver() {
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--headless");
+    this.driver = new ChromeDriver(options);
   }
 
   protected void navigateTo(String website) {
