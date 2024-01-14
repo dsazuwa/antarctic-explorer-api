@@ -30,9 +30,8 @@ public class QuarkScraper extends Scraper {
 
   @Override
   public void scrape() {
-    navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
-
     try {
+      navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
       scrapeData();
 
       while (hasNextPage()) {

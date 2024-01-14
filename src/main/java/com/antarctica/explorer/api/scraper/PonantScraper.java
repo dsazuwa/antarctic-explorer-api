@@ -60,9 +60,8 @@ public class PonantScraper extends Scraper {
 
   @Override
   public void scrape() {
-    navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
-
     try {
+      navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
       Elements expeditions = scrapeExpeditions();
 
       while (hasNextPage()) {
