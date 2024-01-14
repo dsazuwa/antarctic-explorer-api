@@ -39,8 +39,8 @@ public class QuarkScraper extends Scraper {
 
   private void scrapeData() {
     try {
-      waitForInvisibilityOfElement(By.cssSelector(AJAX_PROGRESS_SELECTOR));
-      waitForPresenceOfElement(By.cssSelector(EXPEDITION_SELECTOR));
+      waitForInvisibilityOfElement(AJAX_PROGRESS_SELECTOR);
+      waitForPresenceOfElement(EXPEDITION_SELECTOR);
 
       Document doc = Jsoup.parse(driver.getPageSource());
       Elements expeditionItems = doc.select(EXPEDITION_SELECTOR);

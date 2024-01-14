@@ -91,7 +91,7 @@ public class AuroraScraper extends Scraper {
 
   private String extractDescription(Document doc) {
     String selector = "div.container > div.row.section > div > p";
-    waitForPresenceOfElement(By.cssSelector(selector));
+    waitForPresenceOfElement(selector);
     Elements elements = doc.select(selector);
 
     if (elements.isEmpty()) throw new NoSuchElementException("Description element not found");
@@ -100,7 +100,7 @@ public class AuroraScraper extends Scraper {
 
   private String[] extractPorts(Document doc) {
     String selector = "div.inner-content > div.details > dl.clearfix > dd";
-    waitForPresenceOfElement(By.cssSelector(selector));
+    waitForPresenceOfElement(selector);
     String[] ports = doc.select(selector).get(1).text().split(" - ");
 
     if (ports.length != 2) throw new NoSuchElementException("Ports not found");

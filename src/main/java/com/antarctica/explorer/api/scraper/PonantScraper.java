@@ -119,7 +119,7 @@ public class PonantScraper extends Scraper {
 
   private Document navigateToExpedition(String website) {
     navigateTo(website);
-    waitForPresenceOfElement(By.cssSelector(EXPEDITION_TITLE_SELECTOR));
+    waitForPresenceOfElement(EXPEDITION_TITLE_SELECTOR);
     return Jsoup.parse(driver.getPageSource());
   }
 
@@ -182,7 +182,7 @@ public class PonantScraper extends Scraper {
     try {
       WebElement link = driver.findElement(By.cssSelector(OTHER_TRIPS_LINK_SELECTOR));
       link.click();
-      waitForPresenceOfElement(By.cssSelector(MODAL_CONTAINER_SELECTOR));
+      waitForPresenceOfElement(MODAL_CONTAINER_SELECTOR);
 
       trips.addAll(
           doc.select(TABS_INSIDE_MODAL_SELECTOR).stream().map(this::extractOtherTrip).toList());

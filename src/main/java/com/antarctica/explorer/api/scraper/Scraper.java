@@ -42,12 +42,12 @@ public abstract class Scraper {
     System.out.println("Loaded website: " + website);
   }
 
-  protected void waitForPresenceOfElement(By locator) {
-    wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+  protected void waitForPresenceOfElement(String cssSelector) {
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssSelector)));
   }
 
-  protected void waitForInvisibilityOfElement(By locator) {
-    wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+  protected void waitForInvisibilityOfElement(String cssSelector) {
+    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
   }
 
   protected BigDecimal extractPrice(Element element, String selector) {

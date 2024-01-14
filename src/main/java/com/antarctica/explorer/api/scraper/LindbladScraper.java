@@ -117,7 +117,7 @@ public class LindbladScraper extends Scraper {
 
   private void acceptCookie() {
     String cookieSelector = "button.sc-baf605bd-1.hOSsqd";
-    waitForPresenceOfElement(By.cssSelector(cookieSelector));
+    waitForPresenceOfElement(cookieSelector);
     WebElement acceptCookieButton = driver.findElement(By.cssSelector(cookieSelector));
     acceptCookieButton.click();
     cookieAccepted = true;
@@ -125,7 +125,7 @@ public class LindbladScraper extends Scraper {
 
   private String extractDescription(Document doc) {
     String descriptionSelector = "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
-    waitForPresenceOfElement(By.cssSelector(descriptionSelector));
+    waitForPresenceOfElement(descriptionSelector);
     return doc.select(descriptionSelector).text();
   }
 
@@ -133,7 +133,7 @@ public class LindbladScraper extends Scraper {
     String portSelector =
         "div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
 
-    waitForPresenceOfElement(By.cssSelector(portSelector));
+    waitForPresenceOfElement(portSelector);
     String[] ports = doc.select(portSelector).stream().map(Element::text).toArray(String[]::new);
 
     if (ports.length != 2) throw new NoSuchElementException("Ports not found");
