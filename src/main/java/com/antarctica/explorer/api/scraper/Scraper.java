@@ -23,14 +23,16 @@ public abstract class Scraper {
   private WebDriverWait wait;
 
   public Scraper(
-      CruiseLineService cruiseLineService, ExpeditionService expeditionService, String name) {
-    initializeDriver();
-
+      CruiseLineService cruiseLineService,
+      ExpeditionService expeditionService,
+      String cruiseLineName,
+      String cruiseLineWebsite,
+      String expeditionWebsite) {
     this.cruiseLine =
-        cruiseLineService
-            .findByName(name)
-            .orElseThrow(() -> new RuntimeException("CruiseLine \"" + name + "\" not found"));
+        cruiseLineService.saveIfNotExist(cruiseLineName, cruiseLineWebsite, expeditionWebsite);
     this.expeditionService = expeditionService;
+
+    initializeDriver();
   }
 
   public abstract void scrape();

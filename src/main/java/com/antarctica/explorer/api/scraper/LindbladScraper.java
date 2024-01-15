@@ -23,6 +23,11 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 public class LindbladScraper extends Scraper {
+  private static final String CRUISE_LINE_NAME = "Lindblad Expeditions";
+  private static final String CRUISE_LINE_WEBSITE = "https://world.expeditions.com";
+  private static final String EXPEDITION_WEBSITE =
+      "https://world.expeditions.com/book?destinations.name=Antarctica";
+
   private static final String ALGOLIA_URL =
       "https://prru6fnc68-dsn.algolia.net/1/indexes/*/queries";
   private static final String FORM_DATA =
@@ -36,7 +41,12 @@ public class LindbladScraper extends Scraper {
   private boolean cookieAccepted = false;
 
   public LindbladScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
-    super(cruiseLineService, expeditionService, "Lindblad Expeditions");
+    super(
+        cruiseLineService,
+        expeditionService,
+        CRUISE_LINE_NAME,
+        CRUISE_LINE_WEBSITE,
+        EXPEDITION_WEBSITE);
 
     this.httpClient = HttpClients.createDefault();
     this.objectMapper = new ObjectMapper();

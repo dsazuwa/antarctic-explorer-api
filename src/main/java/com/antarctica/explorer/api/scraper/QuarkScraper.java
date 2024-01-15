@@ -9,6 +9,11 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.WebElement;
 
 public class QuarkScraper extends Scraper {
+  private static final String CRUISE_LINE_NAME = "Quark Expeditions";
+  private static final String CRUISE_LINE_WEBSITE = "https://www.quarkexpeditions.com";
+  private static final String EXPEDITION_WEBSITE =
+      "https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic";
+
   private static final String EXPEDITION_SELECTOR = ".views-row";
   private static final String AJAX_PROGRESS_SELECTOR = "div.ajax-progress-fullscreen";
   private static final String CURRENT_PAGE_SELECTOR =
@@ -25,7 +30,12 @@ public class QuarkScraper extends Scraper {
   private static final String PHOTO_SELECTOR = "div.hero-banner__image > picture > img";
 
   public QuarkScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
-    super(cruiseLineService, expeditionService, "Quark Expeditions");
+    super(
+        cruiseLineService,
+        expeditionService,
+        CRUISE_LINE_NAME,
+        CRUISE_LINE_WEBSITE,
+        EXPEDITION_WEBSITE);
   }
 
   @Override

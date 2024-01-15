@@ -14,6 +14,17 @@ public class CruiseLineService {
     this.repository = repository;
   }
 
+  public CruiseLine addCruiseLine(CruiseLine cruiseLine) {
+    return repository.save(cruiseLine);
+  }
+
+  public CruiseLine saveIfNotExist(String name, String website, String expeditionWebsite) {
+    Optional<CruiseLine> existingCruiseLine = repository.findByName(name);
+
+    return existingCruiseLine.orElseGet(
+        () -> repository.save(new CruiseLine(name, website, expeditionWebsite)));
+  }
+
   public List<CruiseLine> getAll() {
     return repository.findAll();
   }

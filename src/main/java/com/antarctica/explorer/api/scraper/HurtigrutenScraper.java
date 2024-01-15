@@ -9,6 +9,11 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.WebElement;
 
 public class HurtigrutenScraper extends Scraper {
+  private static final String CRUISE_LINE_NAME = "Hurtigruten Expeditions";
+  private static final String CRUISE_LINE_WEBSITE = "https://www.hurtigruten.com";
+  private static final String EXPEDITION_WEBSITE =
+      "https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises";
+
   private static final String EXPEDITION_SELECTOR =
       "a.w-full.link-wrapper.group[data-testid=\"cruise-card-link\"]";
   private static final String NEXT_PAGE_BTN_SELECTOR = "nav#pagination > a.iconBtn";
@@ -27,7 +32,12 @@ public class HurtigrutenScraper extends Scraper {
 
   public HurtigrutenScraper(
       CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
-    super(cruiseLineService, expeditionService, "Hurtigruten Expeditions");
+    super(
+        cruiseLineService,
+        expeditionService,
+        CRUISE_LINE_NAME,
+        CRUISE_LINE_WEBSITE,
+        EXPEDITION_WEBSITE);
   }
 
   @Override
