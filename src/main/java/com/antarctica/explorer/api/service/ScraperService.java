@@ -48,8 +48,10 @@ public class ScraperService {
       } catch (RuntimeException e) {
         e.printStackTrace();
 
-        if (attempt > MAX_RETRIES)
+        if (attempt > MAX_RETRIES) {
           System.err.println("Failed to scrape after " + MAX_RETRIES + " attempts");
+          break;
+        }
 
         System.out.println("Retrying " + scraperName + " (attempt " + attempt + ")");
         scraper.restartDriver();
