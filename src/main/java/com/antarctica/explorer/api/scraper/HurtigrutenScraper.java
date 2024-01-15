@@ -81,6 +81,7 @@ public class HurtigrutenScraper extends Scraper {
   }
 
   private Elements scrapeExpeditions() {
+    getExecutor().executeScript("window.scrollBy(0,1000)");
     return getParsedPageSource().select(EXPEDITION_SELECTOR);
   }
 

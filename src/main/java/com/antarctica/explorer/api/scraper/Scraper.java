@@ -54,32 +54,8 @@ public abstract class Scraper {
     driver.quit();
   }
 
-  protected void navigateTo(String website, Runnable waitFunction) {
-    driver.get(website);
-    waitFunction.run();
-    System.out.println("Loaded website: " + website);
-  }
-
-  protected void navigateTo(String website, String waitForPresenceSelector) {
-    driver.get(website);
-    waitForPresenceOfElement(waitForPresenceSelector);
-    System.out.println("Loaded website: " + website);
-  }
-
-  protected void waitForPresenceOfElement(String cssSelector) {
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssSelector)));
-  }
-
-  protected void waitForInvisibilityOfElement(String cssSelector) {
-    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
-  }
-
-  protected void waitForPageChange(String prevPage) {
-    wait.until(
-        (WebDriver wd) -> {
-          String currentPage = getCurrentPageText();
-          return !currentPage.equals(prevPage);
-        });
+  protected JavascriptExecutor getExecutor() {
+    return ((JavascriptExecutor) driver);
   }
 
   protected String getCurrentUrl() {
@@ -96,6 +72,18 @@ public abstract class Scraper {
 
   protected List<WebElement> findElements(String cssSelector) {
     return driver.findElements(By.cssSelector(cssSelector));
+  }
+
+  protected void navigateTo(String website, Runnable waitFunction) {
+    driver.get(website);
+    waitFunction.run();
+    System.out.println("Loaded website: " + website);
+  }
+
+  protected void navigateTo(String website, String waitForPresenceSelector) {
+    driver.get(website);
+    waitForPresenceOfElement(waitForPresenceSelector);
+    System.out.println("Loaded website: " + website);
   }
 
   protected String extractPhotoUrl(
@@ -122,5 +110,21 @@ public abstract class Scraper {
       System.err.println("Failed to parse price: " + priceText);
       return null;
     }
+  }
+
+  protected void waitForInvisibilityOfElement(String cssSelector) {
+    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
+  }
+
+  protected void waitForPresenceOfElement(String cssSelector) {
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssSelector)));
+  }
+
+  protected void waitForPageChange(String prevPage) {
+    wait.until(
+        (WebDriver wd) -> {
+          String currentPage = getCurrentPageText();
+          return !currentPage.equals(prevPage);
+        });
   }
 }
