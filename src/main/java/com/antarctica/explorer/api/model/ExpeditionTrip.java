@@ -3,7 +3,6 @@ package com.antarctica.explorer.api.model;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import java.sql.Date;
-import java.time.LocalDateTime;
 import org.hibernate.annotations.*;
 
 @Entity
@@ -11,7 +10,7 @@ import org.hibernate.annotations.*;
 public class ExpeditionTrip {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "cruise_id")
+  @Column(name = "expedition_trip_id")
   private Integer id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -33,14 +32,6 @@ public class ExpeditionTrip {
 
   @Column(name = "website")
   private String website;
-
-  @CreationTimestamp(source = SourceType.DB)
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp(source = SourceType.DB)
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
 
   protected ExpeditionTrip() {}
 

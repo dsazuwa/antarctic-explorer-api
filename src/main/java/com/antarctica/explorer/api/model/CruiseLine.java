@@ -21,9 +21,10 @@ public class CruiseLine {
 
   protected CruiseLine() {}
 
-  public CruiseLine(String name, String website) {
+  public CruiseLine(String name, String website, String expeditionWebsite) {
     this.name = name;
     this.website = website;
+    this.expeditionWebsite = expeditionWebsite;
   }
 
   public Integer getId() {

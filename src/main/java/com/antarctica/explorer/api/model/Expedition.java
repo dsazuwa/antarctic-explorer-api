@@ -3,7 +3,6 @@ package com.antarctica.explorer.api.model;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import org.hibernate.annotations.*;
 
 @Entity
@@ -43,14 +42,6 @@ public class Expedition {
   @Column(name = "photo_url", columnDefinition = "TEXT")
   private String photoUrl;
 
-  @CreationTimestamp(source = SourceType.DB)
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp(source = SourceType.DB)
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
-
   protected Expedition() {}
 
   public Expedition(
@@ -82,32 +73,16 @@ public class Expedition {
     return cruiseLine;
   }
 
-  public void setCruiseLine(CruiseLine cruiseLine) {
-    this.cruiseLine = cruiseLine;
-  }
-
   public String getWebsite() {
     return website;
-  }
-
-  public void setWebsite(String website) {
-    this.website = website;
   }
 
   public String getName() {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getDescription() {
     return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public String getDepartingFrom() {
@@ -122,47 +97,11 @@ public class Expedition {
     return duration;
   }
 
-  public void setDuration(String duration) {
-    this.duration = duration;
-  }
-
   public BigDecimal getStartingPrice() {
     return startingPrice;
   }
 
   public String getPhotoUrl() {
     return photoUrl;
-  }
-
-  @Override
-  public String toString() {
-    return "Expedition{"
-        + "id="
-        + id
-        + ", cruiseLine="
-        + cruiseLine.getName()
-        + ", website='"
-        + website
-        + '\''
-        + ", name='"
-        + name
-        + '\''
-        + ", description='"
-        + description
-        + '\''
-        + ", departingFrom='"
-        + departingFrom
-        + '\''
-        + ", arrivingAt='"
-        + arrivingAt
-        + '\''
-        + ", duration='"
-        + duration
-        + '\''
-        + ", startingPrice="
-        + startingPrice
-        + ", photoUrl="
-        + photoUrl
-        + '}';
   }
 }

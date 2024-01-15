@@ -1,7 +1,12 @@
+ALTER TABLE IF EXISTS antarctica.expeditions_vessels DROP CONSTRAINT fk_expedition_trip_id;
+ALTER TABLE IF EXISTS antarctica.expeditions_vessels DROP CONSTRAINT fk_vessel_id;
+ALTER TABLE IF EXISTS antarctica.vessels DROP CONSTRAINT fk_cruise_line_id;
 ALTER TABLE IF EXISTS antarctica.activities DROP CONSTRAINT fk_expedition_id;
 ALTER TABLE IF EXISTS antarctica.expedition_trips DROP CONSTRAINT fk_expedition_id;
 ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT fk_cruise_line_id;
 
+DROP TABLE IF EXISTS antarctica.expeditions_vessels;
+DROP TABLE IF EXISTS antarctica.vessels;
 DROP TABLE IF EXISTS antarctica.activities;
 DROP TABLE IF EXISTS antarctica.expedition_trips;
 DROP TABLE IF EXISTS antarctica.expeditions;
@@ -31,26 +36,20 @@ CREATE TABLE antarctica.expeditions (
   duration VARCHAR(50) NOT NULL,
   starting_price DECIMAL(10, 4),
   photo_url TEXT,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
   PRIMARY KEY (expedition_id),
   CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 CREATE TABLE antarctica.expedition_trips (
-  cruise_id SERIAL,
---  ship_id INTEGER,
+  expedition_trip_id SERIAL,
   expedition_id INTEGER NOT NULL,
   departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   startingPrice DECIMAL(10, 4),
-  duration VARCHAR(50) NOT NULL,
   website TEXT,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  PRIMARY KEY (cruise_id),
+  PRIMARY KEY (expedition_trip_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -61,46 +60,26 @@ CREATE TABLE antarctica.activities (
   description TEXT,
   is_included BOOLEAN NOT NULL,
   price DECIMAL(10, 4),
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
   PRIMARY KEY (activity_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
---CREATE TABLE antarctica.vessels (
---  vessel_id SERIAL,
---  name VARCHAR NOT NULL,
---  capacity INTEGER NOT NULL,
---  created_at TIMESTAMP NOT NULL,
---  updated_at TIMESTAMP NOT NULL,
---  PRIMARY KEY (vessel_id)
---);
+CREATE TABLE antarctica.vessels (
+  vessel_id SERIAL,
+  cruise_line_id INTEGER NOT NULL,
+  name VARCHAR NOT NULL,
+  description TEXT,
+  capacity INTEGER NOT NULL,
+  year_built VARCHAR(10),
+  year_refurbished VARCHAR(10),
+  website TEXT,
+  PRIMARY KEY (vessel_id),
+  CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
 
-DO $$
-DECLARE
-  cruise_lines VARCHAR[] := ARRAY['Lindblad Expeditions', 'Quark Expeditions', 'Viking Expeditions', 'Aurora Expeditions', 'Seaborn Expeditions', 'Ponant', 'Hurtigruten Expeditions'];
-  home_websites VARCHAR[] := ARRAY[
-    'https://world.expeditions.com',
-    'https://www.quarkexpeditions.com',
-    'https://www.vikingcruises.com',
-    'https://www.aurora-expeditions.com/destination',
-    'https://www.seabourn.com/en/cruise-destinations/expedition',
-    'https://us.ponant.com',
-    'https://www.hurtigruten.com/en-us/expeditions'
-   ];
-  expedition_websites VARCHAR[] := ARRAY[
-    'https://world.expeditions.com/book?destinations.name=Antarctica',
-    'https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic',
-    'https://www.vikingcruises.com/expeditions/search-cruises/index.html?Regions=Antarctica',
-    'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle',
-    'https://www.seabourn.com/en/find-a-cruise?destinationIds:(S)',
-    'https://us.ponant.com/cruises/themes/polar-expedition?pred-facet-destination%5B%5D=ANTARCTI',
-    'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises'
-   ];
-  i INTEGER;
-BEGIN
-  FOR i IN 1..array_length(cruise_lines, 1) LOOP
-    INSERT INTO antarctica.cruise_lines (name, website, expedition_website)
-    VALUES (cruise_lines[i], home_websites[i], expedition_websites[i]);
-  END LOOP;
-END $$;
+CREATE TABLE antarctica.expeditions_vessels (
+  vessel_id INTEGER NOT NULL,
+  expedition_trip_id INTEGER NOT NULL,
+  CONSTRAINT fk_vessel_id FOREIGN KEY (vessel_id) REFERENCES antarctica.vessels (vessel_id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT fk_expedition_trip_id FOREIGN KEY (expedition_trip_id) REFERENCES antarctica.expedition_trips (expedition_trip_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
