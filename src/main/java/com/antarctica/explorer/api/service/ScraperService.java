@@ -30,6 +30,7 @@ public class ScraperService {
                 new HurtigrutenScraper(cruiseLineService, expeditionService),
                 new LindbladScraper(cruiseLineService, expeditionService),
                 new PonantScraper(cruiseLineService, expeditionService),
+                new SeabournScraper(cruiseLineService, expeditionService),
                 new QuarkScraper(cruiseLineService, expeditionService),
                 new VikingScraper(cruiseLineService, expeditionService)));
 
@@ -37,18 +38,20 @@ public class ScraperService {
   }
 
   private void scrapeWithRetry(Scraper scraper) {
+    String scraperName = scraper.getClass().getSimpleName();
+
     for (int attempt = 1; true; attempt++)
       try {
         scraper.scrape();
-        System.out.println(scraper.getClass().getSimpleName() + " finished scraping");
+        System.out.println(scraperName + " finished scraping");
         break;
       } catch (RuntimeException e) {
         e.printStackTrace();
 
-        if (attempt == MAX_RETRIES)
-          throw new RuntimeException("Failed to scrape after " + MAX_RETRIES + " attempts", e);
+        if (attempt > MAX_RETRIES)
+          System.err.println("Failed to scrape after " + MAX_RETRIES + " attempts");
 
-        System.out.println("Retrying scraper (attempt " + attempt + ")");
+        System.out.println("Retrying " + scraperName + " (attempt " + attempt + ")");
         scraper.restartDriver();
       }
   }

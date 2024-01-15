@@ -10,25 +10,21 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public abstract class Scraper {
-  private final WebDriverWait wait;
   protected CruiseLine cruiseLine;
   protected ExpeditionService expeditionService;
   private WebDriver driver;
+  private WebDriverWait wait;
 
   public Scraper(
       CruiseLineService cruiseLineService, ExpeditionService expeditionService, String name) {
     initializeDriver();
-    this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
     this.cruiseLine =
         cruiseLineService
@@ -41,15 +37,19 @@ public abstract class Scraper {
 
   protected abstract String getCurrentPageText();
 
-  public void restartDriver() {
-    quitDriver();
-    initializeDriver();
-  }
-
   protected void initializeDriver() {
     ChromeOptions options = new ChromeOptions();
     options.addArguments("--headless");
     this.driver = new ChromeDriver(options);
+    this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+  }
+
+  public void restartDriver() {
+    initializeDriver();
+  }
+
+  public void quitDriver() {
+    driver.quit();
   }
 
   protected void navigateTo(String website, Runnable waitFunction) {
@@ -94,13 +94,6 @@ public abstract class Scraper {
 
   protected List<WebElement> findElements(String cssSelector) {
     return driver.findElements(By.cssSelector(cssSelector));
-  }
-
-  protected void quitDriver() {
-    if (driver != null) {
-      driver.manage().deleteAllCookies();
-      driver.quit();
-    }
   }
 
   protected String extractPhotoUrl(
