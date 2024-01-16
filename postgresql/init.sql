@@ -21,6 +21,7 @@ CREATE TABLE antarctica.cruise_lines (
   name VARCHAR(50) NOT NULL UNIQUE,
   website VARCHAR(255) NOT NULL UNIQUE,
   expedition_website TEXT NOT NULL UNIQUE,
+  logo VARCHAR(255) NOT NULL UNIQUE,
   PRIMARY KEY (cruise_line_id)
 );
 
@@ -30,7 +31,7 @@ CREATE TABLE antarctica.expeditions (
   website TEXT,
   name VARCHAR(255) NOT NULL,
   description TEXT,
---  highlights TEXT[],
+  highlights TEXT[],
   departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
   duration VARCHAR(50) NOT NULL,

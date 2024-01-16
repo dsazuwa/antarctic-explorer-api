@@ -13,6 +13,8 @@ public class QuarkScraper extends Scraper {
   private static final String CRUISE_LINE_WEBSITE = "https://www.quarkexpeditions.com";
   private static final String EXPEDITION_WEBSITE =
       "https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic";
+  private static final String LOGO_URL =
+      "https://mma.prnewswire.com/media/465074/Quark_Expeditions_Logo.jpg?p=facebook";
 
   private static final String EXPEDITION_SELECTOR = ".views-row";
   private static final String AJAX_PROGRESS_SELECTOR = "div.ajax-progress-fullscreen";
@@ -35,7 +37,8 @@ public class QuarkScraper extends Scraper {
         expeditionService,
         CRUISE_LINE_NAME,
         CRUISE_LINE_WEBSITE,
-        EXPEDITION_WEBSITE);
+        EXPEDITION_WEBSITE,
+        LOGO_URL);
   }
 
   @Override

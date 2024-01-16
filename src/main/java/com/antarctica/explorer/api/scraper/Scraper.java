@@ -27,9 +27,11 @@ public abstract class Scraper {
       ExpeditionService expeditionService,
       String cruiseLineName,
       String cruiseLineWebsite,
-      String expeditionWebsite) {
+      String expeditionWebsite,
+      String cruiseLineLogo) {
     this.cruiseLine =
-        cruiseLineService.saveIfNotExist(cruiseLineName, cruiseLineWebsite, expeditionWebsite);
+        cruiseLineService.saveIfNotExist(
+            cruiseLineName, cruiseLineWebsite, expeditionWebsite, cruiseLineLogo);
     this.expeditionService = expeditionService;
 
     initializeDriver();

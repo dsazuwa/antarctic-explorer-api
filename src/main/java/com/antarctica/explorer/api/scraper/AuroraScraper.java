@@ -14,6 +14,8 @@ public class AuroraScraper extends Scraper {
       "https://www.aurora-expeditions.com/destination";
   private static final String EXPEDITION_WEBSITE =
       "https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle";
+  private static final String LOGO_URL =
+      "https://www.aurora-expeditions.com/wp-content/themes/aurora-expeditions/assets/images/logo-full-v2.jpg";
 
   private static final String EXPEDITION_SELECTOR = "div.col-lg-4.py-3 > div.block-offer";
   private static final String CURRENT_PAGE_SELECTOR = "div.wp-pagenavi > span.current";
@@ -32,7 +34,8 @@ public class AuroraScraper extends Scraper {
         expeditionService,
         CRUISE_LINE_NAME,
         CRUISE_LINE_WEBSITE,
-        EXPEDITION_WEBSITE);
+        EXPEDITION_WEBSITE,
+        LOGO_URL);
   }
 
   @Override

@@ -19,12 +19,16 @@ public class CruiseLine {
   @Column(name = "expedition_website", nullable = false, unique = true)
   private String expeditionWebsite;
 
+  @Column(name = "logo", nullable = false, unique = true)
+  private String logo;
+
   protected CruiseLine() {}
 
-  public CruiseLine(String name, String website, String expeditionWebsite) {
+  public CruiseLine(String name, String website, String expeditionWebsite, String logo) {
     this.name = name;
     this.website = website;
     this.expeditionWebsite = expeditionWebsite;
+    this.logo = logo;
   }
 
   public Integer getId() {
@@ -41,5 +45,9 @@ public class CruiseLine {
 
   public String getExpeditionWebsite() {
     return expeditionWebsite;
+  }
+
+  public String getLogo() {
+    return this.logo;
   }
 }

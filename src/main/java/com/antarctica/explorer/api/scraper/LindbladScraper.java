@@ -27,6 +27,8 @@ public class LindbladScraper extends Scraper {
   private static final String CRUISE_LINE_WEBSITE = "https://world.expeditions.com";
   private static final String EXPEDITION_WEBSITE =
       "https://world.expeditions.com/book?destinations.name=Antarctica";
+  private static final String LOGO_URL =
+      "https://world.expeditions.com/book/_next/image?url=%2Fbook%2FlogoLEXNG.png&w=640&q=75";
 
   private static final String ALGOLIA_URL =
       "https://prru6fnc68-dsn.algolia.net/1/indexes/*/queries";
@@ -46,7 +48,8 @@ public class LindbladScraper extends Scraper {
         expeditionService,
         CRUISE_LINE_NAME,
         CRUISE_LINE_WEBSITE,
-        EXPEDITION_WEBSITE);
+        EXPEDITION_WEBSITE,
+        LOGO_URL);
 
     this.httpClient = HttpClients.createDefault();
     this.objectMapper = new ObjectMapper();

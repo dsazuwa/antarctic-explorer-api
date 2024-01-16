@@ -17,6 +17,8 @@ public class SeabournScraper extends Scraper {
   private static final String CRUISE_LINE_WEBSITE = "https://www.seabourn.com";
   private static final String EXPEDITION_WEBSITE =
       "https://www.seabourn.com/en/find-a-cruise?destinationIds:(S)&cruiseType:(EXPEDITION)";
+  private static final String LOGO_URL =
+      "https://mma.prnewswire.com/media/1689609/seabourn_Logo.jpg?p=facebook";
 
   private static final String EXPEDITION_SELECTOR = "div.search-results__card-wrapper";
   private static final String LOAD_SELECTOR = "div.loadspinner";
@@ -40,7 +42,8 @@ public class SeabournScraper extends Scraper {
         expeditionService,
         CRUISE_LINE_NAME,
         CRUISE_LINE_WEBSITE,
-        EXPEDITION_WEBSITE);
+        EXPEDITION_WEBSITE,
+        LOGO_URL);
   }
 
   @Override
