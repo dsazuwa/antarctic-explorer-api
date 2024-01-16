@@ -1,10 +1,12 @@
 package com.antarctica.explorer.api.controller;
 
+import com.antarctica.explorer.api.dto.CruiseLineDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +26,16 @@ public class CruiseLineController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<CruiseLine> getCruiseLineById(@PathVariable Long id) {
-    Optional<CruiseLine> cruiseLine = service.findById(id);
-    return cruiseLine.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+  public ResponseEntity<CruiseLineByIdResponse> getCruiseLineById(@PathVariable Long id) {
+    Optional<CruiseLineDTO> cruiseLine = service.getCruiseLine(id);
+
+    return cruiseLine
+        .map(line -> ResponseEntity.ok(new CruiseLineByIdResponse(line, line.name() + " found")))
+        .orElseGet(
+            () ->
+                ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(
+                        new CruiseLineByIdResponse(null, "Cruise line not found with ID: " + id)));
   }
 
   @GetMapping("/search")
@@ -34,4 +43,6 @@ public class CruiseLineController {
     Optional<CruiseLine> cruiseLine = service.findByName(name);
     return cruiseLine.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
+
+  record CruiseLineByIdResponse(CruiseLineDTO cruiseLine, String message) {}
 }
