@@ -145,7 +145,7 @@ public class LindbladScraper extends Scraper {
 
   private String[] extractPorts(Document doc) {
     String portSelector =
-        "div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
+        "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz > header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
 
     waitForPresenceOfElement(portSelector);
     String[] ports = doc.select(portSelector).stream().map(Element::text).toArray(String[]::new);
