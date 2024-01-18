@@ -3,7 +3,7 @@ package com.antarctica.explorer.api.controller;
 import com.antarctica.explorer.api.dto.CruiseLineDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,8 +21,8 @@ public class CruiseLineController {
   }
 
   @GetMapping
-  public List<CruiseLine> getAllCruiseLines() {
-    return service.getAll();
+  public Map<String, CruiseLine> getAllCruiseLines() {
+    return service.getCruiseLines();
   }
 
   @GetMapping("/{id}")
@@ -44,5 +44,5 @@ public class CruiseLineController {
     return cruiseLine.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
-  record CruiseLineByIdResponse(CruiseLineDTO cruiseLine, String message) {}
+  public record CruiseLineByIdResponse(CruiseLineDTO cruiseLine, String message) {}
 }

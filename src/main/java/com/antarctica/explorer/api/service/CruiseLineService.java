@@ -4,8 +4,9 @@ import com.antarctica.explorer.api.dto.CruiseLineDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.repository.CruiseLineRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,6 +34,16 @@ public class CruiseLineService {
 
   public List<CruiseLine> getAll() {
     return cruiseLineRepository.findAll();
+  }
+
+  public Map<String, CruiseLine> getCruiseLines() {
+    return cruiseLineRepository.findAll().stream()
+        .collect(
+            Collectors.toMap(
+                CruiseLine::getName,
+                Function.identity(),
+                (existing, replacement) -> existing,
+                TreeMap::new));
   }
 
   public Optional<CruiseLineDTO> getCruiseLine(Long id) {
