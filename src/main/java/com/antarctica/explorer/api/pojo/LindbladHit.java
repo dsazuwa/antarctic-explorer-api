@@ -41,25 +41,25 @@ public class LindbladHit {
 
   public LindbladHit() {}
 
-  static class DepartureDate {
+  public static class DepartureDate {
     public String departureId;
     public Long dateFromTimestamp;
     public String dateFromYearMonth;
     public String dateFromYearMonthUS;
   }
 
-  static class Destination {
+  public static class Destination {
     public String name;
     public String pageSlug;
   }
 
-  static class Ship {
+  public static class Ship {
     public String name;
     public String code;
     public String pageSlug;
   }
 
-  static class Extension {
+  public static class Extension {
     public String packageCode;
     public int duration;
     public Long doublePriceFromUSD;
@@ -68,14 +68,14 @@ public class LindbladHit {
     public Long singlePriceFromAUD;
   }
 
-  static class Promotion {
+  public static class Promotion {
     public String label;
     public String priceProgram;
     public String key;
     public String type;
   }
 
-  static class ImageAsset {
+  public static class ImageAsset {
     public String transformUrl;
     public int width;
     public int height;
