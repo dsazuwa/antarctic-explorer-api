@@ -19,7 +19,9 @@ public class ExpeditionController {
   }
 
   @GetMapping
-  public List<ExpeditionDTO> findAllExpeditions() {
-    return service.findAll();
+  public ExpeditionResponse findAllExpeditions() {
+    return new ExpeditionResponse(service.findAll());
   }
+
+ public record ExpeditionResponse(List<ExpeditionDTO> expeditions) {}
 }
