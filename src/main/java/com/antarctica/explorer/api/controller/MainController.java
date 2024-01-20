@@ -4,6 +4,8 @@ import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class MainController {
   public MainResponse getData() {
     Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
     List<ExpeditionDTO> expeditions = expeditionService.findAll();
+
+    expeditions.sort(
+        Comparator.comparing(ExpeditionDTO::cruiseLine).thenComparing(ExpeditionDTO::name));
 
     return new MainResponse(cruiseLines, expeditions);
   }
