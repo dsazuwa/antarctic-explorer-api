@@ -12,8 +12,7 @@ public class VikingScraper extends Scraper {
   private static final String CRUISE_LINE_WEBSITE = "https://www.vikingcruises.com";
   private static final String EXPEDITION_WEBSITE =
       "https://www.vikingcruises.com/expeditions/search-cruises/index.html?Regions=Antarctica";
-  private static final String LOGO_URL =
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh8ElmZIgRotGEk5bM9hSa5bRh9QMMWP8Oug&usqp=CAU";
+  private static final String LOGO_URL = "https://centraltravel.com/images/Viking-logo.jpg";
 
   private static final String EXPEDITION_SELECTOR = "div.cruise-detail-wrapper > div.cruise-detail";
   private static final String DESCRIPTION_SELECTOR = ".hero-sidebar-content > div.description";

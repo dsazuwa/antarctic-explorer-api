@@ -14,7 +14,7 @@ public class HurtigrutenScraper extends Scraper {
   private static final String EXPEDITION_WEBSITE =
       "https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises";
   private static final String LOGO_URL =
-      "https://www.crucero-magazin.de/wp-content/uploads/2023/09/HX_HurtigrutenExpeditions_Logo_RGB_black_300dpi-1024x455.png";
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwcBwli1vBRXe-03T9px8R-gI85IRI4GZPzZwChx2Y_sFPGUfzIxNO6m-wrFq8A7Sww4A&usqp=CAU";
 
   private static final String EXPEDITION_SELECTOR =
       "a.w-full.link-wrapper.group[data-testid=\"cruise-card-link\"]";
