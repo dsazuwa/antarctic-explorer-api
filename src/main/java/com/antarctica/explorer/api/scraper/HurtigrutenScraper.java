@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 public class HurtigrutenScraper extends Scraper {
@@ -25,12 +26,11 @@ public class HurtigrutenScraper extends Scraper {
       "div.my-4 > div > p.body-text-2.text-light-black";
   private static final String NAME_SELECTOR = "h3[data-testid=\"cruisecard-heading\"]";
   private static final String DURATION_SELECTOR = "div > div > div > div.ml-2";
-  private static final String PHOTO_SELECTOR =
-      "div > span > img[data-testid=\"cruisecard-header-image\"]";
   private static final String PRICE_SELECTOR =
       "div.flex.items-start > div.flex > div.flex > p[data-testid=\"feature-item-value\"]";
   private static final String DESCRIPTION_SELECTOR =
       "div.flex.flex-col.w-full > div > div.flex > p.mb-0";
+  private static final String PHOTO_SELECTOR = "div.imageContainer > span > img";
 
   public HurtigrutenScraper(
       CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
@@ -84,7 +84,8 @@ public class HurtigrutenScraper extends Scraper {
   }
 
   private Elements scrapeExpeditions() {
-    getExecutor().executeScript("window.scrollBy(0,1000)");
+    getExecutor().executeScript("window.scrollBy(0, 500)");
+    getExecutor().executeScript("window.scrollBy(0, 500)");
     return getParsedPageSource().select(EXPEDITION_SELECTOR);
   }
 
@@ -93,11 +94,12 @@ public class HurtigrutenScraper extends Scraper {
     String name = expedition.select(NAME_SELECTOR).text();
     String duration = expedition.select(DURATION_SELECTOR).text().replaceAll("[A-Za-z\\s]", "");
     BigDecimal startingPrice = extractPrice(expedition, PRICE_SELECTOR);
-    String photoUrl = expedition.select(PHOTO_SELECTOR).attr("src");
 
     if (!navigateToExpeditionWebsite(website)) return;
 
     String description = extractDescription();
+    String photoUrl = findElement(PHOTO_SELECTOR).getAttribute("src");
+    ;
 
     expeditionService.saveIfNotExist(
         cruiseLine, website, name, description, null, null, duration, startingPrice, photoUrl);
