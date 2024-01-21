@@ -162,7 +162,7 @@ public class LindbladScraper extends Scraper {
         description,
         ports[0],
         ports[1],
-        hit.durationUS + " days",
+        hit.durationUS + "",
         new BigDecimal(hit.priceFromUSD),
         hit.thumbnail);
   }

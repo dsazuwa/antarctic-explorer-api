@@ -79,14 +79,17 @@ public class AuroraScraper extends Scraper {
     String name = title.text();
     String website = title.attr("href");
 
-    String duration = item.select(DURATION_SELECTOR).text();
+    String duration = item.select(DURATION_SELECTOR).text().replaceAll("[A-Za-z\\s]", "");
     BigDecimal startingPrice = extractPrice(item, PRICE_SELECTOR);
     String photoUrl = extractPhotoUrl(item, PHOTO_SELECTOR, "style", "url('", "')");
 
-    navigateTo(website, DESCRIPTION_SELECTOR);
+    navigateTo(website, "div > h1");
     Document doc = getParsedPageSource();
 
-    String description = extractDescription(doc);
+    Elements descriptionElements = doc.select(DESCRIPTION_SELECTOR);
+    if (descriptionElements.isEmpty()) return;
+
+    String description = descriptionElements.text();
     String[] ports = extractPorts(doc);
 
     expeditionService.saveIfNotExist(
@@ -99,13 +102,6 @@ public class AuroraScraper extends Scraper {
         duration,
         startingPrice,
         photoUrl);
-  }
-
-  private String extractDescription(Document doc) {
-    Elements elements = doc.select(DESCRIPTION_SELECTOR);
-
-    if (elements.isEmpty()) throw new NoSuchElementException("Description element not found");
-    return elements.text();
   }
 
   private String[] extractPorts(Document doc) {

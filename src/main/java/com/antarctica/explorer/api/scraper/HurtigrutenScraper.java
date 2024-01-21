@@ -91,7 +91,7 @@ public class HurtigrutenScraper extends Scraper {
   private void processExpedition(Element expedition) {
     String website = cruiseLine.getWebsite() + expedition.attr("href");
     String name = expedition.select(NAME_SELECTOR).text();
-    String duration = expedition.select(DURATION_SELECTOR).text();
+    String duration = expedition.select(DURATION_SELECTOR).text().replaceAll("[A-Za-z\\s]", "");
     BigDecimal startingPrice = extractPrice(expedition, PRICE_SELECTOR);
     String photoUrl = expedition.select(PHOTO_SELECTOR).attr("src");
 

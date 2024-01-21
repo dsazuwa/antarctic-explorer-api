@@ -21,8 +21,8 @@ public class VikingScraper extends Scraper {
   private static final String NAME_SELECTOR = "div.cruise-title-wrapper > a.cruise-link > h3";
   private static final String WEBSITE_SELECTOR = "div.cruise-title-wrapper > a.cruise-link";
   private static final String PORT_SELECTOR = "div.cruise-title-wrapper > h4";
-  private static final String INFO_SELECTOR = "section.info > div.detail > div";
-  private static final String ITEM_VALUE_SELECTOR = "div.item > span.value";
+  private static final String ITEM_VALUE_SELECTOR =
+      "section.info > div.detail > div > div.item > span.value";
 
   public VikingScraper(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
     super(
@@ -61,9 +61,9 @@ public class VikingScraper extends Scraper {
     String startingPort = ports.length > 0 ? ports[0] : null;
     String endingPort = ports.length > 1 ? ports[1] : null;
 
-    Elements infoElement = item.select(INFO_SELECTOR);
-    String duration = infoElement.get(0).select(ITEM_VALUE_SELECTOR).text() + " days";
-    BigDecimal startingPrice = extractPrice(infoElement.get(2), ITEM_VALUE_SELECTOR);
+    Elements infoElements = item.select(ITEM_VALUE_SELECTOR);
+    String duration = infoElements.get(0).text();
+    BigDecimal startingPrice = extractPrice(infoElements.get(infoElements.size() - 1).text());
 
     navigateTo(website, DESCRIPTION_SELECTOR);
     Document doc = getParsedPageSource();

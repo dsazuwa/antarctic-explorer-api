@@ -138,8 +138,7 @@ public class SeabournScraper extends Scraper {
     Matcher matcher = Pattern.compile("(\\d+)-Day").matcher(name);
 
     if (matcher.find()) {
-      String numDays = matcher.group(1);
-      return numDays + " days";
+      return matcher.group(1);
     } else {
       throw new NoSuchElementException("Duration not found");
     }

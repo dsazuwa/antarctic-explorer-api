@@ -224,8 +224,7 @@ public class PonantScraper extends Scraper {
   }
 
   private String extractDuration(Document doc) {
-    Element daysElement = doc.select(NUM_DAYS_SELECTOR).first();
-    return daysElement.text() + " days";
+    return Objects.requireNonNull(doc.select(NUM_DAYS_SELECTOR).first()).text();
   }
 
   private String extractMainTripShip(Element element) {

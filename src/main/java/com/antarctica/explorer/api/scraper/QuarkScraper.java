@@ -80,7 +80,7 @@ public class QuarkScraper extends Scraper {
       String name = item.select(NAME_SELECTOR).text();
       String description = item.select(DESCRIPTION_SELECTOR).text();
       String port = item.select(PORT_SELECTOR).text();
-      String duration = item.select(DURATION_SELECTOR).get(0).text();
+      String duration = item.select(DURATION_SELECTOR).get(0).text().replaceAll("[A-Za-z\\s]", "");
       BigDecimal price = extractPrice(item, PRICE_SELECTOR);
       String photoUrl = cruiseLine.getWebsite() + item.select(PHOTO_SELECTOR).attr("src");
 

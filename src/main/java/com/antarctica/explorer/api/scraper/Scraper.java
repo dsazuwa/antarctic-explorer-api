@@ -101,17 +101,18 @@ public abstract class Scraper {
     return attr.substring(startIndex, endIndex);
   }
 
-  protected BigDecimal extractPrice(Element element, String selector) {
-    Elements priceElement = element.select(selector);
-    if (priceElement.isEmpty()) return null;
-    String priceText = priceElement.text().replaceAll("[^\\d.]", "");
-
+  protected BigDecimal extractPrice(String price) {
     try {
-      return new BigDecimal(priceText);
+      return new BigDecimal(price.replaceAll("[^\\d.]", ""));
     } catch (NumberFormatException e) {
-      System.err.println("Failed to parse price: " + priceText);
+      System.err.println("Failed to parse price: " + price);
       return null;
     }
+  }
+
+  protected BigDecimal extractPrice(Element element, String selector) {
+    Elements priceElement = element.select(selector);
+    return (priceElement.isEmpty()) ? null : extractPrice(priceElement.text());
   }
 
   protected void waitForInvisibilityOfElement(String cssSelector) {
