@@ -142,7 +142,9 @@ public class PonantScraper extends Scraper {
   private void processElements(String name, List<Element> elements) {
     Element element = elements.get(0);
 
-    String photoUrl = extractPhotoUrl(element, PHOTO_URL_SELECTOR, PHOTO_URL_ATTR, "url(", ")");
+    String photoUrl =
+        extractPhotoUrl(element, PHOTO_URL_SELECTOR, PHOTO_URL_ATTR, "url(", ")")
+            .replace("/small", "");
     String website = cruiseLine.getWebsite() + element.select(WEBSITE_SELECTOR).attr("href");
 
     navigateTo(website, EXPEDITION_TITLE_SELECTOR);
