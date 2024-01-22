@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 public class QuarkScraper extends Scraper {
@@ -80,12 +81,19 @@ public class QuarkScraper extends Scraper {
       String name = item.select(NAME_SELECTOR).text();
       String description = item.select(DESCRIPTION_SELECTOR).text();
       String port = item.select(PORT_SELECTOR).text();
-      String duration = item.select(DURATION_SELECTOR).get(0).text().replaceAll("[A-Za-z\\s]", "");
+      String duration = extractDuration(item);
       BigDecimal price = extractPrice(item, PRICE_SELECTOR);
       String photoUrl = cruiseLine.getWebsite() + item.select(PHOTO_SELECTOR).attr("src");
 
       expeditionService.saveIfNotExist(
           cruiseLine, website, name, description, port, port, duration, price, photoUrl);
     }
+  }
+
+  private String extractDuration(Element item) {
+    String[] parts = item.select(DURATION_SELECTOR).get(0).text().split(" ");
+    if (parts.length == 2) return parts[0];
+    else if (parts.length == 4) return parts[0] + " - " + parts[2];
+    else throw new NoSuchElementException("Duration not found");
   }
 }
