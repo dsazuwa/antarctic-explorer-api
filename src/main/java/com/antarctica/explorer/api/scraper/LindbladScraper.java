@@ -36,6 +36,8 @@ public class LindbladScraper extends Scraper {
       "{\"requests\":[{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=true&clickAnalytics=true&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=%5B%22departureDates.dateFromTimestamp%22%2C%22destinations.name%22%2C%22ships.name%22%2C%22duration%22%2C%22productType%22%5D&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&tagFilters=&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facets=destinations.name&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&numericFilters=%5B%22departureDates.dateFromTimestamp%3E%3D0%22%2C%22departureDates.dateFromTimestamp%3C%3D9999999999%22%5D&page=0&userToken=00000000-0000-0000-0000-000000000000\"},{\"indexName\":\"prod_seaware_EXPEDITIONS\",\"params\":\"analytics=false&clickAnalytics=false&enablePersonalization=true&facetFilters=%5B%5B%22destinations.name%3AAntarctica%22%5D%5D&facets=departureDates.dateFromTimestamp&filters=(nrDepartures%20%3E%200)%20AND%20(departureDates.dateFromTimestamp%20%3E%201704239999)&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=0&maxValuesPerFacet=40&page=0&userToken=00000000-0000-0000-0000-000000000000\"}]}";
   private static final String DESCRIPTION_SELECTOR =
       "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
+  private static final String PORT_SELECTOR =
+      "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz > header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
 
   private final CloseableHttpClient httpClient;
   private final ObjectMapper objectMapper;
@@ -123,6 +125,8 @@ public class LindbladScraper extends Scraper {
     for (LindbladHit hit : hits) {
       String website = cruiseLine.getWebsite() + "/en/expeditions/" + hit.pageSlug;
       navigateTo(website, DESCRIPTION_SELECTOR);
+      waitForPresenceOfElement(PORT_SELECTOR);
+
       if (!cookieAccepted) acceptCookie();
 
       Document doc = getParsedPageSource();
@@ -144,11 +148,9 @@ public class LindbladScraper extends Scraper {
   }
 
   private String[] extractPorts(Document doc) {
-    String portSelector =
-        "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz > header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
-
-    waitForPresenceOfElement(portSelector);
-    String[] ports = doc.select(portSelector).stream().map(Element::text).toArray(String[]::new);
+    waitForPresenceOfElement(PORT_SELECTOR);
+    String[] ports = doc.select(PORT_SELECTOR).stream().map(Element::text).toArray(String[]::new);
+    System.out.println(ports);
 
     if (ports.length != 2) throw new NoSuchElementException("Ports not found");
     return ports;
