@@ -1,5 +1,6 @@
 package com.antarctica.explorer.api.controller;
 
+import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -22,13 +23,15 @@ public class ExpeditionController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "5") int size,
       @RequestParam(defaultValue = "cruiseLine") String sort,
-      @RequestParam(defaultValue = "asc") String dir) {
-    if (!isValidSortField(sort))
+      @RequestParam(defaultValue = "asc") String dir,
+      @ModelAttribute ExpeditionFilter filter) {
+    if (isInvalidSortField(sort))
       return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
 
     try {
       return ResponseEntity.ok(
           service.findAll(
+              filter,
               Math.max(0, page),
               Math.max(0, size),
               sort,
@@ -38,9 +41,9 @@ public class ExpeditionController {
     }
   }
 
-  private boolean isValidSortField(String sort) {
-    return "name".equalsIgnoreCase(sort)
-        || "cruiseLine".equalsIgnoreCase(sort)
-        || "price".equalsIgnoreCase(sort);
+  private boolean isInvalidSortField(String sort) {
+    return !"name".equalsIgnoreCase(sort)
+        && !"cruiseLine".equalsIgnoreCase(sort)
+        && !"price".equalsIgnoreCase(sort);
   }
 }

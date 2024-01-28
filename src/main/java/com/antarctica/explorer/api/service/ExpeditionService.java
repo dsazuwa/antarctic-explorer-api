@@ -3,6 +3,8 @@ package com.antarctica.explorer.api.service;
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.model.ExpeditionSpec;
+import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.pojo.response.ExpeditionResponse;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import java.math.BigDecimal;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -72,6 +75,19 @@ public class ExpeditionService {
 
     Pageable paging = PageRequest.of(page, size, sort);
     Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
+    return new ExpeditionResponse(expeditionPage);
+  }
+
+  public ExpeditionResponse findAll(
+      ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
+    Specification<Expedition> spec = ExpeditionSpec.filterBy(filter);
+    Sort sort =
+        sortField.equalsIgnoreCase("cruiseLine")
+            ? Sort.by(dir, sortField).and(Sort.by("name"))
+            : Sort.by(dir, sortField);
+
+    Pageable paging = PageRequest.of(page, size, sort);
+    Page<ExpeditionDTO> expeditionPage = repository.findAll(spec, paging).map(ExpeditionDTO::new);
     return new ExpeditionResponse(expeditionPage);
   }
 
