@@ -1,15 +1,13 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
+import com.antarctica.explorer.api.pojo.response.MainResponse;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
-
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,16 +22,13 @@ public class MainController {
   }
 
   @GetMapping("/api")
-  public MainResponse getData() {
+  public MainResponse getData(
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size) {
     Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
-    List<ExpeditionDTO> expeditions = expeditionService.findAll();
 
-    expeditions.sort(
-        Comparator.comparing(ExpeditionDTO::cruiseLine).thenComparing(ExpeditionDTO::name));
+//    expeditions.sort(
+//        Comparator.comparing(ExpeditionDTO::cruiseLine).thenComparing(ExpeditionDTO::name));
 
-    return new MainResponse(cruiseLines, expeditions);
+    return new MainResponse(cruiseLines, expeditionService.findAll(page, size));
   }
-
-  public record MainResponse(
-      Map<String, CruiseLine> cruiseLines, List<ExpeditionDTO> expeditions) {}
 }

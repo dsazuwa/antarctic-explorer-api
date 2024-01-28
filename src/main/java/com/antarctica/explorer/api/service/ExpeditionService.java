@@ -3,11 +3,15 @@ package com.antarctica.explorer.api.service;
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.pojo.response.ExpeditionResponse;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,12 +54,13 @@ public class ExpeditionService {
   }
 
   public List<ExpeditionDTO> findAll() {
-    List<Expedition> expeditions = repository.findAll();
-    List<ExpeditionDTO> expeditionDTOs = new ArrayList<>();
+    return repository.findAll().stream().map(ExpeditionDTO::new).collect(Collectors.toList());
+  }
 
-    for (Expedition expedition : expeditions) expeditionDTOs.add(new ExpeditionDTO(expedition));
-
-    return expeditionDTOs;
+  public ExpeditionResponse findAll(int page, int size) {
+    Pageable paging = PageRequest.of(page, size);
+    Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
+    return new ExpeditionResponse(expeditionPage);
   }
 
   public Optional<Expedition> findById(Long id) {

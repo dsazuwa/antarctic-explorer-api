@@ -1,12 +1,11 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.dto.ExpeditionDTO;
+import com.antarctica.explorer.api.pojo.response.ExpeditionResponse;
 import com.antarctica.explorer.api.service.ExpeditionService;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/expeditions")
@@ -19,9 +18,12 @@ public class ExpeditionController {
   }
 
   @GetMapping
-  public ExpeditionResponse findAllExpeditions() {
-    return new ExpeditionResponse(service.findAll());
+  public ResponseEntity<ExpeditionResponse> findAllExpeditions(
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size) {
+    try {
+      return ResponseEntity.ok(service.findAll(page, size));
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
-
- public record ExpeditionResponse(List<ExpeditionDTO> expeditions) {}
 }
