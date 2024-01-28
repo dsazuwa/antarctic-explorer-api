@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,11 +64,26 @@ public class ExpeditionService {
     return new ExpeditionResponse(expeditionPage);
   }
 
+  public ExpeditionResponse findAll(int page, int size, String sortField, String dir) {
+    Sort sort =
+        sortField.equalsIgnoreCase("cruiseLine")
+            ? Sort.by(getSortDirection(dir), sortField).and(Sort.by("name"))
+            : Sort.by(getSortDirection(dir), sortField);
+
+    Pageable paging = PageRequest.of(page, size, sort);
+    Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
+    return new ExpeditionResponse(expeditionPage);
+  }
+
   public Optional<Expedition> findById(Long id) {
     return repository.findById(id);
   }
 
   public Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name) {
     return repository.findByCruiseLineAndName(cruiseLine, name);
+  }
+
+  private Sort.Direction getSortDirection(String direction) {
+    return direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
   }
 }

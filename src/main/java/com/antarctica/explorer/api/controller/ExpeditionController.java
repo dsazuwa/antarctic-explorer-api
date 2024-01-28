@@ -19,9 +19,12 @@ public class ExpeditionController {
 
   @GetMapping
   public ResponseEntity<ExpeditionResponse> findAllExpeditions(
-      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size) {
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "5") int size,
+      @RequestParam(defaultValue = "cruiseLine") String sort,
+      @RequestParam(defaultValue = "asc") String dir) {
     try {
-      return ResponseEntity.ok(service.findAll(page, size));
+      return ResponseEntity.ok(service.findAll(page, size, sort, dir));
     } catch (Exception e) {
       return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }

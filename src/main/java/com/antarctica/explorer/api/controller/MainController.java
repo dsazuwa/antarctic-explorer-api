@@ -23,12 +23,9 @@ public class MainController {
 
   @GetMapping("/api")
   public MainResponse getData(
-      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size) {
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
     Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
-
-//    expeditions.sort(
-//        Comparator.comparing(ExpeditionDTO::cruiseLine).thenComparing(ExpeditionDTO::name));
-
-    return new MainResponse(cruiseLines, expeditionService.findAll(page, size));
+    return new MainResponse(
+        cruiseLines, expeditionService.findAll(page, size, "cruiseLine", "asc"));
   }
 }
