@@ -27,6 +27,8 @@ public class MainController {
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
     Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
     return new MainResponse(
-        cruiseLines, expeditionService.findAll(page, size, "cruiseLine", Sort.Direction.ASC));
+        cruiseLines,
+        expeditionService.findAll(
+            Math.max(0, page), Math.max(0, size), "cruiseLine", Sort.Direction.ASC));
   }
 }
