@@ -64,11 +64,11 @@ public class ExpeditionService {
     return new ExpeditionResponse(expeditionPage);
   }
 
-  public ExpeditionResponse findAll(int page, int size, String sortField, String dir) {
+  public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     Sort sort =
         sortField.equalsIgnoreCase("cruiseLine")
-            ? Sort.by(getSortDirection(dir), sortField).and(Sort.by("name"))
-            : Sort.by(getSortDirection(dir), sortField);
+            ? Sort.by(dir, sortField).and(Sort.by("name"))
+            : Sort.by(dir, sortField);
 
     Pageable paging = PageRequest.of(page, size, sort);
     Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
@@ -81,9 +81,5 @@ public class ExpeditionService {
 
   public Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name) {
     return repository.findByCruiseLineAndName(cruiseLine, name);
-  }
-
-  private Sort.Direction getSortDirection(String direction) {
-    return direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
   }
 }
