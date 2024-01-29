@@ -93,7 +93,7 @@ public class QuarkScraper extends Scraper {
   private String extractDuration(Element item) {
     String[] parts = item.select(DURATION_SELECTOR).get(0).text().split(" ");
     if (parts.length == 2) return parts[0];
-    else if (parts.length == 4) return parts[0] + " - " + parts[2];
+    else if (parts.length == 4) return parts[0] + "-" + parts[2];
     else throw new NoSuchElementException("Duration not found");
   }
 }
