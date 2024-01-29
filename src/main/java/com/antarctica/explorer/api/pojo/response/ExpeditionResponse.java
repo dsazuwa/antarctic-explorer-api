@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public record ExpeditionResponse(
-    List<ExpeditionDTO> expeditions,
+    List<ExpeditionDTO> data,
     int itemsPerPage,
     long totalItems,
     int totalPages,
