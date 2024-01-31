@@ -15,7 +15,7 @@ public class QuarkScraper extends Scraper {
   private static final String EXPEDITION_WEBSITE =
       "https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic";
   private static final String LOGO_URL =
-      "https://seeklogo.com/images/Q/quark-expeditions-logo-0F231D76BF-seeklogo.com.png";
+      "https://asset.brandfetch.io/idP1Daj0JZ/id7RoR85H4.jpeg?updated=1701403444279";
 
   private static final String EXPEDITION_SELECTOR = ".views-row";
   private static final String AJAX_PROGRESS_SELECTOR = "div.ajax-progress-fullscreen";
