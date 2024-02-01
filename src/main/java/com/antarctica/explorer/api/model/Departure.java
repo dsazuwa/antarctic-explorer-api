@@ -2,21 +2,25 @@ package com.antarctica.explorer.api.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.hibernate.annotations.*;
 
 @Entity
-@Table(schema = "antarctica", name = "expedition_trips")
-public class ExpeditionTrip {
+@Table(schema = "antarctica", name = "departures")
+public class Departure {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "expedition_trip_id")
+  @Column(name = "departure_id")
   private Integer id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "expedition_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Expedition expedition;
+
+  @Column(name = "name")
+  private String name;
 
   @Column(name = "departing_from")
   private String departingFrom;
@@ -25,29 +29,35 @@ public class ExpeditionTrip {
   private String arrivingAt;
 
   @Column(name = "start_date", nullable = false)
-  private Date startDate;
+  private LocalDate startDate;
 
   @Column(name = "end_date", nullable = false)
-  private Date endDate;
+  private LocalDate endDate;
+
+  @Column(name = "starting_price", nullable = false)
+  private BigDecimal startingPrice;
 
   @Column(name = "website")
   private String website;
 
-  protected ExpeditionTrip() {}
+  protected Departure() {}
 
-  public ExpeditionTrip(
+  public Departure(
       Expedition expedition,
-      String description,
+      String name,
       String departingFrom,
       String arrivingAt,
-      Date startDate,
-      Date endDate,
+      LocalDate startDate,
+      LocalDate endDate,
+      BigDecimal startingPrice,
       String website) {
     this.expedition = expedition;
+    this.name = name;
     this.departingFrom = departingFrom;
     this.arrivingAt = arrivingAt;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.startingPrice = startingPrice;
     this.website = website;
   }
 
@@ -59,6 +69,10 @@ public class ExpeditionTrip {
     return expedition;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public String getDepartingFrom() {
     return departingFrom;
   }
@@ -67,12 +81,16 @@ public class ExpeditionTrip {
     return arrivingAt;
   }
 
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return startDate;
   }
 
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
+  }
+
+  public BigDecimal getStartingPrice() {
+    return startingPrice;
   }
 
   public String getWebsite() {

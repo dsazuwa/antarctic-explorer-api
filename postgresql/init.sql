@@ -1,14 +1,16 @@
-ALTER TABLE IF EXISTS antarctica.expeditions_vessels DROP CONSTRAINT fk_expedition_trip_id;
+ALTER TABLE IF EXISTS antarctica.expeditions_vessels DROP CONSTRAINT fk_departure_id;
 ALTER TABLE IF EXISTS antarctica.expeditions_vessels DROP CONSTRAINT fk_vessel_id;
 ALTER TABLE IF EXISTS antarctica.vessels DROP CONSTRAINT fk_cruise_line_id;
 ALTER TABLE IF EXISTS antarctica.activities DROP CONSTRAINT fk_expedition_id;
-ALTER TABLE IF EXISTS antarctica.expedition_trips DROP CONSTRAINT fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.itineraries DROP CONSTRAINT fk_expedition_id;
 ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT fk_cruise_line_id;
 
 DROP TABLE IF EXISTS antarctica.expeditions_vessels;
 DROP TABLE IF EXISTS antarctica.vessels;
 DROP TABLE IF EXISTS antarctica.activities;
-DROP TABLE IF EXISTS antarctica.expedition_trips;
+DROP TABLE IF EXISTS antarctica.departures;
+DROP TABLE IF EXISTS antarctica.itineraries;
 DROP TABLE IF EXISTS antarctica.expeditions;
 DROP TABLE IF EXISTS antarctica.cruise_lines;
 
@@ -41,16 +43,27 @@ CREATE TABLE antarctica.expeditions (
   CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
-CREATE TABLE antarctica.expedition_trips (
-  expedition_trip_id SERIAL,
+CREATE TABLE antarctica.itineraries (
+  itinerary_id SERIAL,
   expedition_id INTEGER NOT NULL,
+  day VARCHAR(10) NOT NULL,
+  header VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  PRIMARY KEY (itinerary_id),
+  CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE TABLE antarctica.departures (
+  departure_id SERIAL,
+  expedition_id INTEGER NOT NULL,
+  name VARCHAR,
   departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  startingPrice DECIMAL(10, 4),
+  starting_price DECIMAL(10, 4),
   website TEXT,
-  PRIMARY KEY (expedition_trip_id),
+  PRIMARY KEY (departure_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -80,7 +93,7 @@ CREATE TABLE antarctica.vessels (
 
 CREATE TABLE antarctica.expeditions_vessels (
   vessel_id INTEGER NOT NULL,
-  expedition_trip_id INTEGER NOT NULL,
+  departure_id INTEGER NOT NULL,
   CONSTRAINT fk_vessel_id FOREIGN KEY (vessel_id) REFERENCES antarctica.vessels (vessel_id) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT fk_expedition_trip_id FOREIGN KEY (expedition_trip_id) REFERENCES antarctica.expedition_trips (expedition_trip_id) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT fk_departure_id FOREIGN KEY (departure_id) REFERENCES antarctica.departures (departure_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
