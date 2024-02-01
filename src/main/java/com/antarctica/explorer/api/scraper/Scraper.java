@@ -19,8 +19,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class Scraper {
   protected CruiseLine cruiseLine;
   protected ExpeditionService expeditionService;
+  protected WebDriverWait wait;
   private WebDriver driver;
-  private WebDriverWait wait;
 
   public Scraper(
       CruiseLineService cruiseLineService,
@@ -66,6 +66,10 @@ public abstract class Scraper {
 
   protected Document getParsedPageSource() {
     return Jsoup.parse(driver.getPageSource());
+  }
+
+  protected WebElement findElement(By by) {
+    return driver.findElement(by);
   }
 
   protected WebElement findElement(String cssSelector) {

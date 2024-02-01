@@ -1,13 +1,14 @@
 package com.antarctica.explorer.api.service;
 
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
-import com.antarctica.explorer.api.model.CruiseLine;
-import com.antarctica.explorer.api.model.Expedition;
-import com.antarctica.explorer.api.model.ExpeditionSpec;
+import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.pojo.response.ExpeditionResponse;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
+import com.antarctica.explorer.api.repository.ItineraryRepository;
+import com.antarctica.explorer.api.repository.DepartureRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,14 +21,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExpeditionService {
-  private final ExpeditionRepository repository;
+  private final ExpeditionRepository expeditionRepository;
+  private final ItineraryRepository itineraryRepository;
+  private final DepartureRepository departureRepository;
 
-  public ExpeditionService(ExpeditionRepository repository) {
-    this.repository = repository;
+  public ExpeditionService(
+      ExpeditionRepository repository,
+      ItineraryRepository itineraryRepository,
+      DepartureRepository departureRepository) {
+    this.expeditionRepository = repository;
+    this.itineraryRepository = itineraryRepository;
+    this.departureRepository = departureRepository;
   }
 
   public Expedition save(Expedition expedition) {
-    return repository.save(expedition);
+    return expeditionRepository.save(expedition);
   }
 
   public Expedition saveIfNotExist(
@@ -40,11 +48,12 @@ public class ExpeditionService {
       String duration,
       BigDecimal startingPrice,
       String photoUrl) {
-    Optional<Expedition> existingExpedition = repository.findByCruiseLineAndName(cruiseLine, name);
+    Optional<Expedition> existingExpedition =
+        expeditionRepository.findByCruiseLineAndName(cruiseLine, name);
 
     return existingExpedition.orElseGet(
         () ->
-            repository.save(
+            expeditionRepository.save(
                 new Expedition(
                     cruiseLine,
                     website,
@@ -57,13 +66,31 @@ public class ExpeditionService {
                     photoUrl)));
   }
 
+  public void saveItinerary(Expedition expedition, String day, String header, String content) {
+    itineraryRepository.save(new Itinerary(expedition, day, header, content));
+  }
+
+  public void saveDeparture(
+      Expedition expedition,
+      String name,
+      String[] ports,
+      LocalDate[] dates,
+      BigDecimal price,
+      String website) {
+    departureRepository.save(
+        new Departure(expedition, name, ports[0], ports[1], dates[0], dates[1], price, website));
+  }
+
   public List<ExpeditionDTO> findAll() {
-    return repository.findAll().stream().map(ExpeditionDTO::new).collect(Collectors.toList());
+    return expeditionRepository.findAll().stream()
+        .map(ExpeditionDTO::new)
+        .collect(Collectors.toList());
   }
 
   public ExpeditionResponse findAll(int page, int size) {
     Pageable paging = PageRequest.of(page, size);
-    Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
+    Page<ExpeditionDTO> expeditionPage =
+        expeditionRepository.findAll(paging).map(ExpeditionDTO::new);
     return new ExpeditionResponse(expeditionPage);
   }
 
@@ -74,7 +101,8 @@ public class ExpeditionService {
             : Sort.by(dir, sortField);
 
     Pageable paging = PageRequest.of(page, size, sort);
-    Page<ExpeditionDTO> expeditionPage = repository.findAll(paging).map(ExpeditionDTO::new);
+    Page<ExpeditionDTO> expeditionPage =
+        expeditionRepository.findAll(paging).map(ExpeditionDTO::new);
     return new ExpeditionResponse(expeditionPage);
   }
 
@@ -87,15 +115,16 @@ public class ExpeditionService {
             : Sort.by(dir, sortField);
 
     Pageable paging = PageRequest.of(page, size, sort);
-    Page<ExpeditionDTO> expeditionPage = repository.findAll(spec, paging).map(ExpeditionDTO::new);
+    Page<ExpeditionDTO> expeditionPage =
+        expeditionRepository.findAll(spec, paging).map(ExpeditionDTO::new);
     return new ExpeditionResponse(expeditionPage);
   }
 
   public Optional<Expedition> findById(Long id) {
-    return repository.findById(id);
+    return expeditionRepository.findById(id);
   }
 
   public Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name) {
-    return repository.findByCruiseLineAndName(cruiseLine, name);
+    return expeditionRepository.findByCruiseLineAndName(cruiseLine, name);
   }
 }
