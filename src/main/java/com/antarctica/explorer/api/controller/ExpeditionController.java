@@ -21,7 +21,7 @@ public class ExpeditionController {
   @GetMapping
   public ResponseEntity<?> findAllExpeditions(
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "5") int size,
+      @RequestParam(defaultValue = "6") int size,
       @RequestParam(defaultValue = "cruiseLine") String sort,
       @RequestParam(defaultValue = "asc") String dir,
       @ModelAttribute ExpeditionFilter filter) {

@@ -24,7 +24,7 @@ public class MainController {
 
   @GetMapping("/api")
   public MainResponse getData(
-      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size) {
     Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
     return new MainResponse(
         cruiseLines,
