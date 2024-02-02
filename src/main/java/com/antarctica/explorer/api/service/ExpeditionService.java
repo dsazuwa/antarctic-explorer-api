@@ -4,9 +4,9 @@ import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.pojo.response.ExpeditionResponse;
+import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
-import com.antarctica.explorer.api.repository.DepartureRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -73,12 +73,15 @@ public class ExpeditionService {
   public void saveDeparture(
       Expedition expedition,
       String name,
-      String[] ports,
-      LocalDate[] dates,
+      String departingFrom,
+      String arrivingAt,
+      LocalDate startDate,
+      LocalDate endDate,
       BigDecimal price,
       String website) {
     departureRepository.save(
-        new Departure(expedition, name, ports[0], ports[1], dates[0], dates[1], price, website));
+        new Departure(
+            expedition, name, departingFrom, arrivingAt, startDate, endDate, price, website));
   }
 
   public List<ExpeditionDTO> findAll() {

@@ -43,7 +43,7 @@ public abstract class Scraper {
 
   protected void initializeDriver() {
     ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
+    //    options.addArguments("--headless");
     this.driver = new ChromeDriver(options);
     this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
   }
@@ -86,9 +86,20 @@ public abstract class Scraper {
     System.out.println("Loaded website: " + website);
   }
 
+  protected void navigateTo(String website) {
+    driver.get(website);
+    System.out.println("Loaded website: " + website);
+  }
+
   protected void navigateTo(String website, String waitForPresenceSelector) {
     driver.get(website);
     waitForPresenceOfElement(waitForPresenceSelector);
+    System.out.println("Loaded website: " + website);
+  }
+
+  protected void navigateTo(String website, String[] waitForPresenceSelectors) {
+    driver.get(website);
+    for (String selector : waitForPresenceSelectors) waitForPresenceOfElement(selector);
     System.out.println("Loaded website: " + website);
   }
 
