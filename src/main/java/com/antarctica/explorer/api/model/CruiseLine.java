@@ -16,6 +16,9 @@ public class CruiseLine {
   @Column(name = "website", nullable = false, unique = true)
   private String website;
 
+  @Column(name = "fleet_website", nullable = false, unique = true)
+  private String fleetWebsite;
+
   @Column(name = "expedition_website", nullable = false, unique = true)
   private String expeditionWebsite;
 
@@ -31,6 +34,15 @@ public class CruiseLine {
     this.logo = logo;
   }
 
+  public CruiseLine(
+      String name, String website, String fleetWebsite, String expeditionWebsite, String logo) {
+    this.name = name;
+    this.website = website;
+    this.fleetWebsite = fleetWebsite;
+    this.expeditionWebsite = expeditionWebsite;
+    this.logo = logo;
+  }
+
   public Integer getId() {
     return id;
   }
@@ -41,6 +53,10 @@ public class CruiseLine {
 
   public String getWebsite() {
     return website;
+  }
+
+  public String getFleetWebsite() {
+    return fleetWebsite;
   }
 
   public String getExpeditionWebsite() {

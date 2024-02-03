@@ -56,6 +56,10 @@ public class CruiseLineService {
     return cruiseLineRepository.findById(id);
   }
 
+  public CruiseLine getByName(String name) {
+    return cruiseLineRepository.findByName(name).orElseThrow();
+  }
+
   public Optional<CruiseLine> findByName(String name) {
     return cruiseLineRepository.findByName(name);
   }

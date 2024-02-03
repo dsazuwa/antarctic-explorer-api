@@ -19,6 +19,11 @@ public class Departure {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Expedition expedition;
 
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "vessel_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Vessel vessel;
+
   @Column(name = "name")
   private String name;
 
@@ -44,6 +49,7 @@ public class Departure {
 
   public Departure(
       Expedition expedition,
+      Vessel vessel,
       String name,
       String departingFrom,
       String arrivingAt,
@@ -52,6 +58,7 @@ public class Departure {
       BigDecimal startingPrice,
       String website) {
     this.expedition = expedition;
+    this.vessel = vessel;
     this.name = name;
     this.departingFrom = departingFrom;
     this.arrivingAt = arrivingAt;
@@ -67,6 +74,10 @@ public class Departure {
 
   public Expedition getExpedition() {
     return expedition;
+  }
+
+  public Vessel getVessel() {
+    return vessel;
   }
 
   public String getName() {

@@ -72,6 +72,7 @@ public class ExpeditionService {
 
   public void saveDeparture(
       Expedition expedition,
+      Vessel vessel,
       String name,
       String departingFrom,
       String arrivingAt,
@@ -81,7 +82,15 @@ public class ExpeditionService {
       String website) {
     departureRepository.save(
         new Departure(
-            expedition, name, departingFrom, arrivingAt, startDate, endDate, price, website));
+            expedition,
+            vessel,
+            name,
+            departingFrom,
+            arrivingAt,
+            startDate,
+            endDate,
+            price,
+            website));
   }
 
   public List<ExpeditionDTO> findAll() {
