@@ -153,11 +153,11 @@ public class LindbladScraper extends Scraper {
         .forEach(
             element -> {
               String daySelector = "p.sc-dd73f2f5-0.sc-ad096f17-6.bMGjHV.bvzlzR";
-              String headerSelector = "h4.sc-91ccd5f9-0.sc-ad096f17-5.gZhyTX.eSHMXQ:not(:has(p))";
+              String headerSelector = "h4.sc-91ccd5f9-0.sc-ad096f17-5.gZhyTX.eSHMXQ";
               String contentSelector = "p.sc-dd73f2f5-0.sc-1a030b44-0.gQUCHt.dzbrZi";
 
               String day = element.select(daySelector).text();
-              String header = element.select(headerSelector).text();
+              String header = Objects.requireNonNull(element.select(headerSelector).first()).ownText();
               String content =
                   element.select(contentSelector).stream()
                       .map(Element::text)
