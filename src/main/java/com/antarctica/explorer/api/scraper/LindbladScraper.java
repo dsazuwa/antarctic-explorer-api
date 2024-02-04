@@ -39,18 +39,8 @@ public class LindbladScraper extends Scraper {
     try {
       newsletterRemoved = false;
 
-      navigateTo(cruiseLine.getFleetWebsite());
-      acceptCookie();
-
-      getDocument(
-              "section[id=ships] > button.button.filterable-grid__load-button",
-              "(//div.filterable-grid__grid/div.ship-card)[last()]",
-              "section[data-segmentid='Daily Expedition Reports']")
-          .select(SHIP_SELECTOR)
-          .forEach(this::scrapeVessel);
-
-      navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
-      getParsedPageSource().select(EXPEDITION_SELECTOR).forEach(this::processExpedition);
+      scrapeVessels();
+      scrapeExpeditions();
     } finally {
       quitDriver();
     }
@@ -77,6 +67,33 @@ public class LindbladScraper extends Scraper {
     if (closeButton != null) {
       closeButton.click();
       newsletterRemoved = true;
+    }
+  }
+
+  private void scrapeVessels() {
+    navigateTo(cruiseLine.getFleetWebsite());
+    acceptCookie();
+    getDocument(
+            "section[id=ships] > button.button.filterable-grid__load-button",
+            "(//div.filterable-grid__grid/div.ship-card)[last()]",
+            "section[data-segmentid='Daily Expedition Reports']")
+        .select(SHIP_SELECTOR)
+        .forEach(this::scrapeVessel);
+  }
+
+  private void scrapeExpeditions() {
+    navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
+    loadLazyImage();
+    getParsedPageSource().select(EXPEDITION_SELECTOR).forEach(this::processExpedition);
+  }
+
+  private void loadLazyImage() {
+    for (WebElement listItem : findElements(EXPEDITION_SELECTOR)) {
+      getExecutor().executeScript("arguments[0].scrollIntoView(true);", listItem);
+
+      WebElement image =
+          listItem.findElement(By.cssSelector("div.card_cardContainer__vyvNi > div > span"));
+      wait.until(ExpectedConditions.attributeContains(image, "class", "lazy-load-image-loaded"));
     }
   }
 
@@ -110,7 +127,7 @@ public class LindbladScraper extends Scraper {
     String nameSelector = "a.card_name__GotR3";
     String duration_selector = "span.card_days__B1niQ";
     String priceSelector = "div.card_price___eMSv > span.card_amount__VxXVs";
-    String imageSelector = "div.sc-404189a-6.hsqTTv > img.sc-a2b32e3-4.kidUre";
+    String imageSelector = "img.card_image___G1Nm";
     String highlightSelector = "ul.sc-d5179a42-0.jKPGuL > li > p";
     String departureSelector = "ol[data-module=departureCardList] > li";
 
@@ -120,6 +137,7 @@ public class LindbladScraper extends Scraper {
 
     String duration = element.select(duration_selector).text().split(" ")[0];
     BigDecimal price = extractPrice(element, priceSelector);
+    String photoUrl = Objects.requireNonNull(element.selectFirst(imageSelector)).attr("src");
 
     navigateTo(
         website,
@@ -132,7 +150,6 @@ public class LindbladScraper extends Scraper {
             "ol[data-module=departureCardList] > button.sc-baf605bd-1.cwYkyy",
             "(//ol[@data-module='departureCardList']/li)[last()]",
             "section[aria-label='Newsletter sign up']");
-    String photoUrl = Objects.requireNonNull(doc.selectFirst(imageSelector)).attr("src");
     String description = doc.select(DESCRIPTION_SELECTOR).text();
     String[] ports = extractPorts(doc);
     String[] highlights =
