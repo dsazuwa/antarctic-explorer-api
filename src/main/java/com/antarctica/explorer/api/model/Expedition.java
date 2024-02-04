@@ -27,6 +27,9 @@ public class Expedition {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
+  @Column(name = "highlights", columnDefinition = "TEXT[]")
+  private String[] highlights;
+
   @Column(name = "departing_from")
   private String departingFrom;
 
@@ -49,6 +52,7 @@ public class Expedition {
       String website,
       String name,
       String description,
+      String[] highlights,
       String departingFrom,
       String arrivingAt,
       String duration,
@@ -58,6 +62,7 @@ public class Expedition {
     this.website = website;
     this.name = name;
     this.description = description;
+    this.highlights = highlights;
     this.departingFrom = departingFrom;
     this.arrivingAt = arrivingAt;
     this.duration = duration;
@@ -83,6 +88,10 @@ public class Expedition {
 
   public String getDescription() {
     return description;
+  }
+
+  public String[] getHighlights() {
+    return highlights;
   }
 
   public String getDepartingFrom() {

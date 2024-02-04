@@ -156,7 +156,16 @@ public class LindbladScraper extends Scraper {
         doc.select(highlightSelector).stream().map(Element::text).toArray(String[]::new);
 
     return expeditionService.saveIfNotExist(
-        cruiseLine, website, name, description, ports[0], ports[1], duration, price, photoUrl);
+        cruiseLine,
+        website,
+        name,
+        description,
+        highlights,
+        ports[0],
+        ports[1],
+        duration,
+        price,
+        photoUrl);
   }
 
   private void scrapeItineraries(Document doc, Expedition expedition) {

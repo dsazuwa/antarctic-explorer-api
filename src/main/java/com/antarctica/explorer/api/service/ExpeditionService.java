@@ -43,6 +43,7 @@ public class ExpeditionService {
       String website,
       String name,
       String description,
+      String[] highlights,
       String departingFrom,
       String arrivingAt,
       String duration,
@@ -59,11 +60,35 @@ public class ExpeditionService {
                     website,
                     name,
                     description,
+                    highlights,
                     departingFrom,
                     arrivingAt,
                     duration,
                     startingPrice,
                     photoUrl)));
+  }
+
+  public Expedition saveIfNotExist(
+      CruiseLine cruiseLine,
+      String website,
+      String name,
+      String description,
+      String departingFrom,
+      String arrivingAt,
+      String duration,
+      BigDecimal startingPrice,
+      String photoUrl) {
+    return saveIfNotExist(
+        cruiseLine,
+        website,
+        name,
+        description,
+        null,
+        departingFrom,
+        arrivingAt,
+        duration,
+        startingPrice,
+        photoUrl);
   }
 
   public void saveItinerary(Expedition expedition, String day, String header, String content) {
