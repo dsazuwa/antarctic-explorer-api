@@ -16,7 +16,7 @@ public class CruiseLine {
   @Column(name = "website", nullable = false, unique = true)
   private String website;
 
-  @Column(name = "fleet_website", nullable = false, unique = true)
+  @Column(name = "fleet_website", unique = true)
   private String fleetWebsite;
 
   @Column(name = "expedition_website", nullable = false, unique = true)

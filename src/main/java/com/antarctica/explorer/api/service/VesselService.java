@@ -25,4 +25,12 @@ public class VesselService {
   public Vessel getByName(String name) {
     return vesselRepository.findByName(name).orElseThrow();
   }
+
+  public Optional<Vessel> findByName(String name) {
+    return vesselRepository.findByName(name);
+  }
+
+  public Optional<Vessel> findOneByCruiseLIne(CruiseLine cruiseLine) {
+    return vesselRepository.findTopByCruiseLineOrderById(cruiseLine);
+  }
 }

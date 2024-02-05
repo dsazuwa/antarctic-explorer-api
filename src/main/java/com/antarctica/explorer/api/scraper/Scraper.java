@@ -57,7 +57,7 @@ public abstract class Scraper {
 
   protected void initializeDriver() {
     ChromeOptions options = new ChromeOptions();
-    //    options.addArguments("--headless");
+    options.addArguments("--headless");
     this.driver = new ChromeDriver(options);
     this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
   }
@@ -131,6 +131,8 @@ public abstract class Scraper {
   }
 
   protected BigDecimal extractPrice(String price) {
+    if (price.isEmpty()) return null;
+
     try {
       return new BigDecimal(price.replaceAll("[^\\d.]", ""));
     } catch (NumberFormatException e) {

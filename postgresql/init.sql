@@ -18,7 +18,7 @@ CREATE TABLE antarctica.cruise_lines (
   cruise_line_id SERIAL,
   name VARCHAR(50) NOT NULL UNIQUE,
   website VARCHAR(255) NOT NULL UNIQUE,
-  fleet_website VARCHAR(255) NOT NULL UNIQUE,
+  fleet_website VARCHAR(255) UNIQUE,
   expedition_website TEXT NOT NULL UNIQUE,
   logo TEXT NOT NULL UNIQUE,
   PRIMARY KEY (cruise_line_id)
@@ -81,11 +81,13 @@ DO $$
 BEGIN
   INSERT INTO antarctica.cruise_lines (name, website, fleet_website, expedition_website, logo)
   VALUES
---    (
---      'Aurora Expeditions',
---      'https://www.aurora-expeditions.com/destination',
---      'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle'
---    ),
+    (
+      'Aurora Expeditions',
+      'https://www.aurora-expeditions.com/destination',
+      NULL,
+      'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle',
+      '"https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png"'
+    ),
 --    (
 --      'Hurtigruten Expeditions',
 --      'https://www.hurtigruten.com/en-us/expeditions',
@@ -95,7 +97,7 @@ BEGIN
       'Lindblad Expeditions',
       'https://world.expeditions.com',
       'https://world.expeditions.com/about/fleet#ships',
-      'https://world.expeditions.com/book?destinations.name=Antarctica',
+      'https://world.expeditions.com/book?destinations.name=Antarctica&destinations.name=Patagonia',
       'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
     );
 --    (

@@ -13,11 +13,16 @@ public class ScraperService {
   private static final int MAX_RETRIES = 3;
 
   private final CruiseLineService cruiseLineService;
+  private final VesselService vesselService;
   private final ExpeditionService expeditionService;
 
   @Autowired
-  public ScraperService(CruiseLineService cruiseLineService, ExpeditionService expeditionService) {
+  public ScraperService(
+      CruiseLineService cruiseLineService,
+      VesselService vesselService,
+      ExpeditionService expeditionService) {
     this.cruiseLineService = cruiseLineService;
+    this.vesselService = vesselService;
     this.expeditionService = expeditionService;
   }
 
@@ -26,13 +31,19 @@ public class ScraperService {
     List<Scraper> scrapers =
         new ArrayList<>(
             Arrays.asList(
-                new AuroraScraper(cruiseLineService, expeditionService),
-                new HurtigrutenScraper(cruiseLineService, expeditionService),
-                new LindbladScraper(cruiseLineService, expeditionService),
-                new PonantScraper(cruiseLineService, expeditionService),
-                new SeabournScraper(cruiseLineService, expeditionService),
-                new QuarkScraper(cruiseLineService, expeditionService),
-                new VikingScraper(cruiseLineService, expeditionService)));
+                new AuroraScraper(cruiseLineService, vesselService, expeditionService)
+//                ,
+                //                new HurtigrutenScraper(cruiseLineService, expeditionService),
+//                new LindbladScraper(cruiseLineService, vesselService, expeditionService)
+                //                ,
+                //                new PonantScraper(cruiseLineService, expeditionService),
+                //                new SeabournScraper(cruiseLineService, expeditionService),
+                //                                new QuarkScraper(cruiseLineService,
+                // expeditionService)
+                //                ,
+                //                new VikingScraper(cruiseLineService, expeditionService)
+                //
+                ));
 
     scrapers.forEach(this::scrapeWithRetry);
   }
@@ -46,6 +57,7 @@ public class ScraperService {
         System.out.println(scraperName + " finished scraping");
         break;
       } catch (RuntimeException e) {
+        System.out.println(e.getMessage());
         e.printStackTrace();
 
         if (attempt > MAX_RETRIES) {
