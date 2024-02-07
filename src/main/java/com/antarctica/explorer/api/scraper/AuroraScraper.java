@@ -8,6 +8,7 @@ import com.antarctica.explorer.api.service.VesselService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,12 +41,7 @@ public class AuroraScraper extends Scraper {
         expeditions.addAll(scrapeExpeditions());
       }
 
-      expeditions.forEach(
-          element -> {
-            Expedition expedition = processExpedition(element);
-            scrapeItinerary(expedition);
-            scrapeDeparture(expedition);
-          });
+      expeditions.forEach(this::scrapeExpedition);
     } finally {
       quitDriver();
     }
@@ -70,23 +66,28 @@ public class AuroraScraper extends Scraper {
     return getParsedPageSource().select(EXPEDITION_SELECTOR);
   }
 
-  private Expedition processExpedition(Element element) {
-    String titleSelector = "h4.mb-2 > a";
+  private void scrapeExpedition(Element element) {
+    Elements title = element.select("h4.mb-2 > a");
+    String name = title.text();
+    String website = title.attr("href");
+
+    navigateTo(website);
+    Document doc = getParsedPageSource();
+
+    Expedition expedition = processExpedition(doc, element, name, website);
+    scrapeItinerary(doc, expedition);
+    scrapeDeparture(doc, expedition);
+  }
+
+  private Expedition processExpedition(Document doc, Element element, String name, String website) {
     String durationSelector = "div.col > p.font-weight-bold";
     String photoSelector = "a > div.embed-responsive-item";
     String descriptionSelector = "div.container > div.row.section > div > p";
     String priceSelector = "div.col > p.price > span.price__value";
 
-    Elements title = element.select(titleSelector);
-    String name = title.text();
-    String website = title.attr("href");
-
     String duration = element.select(durationSelector).text().replaceAll("[A-Za-z\\s]", "");
     BigDecimal startingPrice = extractPrice(element, priceSelector);
     String photoUrl = extractPhotoUrl(element, photoSelector, "style", "url('", "')");
-
-    navigateTo(website);
-    Document doc = getParsedPageSource();
 
     Elements descriptionElements = doc.select(descriptionSelector);
     String description =
@@ -116,15 +117,40 @@ public class AuroraScraper extends Scraper {
         photoUrl);
   }
 
-  private void scrapeDeparture(Expedition expedition) {
+  private void scrapeItinerary(Document doc, Expedition expedition) {
+    String itinerarySelector = "div.section-itinerary > div.accordion > div > div";
+    String headerSelector = "a.media > div.media-body > h4";
+    String contentSelector = "div.collapse > div.generic-content > p";
+
+    doc.select(itinerarySelector)
+        .forEach(
+            itinerary -> {
+              String[] headerParts = itinerary.select(headerSelector).text().split(" ");
+              String day = headerParts[0] + " " + headerParts[1];
+              String header =
+                  String.join(" ", Arrays.copyOfRange(headerParts, 2, headerParts.length));
+
+              String content =
+                  itinerary.select(contentSelector).stream()
+                      .map(Element::text)
+                      .collect(
+                          StringBuilder::new,
+                          (sb, text) -> sb.append(text).append("\n"),
+                          StringBuilder::append)
+                      .toString();
+
+              expeditionService.saveItinerary(expedition, day, header, content);
+            });
+  }
+
+  private void scrapeDeparture(Document doc, Expedition expedition) {
     String optionSelector = "div.details > dl.clearfix > dd > select > option";
     String priceSelector = "dd > h4 > span.price__value";
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
     String mainWebsite = getCurrentUrl();
 
-    getParsedPageSource()
-        .select(optionSelector)
+    doc.select(optionSelector)
         .forEach(
             option -> {
               String[] dates = option.text().split(" - ");
@@ -140,12 +166,12 @@ public class AuroraScraper extends Scraper {
                           ExpectedConditions.textToBePresentInElement(
                               findElements("div.details > dl.clearfix > dd").get(2), name)));
 
-              Document doc = getParsedPageSource();
-              BigDecimal startingPrice = extractPrice(doc, priceSelector);
+              Document departureDoc = getParsedPageSource();
+              BigDecimal startingPrice = extractPrice(departureDoc, priceSelector);
               if (startingPrice == null) return;
-              String[] ports = extractPorts(doc);
+              String[] ports = extractPorts(departureDoc);
 
-              Vessel vessel = scrapeVessel(doc);
+              Vessel vessel = scrapeVessel(departureDoc);
               if (vessel == null) {
                 Optional<Vessel> randVessel = vesselService.findOneByCruiseLIne(cruiseLine);
                 if (randVessel.isEmpty()) return;
@@ -164,8 +190,6 @@ public class AuroraScraper extends Scraper {
                   website);
             });
   }
-
-  private void scrapeItinerary(Expedition expedition) {}
 
   private Vessel scrapeVessel(Document doc) {
     String shipSelector = "div.details > dl.clearfix > dd";
