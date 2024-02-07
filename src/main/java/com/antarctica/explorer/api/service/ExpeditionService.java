@@ -8,8 +8,13 @@ import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -114,22 +119,37 @@ public class ExpeditionService {
       ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
     Specification<ExpeditionDTO> spec = ExpeditionSpec.filterBy(filter);
 
-    if (sortField.equalsIgnoreCase("nearestDate"))
-      return new ExpeditionResponse(
-          expeditionRepository.findAllSortedByNearestDate(
-              spec, PageRequest.of(page, size )));
-
     Sort sort =
         sortField.equalsIgnoreCase("cruiseLine")
             ? Sort.by(dir, sortField).and(Sort.by("name"))
             : Sort.by(dir, sortField);
 
+    Page<Map<String, Object>> x =
+        expeditionRepository.findAllExpeditionDTO(spec, PageRequest.of(page, size, sort));
+
+    List<ExpeditionDTO> dto =
+        x.getContent().stream().map(this::mapToExpeditionDTO).collect(Collectors.toList());
+
     return new ExpeditionResponse(
-        expeditionRepository.findAllWithNearestDateAndCapacity(
-            spec, PageRequest.of(page, size, sort)));
+        dto, x.getSize(), x.getTotalElements(), x.getTotalPages(), x.getNumber());
   }
 
   public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(null, null), page, size, sortField, dir);
+  }
+
+  private ExpeditionDTO mapToExpeditionDTO(Map<String, Object> resultMap) {
+    return new ExpeditionDTO(
+        (Integer) resultMap.get("id"),
+        (String) resultMap.get("cruise_line"),
+        (String) resultMap.get("website"),
+        (String) resultMap.get("name"),
+        (String) resultMap.get("description"),
+        (String) resultMap.get("departing_from"),
+        (String) resultMap.get("arriving_at"),
+        (String) resultMap.get("duration"),
+        (BigDecimal) resultMap.get("starting_price"),
+        (Date) resultMap.get("nearest_date"),
+        (String) resultMap.get("photo_url"));
   }
 }
