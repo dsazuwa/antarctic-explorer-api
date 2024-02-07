@@ -2,9 +2,10 @@ package com.antarctica.explorer.api.dto;
 
 import com.antarctica.explorer.api.model.Expedition;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
-public record ExpeditionDTO(
-    Integer id,
+ public record ExpeditionDTO(
+    int id,
     String cruiseLine,
     String website,
     String name,
@@ -13,7 +14,8 @@ public record ExpeditionDTO(
     String arrivingAt,
     String duration,
     BigDecimal startingPrice,
-    String photoUrl) {
+    LocalDate nearestDate,
+    String photoUrl) {}
 
   public ExpeditionDTO(Expedition expedition) {
     this(

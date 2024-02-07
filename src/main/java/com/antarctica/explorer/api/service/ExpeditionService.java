@@ -9,12 +9,8 @@ import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -32,10 +28,6 @@ public class ExpeditionService {
     this.expeditionRepository = repository;
     this.itineraryRepository = itineraryRepository;
     this.departureRepository = departureRepository;
-  }
-
-  public Expedition save(Expedition expedition) {
-    return expeditionRepository.save(expedition);
   }
 
   public Expedition saveIfNotExist(
@@ -118,50 +110,26 @@ public class ExpeditionService {
             website));
   }
 
-  public List<ExpeditionDTO> findAll() {
-    return expeditionRepository.findAll().stream()
-        .map(ExpeditionDTO::new)
-        .collect(Collectors.toList());
-  }
+  public ExpeditionResponse findAll(
+      ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
+    Specification<ExpeditionDTO> spec = ExpeditionSpec.filterBy(filter);
 
-  public ExpeditionResponse findAll(int page, int size) {
-    Pageable paging = PageRequest.of(page, size);
-    Page<ExpeditionDTO> expeditionPage =
-        expeditionRepository.findAll(paging).map(ExpeditionDTO::new);
-    return new ExpeditionResponse(expeditionPage);
+    if (sortField.equalsIgnoreCase("nearestDate"))
+      return new ExpeditionResponse(
+          expeditionRepository.findAllSortedByNearestDate(
+              spec, PageRequest.of(page, size )));
+
+    Sort sort =
+        sortField.equalsIgnoreCase("cruiseLine")
+            ? Sort.by(dir, sortField).and(Sort.by("name"))
+            : Sort.by(dir, sortField);
+
+    return new ExpeditionResponse(
+        expeditionRepository.findAllWithNearestDateAndCapacity(
+            spec, PageRequest.of(page, size, sort)));
   }
 
   public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
-    Sort sort =
-        sortField.equalsIgnoreCase("cruiseLine")
-            ? Sort.by(dir, sortField).and(Sort.by("name"))
-            : Sort.by(dir, sortField);
-
-    Pageable paging = PageRequest.of(page, size, sort);
-    Page<ExpeditionDTO> expeditionPage =
-        expeditionRepository.findAll(paging).map(ExpeditionDTO::new);
-    return new ExpeditionResponse(expeditionPage);
-  }
-
-  public ExpeditionResponse findAll(
-      ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
-    Specification<Expedition> spec = ExpeditionSpec.filterBy(filter);
-    Sort sort =
-        sortField.equalsIgnoreCase("cruiseLine")
-            ? Sort.by(dir, sortField).and(Sort.by("name"))
-            : Sort.by(dir, sortField);
-
-    Pageable paging = PageRequest.of(page, size, sort);
-    Page<ExpeditionDTO> expeditionPage =
-        expeditionRepository.findAll(spec, paging).map(ExpeditionDTO::new);
-    return new ExpeditionResponse(expeditionPage);
-  }
-
-  public Optional<Expedition> findById(Long id) {
-    return expeditionRepository.findById(id);
-  }
-
-  public Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name) {
-    return expeditionRepository.findByCruiseLineAndName(cruiseLine, name);
+    return findAll(new ExpeditionFilter(null, null), page, size, sortField, dir);
   }
 }

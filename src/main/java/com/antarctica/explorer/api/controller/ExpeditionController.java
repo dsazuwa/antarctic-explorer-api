@@ -44,6 +44,7 @@ public class ExpeditionController {
   private boolean isInvalidSortField(String sort) {
     return !"name".equalsIgnoreCase(sort)
         && !"cruiseLine".equalsIgnoreCase(sort)
-        && !"startingPrice".equalsIgnoreCase(sort);
+        && !"startingPrice".equalsIgnoreCase(sort)
+        && !"nearestDate".equalsIgnoreCase(sort);
   }
 }
