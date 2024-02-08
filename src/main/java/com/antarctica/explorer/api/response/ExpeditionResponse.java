@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.pojo.response;
+package com.antarctica.explorer.api.response;
 
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import java.util.List;

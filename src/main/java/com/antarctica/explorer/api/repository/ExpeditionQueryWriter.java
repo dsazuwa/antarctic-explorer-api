@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.pojo;
+package com.antarctica.explorer.api.repository;
 
 import com.google.common.base.CaseFormat;
 import org.springframework.data.domain.Sort;

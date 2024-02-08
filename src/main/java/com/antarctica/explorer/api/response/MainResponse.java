@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.pojo.response;
+package com.antarctica.explorer.api.response;
 
 import com.antarctica.explorer.api.model.CruiseLine;
 import java.util.Map;

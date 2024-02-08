@@ -1,7 +1,7 @@
 package com.antarctica.explorer.api.controller;
 
 import com.antarctica.explorer.api.model.CruiseLine;
-import com.antarctica.explorer.api.pojo.response.MainResponse;
+import com.antarctica.explorer.api.response.MainResponse;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.util.Map;

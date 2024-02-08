@@ -1,6 +1,5 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.pojo.PonantExpeditionTrip;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.math.BigDecimal;
@@ -255,4 +254,13 @@ public class PonantScraper extends Scraper {
         ? trips.get(0).arrivingAt()
         : null;
   }
+
+  public record PonantExpeditionTrip(
+      String departingFrom,
+      String arrivingAt,
+      String startDate,
+      String endDate,
+      BigDecimal startingPrice,
+      String shipName,
+      String website) {}
 }

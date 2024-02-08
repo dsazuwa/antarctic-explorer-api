@@ -1,6 +1,5 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.pojo.SeabournExpeditionTrip;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.math.BigDecimal;
@@ -166,4 +165,7 @@ public class SeabournScraper extends Scraper {
   private boolean isSoldOut(Element element) {
     return !element.select(SOLD_OUT_SELECTOR).isEmpty();
   }
+
+  public record SeabournExpeditionTrip(
+      String startingDate, BigDecimal startingPrice, String shipName, String website) {}
 }

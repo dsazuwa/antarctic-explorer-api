@@ -2,7 +2,6 @@ package com.antarctica.explorer.api.repository;
 
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.model.Expedition;
-import com.antarctica.explorer.api.pojo.ExpeditionQueryWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +22,7 @@ public interface ExpeditionRepository
 
   @Query(
       value =
-        """
+          """
           WITH combined_table AS (
             SELECT
               e.expedition_id as id,
@@ -58,7 +57,7 @@ public interface ExpeditionRepository
           SELECT * FROM combined_table e
         """,
       countQuery =
-        """
+          """
           SELECT count(*)
           FROM antarctica.expeditions e
           JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
