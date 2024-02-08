@@ -2,7 +2,6 @@ package com.antarctica.explorer.api.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
