@@ -86,7 +86,7 @@ BEGIN
       'https://www.aurora-expeditions.com/destination',
       NULL,
       'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle',
-      '"https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png"'
+      'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
     ),
 --    (
 --      'Hurtigruten Expeditions',
@@ -98,7 +98,7 @@ BEGIN
       'https://world.expeditions.com',
       'https://world.expeditions.com/about/fleet#ships',
       'https://world.expeditions.com/book?destinations.name=Antarctica&destinations.name=Patagonia',
-      'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIYnZRyYN0tIRpXDqp-e0F104zX1L1jm3PTQyGa02Gbg&s'
     );
 --    (
 --      'Ponant',
