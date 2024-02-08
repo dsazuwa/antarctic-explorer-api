@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -117,7 +116,6 @@ public class ExpeditionService {
 
   public ExpeditionResponse findAll(
       ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
-    Specification<ExpeditionDTO> spec = ExpeditionSpec.filterBy(filter);
 
     Sort sort =
         sortField.equalsIgnoreCase("cruiseLine")
@@ -125,7 +123,13 @@ public class ExpeditionService {
             : Sort.by(dir, sortField);
 
     Page<Map<String, Object>> x =
-        expeditionRepository.findAllExpeditionDTO(spec, PageRequest.of(page, size, sort));
+        expeditionRepository.findAllExpeditionDTO(
+            PageRequest.of(page, size, sort),
+            filter.cruiseLines(),
+            filter.capacity().min(),
+            filter.capacity().max(),
+            filter.duration().min(),
+            filter.duration().max());
 
     List<ExpeditionDTO> dto =
         x.getContent().stream().map(this::mapToExpeditionDTO).collect(Collectors.toList());
@@ -135,7 +139,7 @@ public class ExpeditionService {
   }
 
   public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
-    return findAll(new ExpeditionFilter(null, null), page, size, sortField, dir);
+    return findAll(new ExpeditionFilter(null, null, null), page, size, sortField, dir);
   }
 
   private ExpeditionDTO mapToExpeditionDTO(Map<String, Object> resultMap) {
