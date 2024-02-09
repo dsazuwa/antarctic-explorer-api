@@ -39,7 +39,13 @@ public interface ExpeditionRepository
               e.photo_url
             FROM antarctica.expeditions e
             JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
-            LEFT JOIN antarctica.departures d ON e.expedition_id = d.expedition_id
+            LEFT JOIN (
+              SELECT *
+              FROM antarctica.departures d
+              WHERE
+                (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
+                (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
+            ) d ON e.expedition_id = d.expedition_id
             LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
             WHERE
               (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
@@ -61,7 +67,13 @@ public interface ExpeditionRepository
           SELECT count(*)
           FROM antarctica.expeditions e
           JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
-          LEFT JOIN antarctica.departures d ON e.expedition_id = d.expedition_id
+          LEFT JOIN (
+            SELECT *
+            FROM antarctica.departures d
+            WHERE
+              (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
+              (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
+          ) d ON e.expedition_id = d.expedition_id
           LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
           WHERE
             (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
@@ -80,6 +92,8 @@ public interface ExpeditionRepository
       queryRewriter = ExpeditionQueryWriter.class)
   Page<Map<String, Object>> findAllExpeditionDTO(
       Pageable pageable,
+      @Param("start_date") String startDate,
+      @Param("end_date") String endDate,
       @Param("cruise_lines") String[] cruiseLines,
       @Param("min_capacity") Integer minCapacity,
       @Param("max_capacity") Integer maxCapacity,

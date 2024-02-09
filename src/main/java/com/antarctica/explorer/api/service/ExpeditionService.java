@@ -10,7 +10,6 @@ import com.antarctica.explorer.api.response.ExpeditionResponse;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,24 +121,27 @@ public class ExpeditionService {
             ? Sort.by(dir, sortField).and(Sort.by("name"))
             : Sort.by(dir, sortField);
 
-    Page<Map<String, Object>> x =
+    Page<Map<String, Object>> result =
         expeditionRepository.findAllExpeditionDTO(
             PageRequest.of(page, size, sort),
+            filter.startDate(),
+            filter.endDate(),
             filter.cruiseLines(),
             filter.capacity().min(),
             filter.capacity().max(),
             filter.duration().min(),
             filter.duration().max());
 
-    List<ExpeditionDTO> dto =
-        x.getContent().stream().map(this::mapToExpeditionDTO).collect(Collectors.toList());
-
     return new ExpeditionResponse(
-        dto, x.getSize(), x.getTotalElements(), x.getTotalPages(), x.getNumber());
+        result.getContent().stream().map(this::mapToExpeditionDTO).collect(Collectors.toList()),
+        result.getSize(),
+        result.getTotalElements(),
+        result.getTotalPages(),
+        result.getNumber());
   }
 
   public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
-    return findAll(new ExpeditionFilter(null, null, null), page, size, sortField, dir);
+    return findAll(new ExpeditionFilter(), page, size, sortField, dir);
   }
 
   private ExpeditionDTO mapToExpeditionDTO(Map<String, Object> resultMap) {
