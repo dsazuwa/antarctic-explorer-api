@@ -16,9 +16,58 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ExpeditionRepository
     extends JpaRepository<Expedition, Long>, JpaSpecificationExecutor<Expedition> {
-  List<Expedition> findAllByCruiseLine(CruiseLine cruiseLine);
-
-  Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name);
+  @Query(
+      value =
+          """
+            SELECT
+              e.expedition_id AS id,
+              e.name,
+              e.description,
+              e.highlights,
+              e.departing_from,
+              e.arriving_at,
+              e.duration,
+              e.starting_price,
+              e.website,
+              e.photo_url,
+              (
+                SELECT
+                  jsonb_agg(DISTINCT jsonb_build_object(
+                    'day', i.day,
+                    'header', i.header,
+                    'content', i.content
+                  ))
+                FROM antarctica.itineraries i
+                WHERE i.expedition_id = :p_expedition_id
+              ) as itinerary,
+              (
+                SELECT
+                  jsonb_agg(DISTINCT jsonb_build_object(
+                    'name', d.name,
+                    'departing_from', d.departing_from,
+                    'arriving_at', d.arriving_at,
+                    'start_date', d.start_date,
+                    'end_date', d.end_date,
+                    'starting_price', d.starting_price,
+                    'vessel', v.vessel
+                  ))
+                FROM antarctica.departures d
+                JOIN (
+                  SELECT
+                    v.vessel_id,
+                    jsonb_build_object(
+                      'id', v.vessel_id,
+                      'name', v.name
+                    ) AS vessel
+                  FROM antarctica.vessels v
+                ) v ON v.vessel_id = d.vessel_id
+                WHERE d.expedition_id = :p_expedition_id
+              ) as departures
+            FROM antarctica.expeditions e
+            WHERE e.expedition_id = :p_expedition_id
+          """,
+      nativeQuery = true)
+  Map<String, Object> getById(@Param("p_expedition_id") int id);
 
   @Query(
       value =
@@ -99,4 +148,8 @@ public interface ExpeditionRepository
       @Param("max_capacity") Integer maxCapacity,
       @Param("min_duration") Integer minDuration,
       @Param("max_duration") Integer maxDuration);
+
+  List<Expedition> findAllByCruiseLine(CruiseLine cruiseLine);
+
+  Optional<Expedition> findByCruiseLineAndName(CruiseLine cruiseLine, String name);
 }

@@ -2,13 +2,12 @@ package com.antarctica.explorer.api.service;
 
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.*;
-import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
+import com.antarctica.explorer.api.response.ExpeditionPageResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
@@ -113,7 +112,12 @@ public class ExpeditionService {
             website));
   }
 
-  public ExpeditionResponse findAll(
+  public ExpeditionResponse getById(int id) {
+    Map<String, Object> obj = expeditionRepository.getById(id);
+    return (!obj.isEmpty()) ? new ExpeditionResponse(obj) : null;
+  }
+
+  public ExpeditionPageResponse findAll(
       ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
 
     Sort sort =
@@ -132,30 +136,15 @@ public class ExpeditionService {
             filter.duration().min(),
             filter.duration().max());
 
-    return new ExpeditionResponse(
-        result.getContent().stream().map(this::mapToExpeditionDTO).collect(Collectors.toList()),
+    return new ExpeditionPageResponse(
+        result.getContent().stream().map(ExpeditionDTO::new).collect(Collectors.toList()),
         result.getSize(),
         result.getTotalElements(),
         result.getTotalPages(),
         result.getNumber());
   }
 
-  public ExpeditionResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
+  public ExpeditionPageResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(), page, size, sortField, dir);
-  }
-
-  private ExpeditionDTO mapToExpeditionDTO(Map<String, Object> resultMap) {
-    return new ExpeditionDTO(
-        (Integer) resultMap.get("id"),
-        (String) resultMap.get("cruise_line"),
-        (String) resultMap.get("website"),
-        (String) resultMap.get("name"),
-        (String) resultMap.get("description"),
-        (String) resultMap.get("departing_from"),
-        (String) resultMap.get("arriving_at"),
-        (String) resultMap.get("duration"),
-        (BigDecimal) resultMap.get("starting_price"),
-        (Date) resultMap.get("nearest_date"),
-        (String) resultMap.get("photo_url"));
   }
 }

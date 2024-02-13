@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.pojo;
+package com.antarctica.explorer.api.service;
 
 import java.time.LocalDate;
 

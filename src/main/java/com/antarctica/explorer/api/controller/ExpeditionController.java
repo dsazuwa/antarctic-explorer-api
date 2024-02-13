@@ -1,7 +1,8 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.pojo.ExpeditionFilter;
 import com.antarctica.explorer.api.response.ErrorResponse;
+import com.antarctica.explorer.api.response.ExpeditionResponse;
+import com.antarctica.explorer.api.service.ExpeditionFilter;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +23,21 @@ public class ExpeditionController {
     this.service = service;
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getExpedition(@PathVariable String id) {
+    try {
+      ExpeditionResponse expedition = service.getById(Integer.parseInt(id));
+
+      return (expedition != null)
+          ? ResponseEntity.ok(expedition)
+          : ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body(new ErrorResponse("Expedition with ID " + id + " not found"));
+    } catch (NumberFormatException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ErrorResponse("Invalid expedition ID: " + id));
+    }
+  }
+
   //  TODO: resolve startDate and endDate not binding when using @ModelAttribute ExpeditionFilter
   @GetMapping
   public ResponseEntity<?> findAllExpeditions(
@@ -39,8 +55,6 @@ public class ExpeditionController {
 
     if (isInvalidSortField(sort))
       return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
-
-    System.out.println(startDate + " " + endDate);
 
     try {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
