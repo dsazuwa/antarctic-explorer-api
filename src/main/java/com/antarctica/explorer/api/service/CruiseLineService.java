@@ -46,21 +46,14 @@ public class CruiseLineService {
                 TreeMap::new));
   }
 
-  public Optional<CruiseLineDTO> getCruiseLine(Long id) {
-    Optional<CruiseLine> existingCruiseLine = cruiseLineRepository.findById(id);
-    return existingCruiseLine.map(
-        line -> new CruiseLineDTO(line, expeditionRepository.findAllByCruiseLine(line)));
-  }
-
-  public Optional<CruiseLine> findById(Long id) {
-    return cruiseLineRepository.findById(id);
+  public CruiseLineDTO getCruiseLine(Long id) {
+    Optional<CruiseLine> cruiseLine = cruiseLineRepository.findById(id);
+    return cruiseLine
+        .map(line -> new CruiseLineDTO(line, expeditionRepository.findAllByCruiseLine(line)))
+        .orElse(null);
   }
 
   public CruiseLine getByName(String name) {
     return cruiseLineRepository.findByName(name).orElseThrow();
-  }
-
-  public Optional<CruiseLine> findByName(String name) {
-    return cruiseLineRepository.findByName(name);
   }
 }
