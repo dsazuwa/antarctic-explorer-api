@@ -224,7 +224,7 @@ public class LindbladScraper extends Scraper {
         expeditionService.saveDeparture(
             expedition,
             vessel,
-            name.equalsIgnoreCase("Expedition") ? null : name,
+            name.equalsIgnoreCase("Expedition") || name.isEmpty() ? null : name,
             ports.length != 2 ? null : ports[0],
             ports.length != 2 ? null : ports[1],
             dates[0],

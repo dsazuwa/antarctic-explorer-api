@@ -19,6 +19,15 @@ public interface ExpeditionRepository
   @Query(
       value =
           """
+            WITH vessels AS (
+              SELECT
+                v.vessel_id,
+                jsonb_build_object(
+                  'id', v.vessel_id,
+                  'name', v.name
+                ) AS vessel
+              FROM antarctica.vessels v
+            )
             SELECT
               e.expedition_id AS id,
               e.name,
@@ -30,41 +39,29 @@ public interface ExpeditionRepository
               e.starting_price,
               e.website,
               e.photo_url,
-              (
-                SELECT
-                  jsonb_agg(DISTINCT jsonb_build_object(
-                    'day', i.day,
-                    'header', i.header,
-                    'content', i.content
-                  ))
-                FROM antarctica.itineraries i
-                WHERE i.expedition_id = :p_expedition_id
-              ) as itinerary,
-              (
-                SELECT
-                  jsonb_agg(DISTINCT jsonb_build_object(
-                    'name', d.name,
-                    'departing_from', d.departing_from,
-                    'arriving_at', d.arriving_at,
-                    'start_date', d.start_date,
-                    'end_date', d.end_date,
-                    'starting_price', d.starting_price,
-                    'vessel', v.vessel
-                  ))
-                FROM antarctica.departures d
-                JOIN (
-                  SELECT
-                    v.vessel_id,
-                    jsonb_build_object(
-                      'id', v.vessel_id,
-                      'name', v.name
-                    ) AS vessel
-                  FROM antarctica.vessels v
-                ) v ON v.vessel_id = d.vessel_id
-                WHERE d.expedition_id = :p_expedition_id
-              ) as departures
+              json_agg(DISTINCT v.vessel) AS vessels,
+              json_agg(DISTINCT jsonb_build_object(
+                'id', i.itinerary_id,
+                'day', i.day,
+                'header', i.header,
+                'content', i.content
+              )) as itinerary,
+              jsonb_agg(DISTINCT jsonb_build_object(
+                'id', d.departure_id,
+                'name', d.name,
+                'departing_from', d.departing_from,
+                'arriving_at', d.arriving_at,
+                'start_date', d.start_date,
+                'end_date', d.end_date,
+                'starting_price', d.starting_price,
+                'vessel', v.vessel
+              )) as departures
             FROM antarctica.expeditions e
+            LEFT JOIN antarctica.itineraries i ON i.expedition_id = e.expedition_id
+            LEFT JOIN antarctica.departures d ON d.expedition_id = e.expedition_id
+            LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
             WHERE e.expedition_id = :p_expedition_id
+            GROUP BY e.expedition_id
           """,
       nativeQuery = true)
   Map<String, Object> getById(@Param("p_expedition_id") int id);

@@ -1,6 +1,7 @@
 package com.antarctica.explorer.api.response;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public record ExpeditionResponse(
     BigDecimal startingPrice,
     String website,
     String photoUrl,
+    Vessel[] vessels,
     Itinerary[] itinerary,
     Departure[] departures) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
@@ -31,8 +33,23 @@ public record ExpeditionResponse(
         (BigDecimal) resultMap.get("starting_price"),
         (String) resultMap.get("website"),
         (String) resultMap.get("photo_url"),
+        mapVessel((String) resultMap.get("vessels")),
         mapItinerary((String) resultMap.get("itinerary")),
         mapDepartures((String) resultMap.get("departures")));
+  }
+
+  private static Vessel[] mapVessel(String json) {
+    if (json.isEmpty()) return new Vessel[0];
+
+    JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+    Vessel[] vessels = new Vessel[arr.size()];
+
+    for (int i = 0; i < arr.size(); i++) {
+      JsonObject vesselObj = arr.get(i).getAsJsonObject();
+      vessels[i] = new Vessel(vesselObj.get("id").getAsInt(), vesselObj.get("name").getAsString());
+    }
+
+    return vessels;
   }
 
   private static Itinerary[] mapItinerary(String json) {
@@ -63,11 +80,14 @@ public record ExpeditionResponse(
       JsonObject departureObj = arr.get(i).getAsJsonObject();
       JsonObject vesselObj = departureObj.get("vessel").getAsJsonObject();
 
+      JsonElement name = departureObj.get("name");
+      JsonElement startPort = departureObj.get("departing_from");
+      JsonElement endPort = departureObj.get("arriving_at");
       departures[i] =
           new Departure(
-              departureObj.get("name").getAsString(),
-              departureObj.get("departing_from").getAsString(),
-              departureObj.get("arriving_at").getAsString(),
+              name.isJsonNull() ? null : name.getAsString(),
+              startPort.isJsonNull() ? null : startPort.getAsString(),
+              endPort.isJsonNull() ? null : endPort.getAsString(),
               departureObj.get("start_date").getAsString(),
               departureObj.get("end_date").getAsString(),
               departureObj.get("starting_price").getAsBigDecimal(),
