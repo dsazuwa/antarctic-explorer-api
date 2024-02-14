@@ -22,6 +22,7 @@ public class AuroraScraper extends Scraper {
   private static final String EXPEDITION_SELECTOR = "div.col-lg-4.py-3 > div.block-offer";
   private static final String CURRENT_PAGE_SELECTOR = "div.wp-pagenavi > span.current";
   private static final String NEXT_PAGE_SELECTOR = "div.wp-pagenavi > a.nextpostslink";
+  private static final String PORT_SELECTOR = "div.inner-content > div.details > dl.clearfix > dd";
 
   public AuroraScraper(
       CruiseLineService cruiseLineService,
@@ -73,6 +74,7 @@ public class AuroraScraper extends Scraper {
 
     navigateTo(website);
     Document doc = getParsedPageSource();
+    if (doc.select(PORT_SELECTOR).isEmpty()) return;
 
     Expedition expedition = processExpedition(doc, element, name, website);
     scrapeItinerary(doc, expedition);
@@ -231,8 +233,7 @@ public class AuroraScraper extends Scraper {
   }
 
   private String[] extractPorts(Document doc) {
-    String portsSelector = "div.inner-content > div.details > dl.clearfix > dd";
-    String[] ports = doc.select(portsSelector).get(1).text().split(" - ");
+    String[] ports = doc.select(PORT_SELECTOR).get(1).text().split(" - ");
 
     if (ports.length != 2) throw new NoSuchElementException("Ports not found");
     return ports;
