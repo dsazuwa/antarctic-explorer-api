@@ -43,7 +43,7 @@ public class ExpeditionController {
   public ResponseEntity<?> findAllExpeditions(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "6") int size,
-      @RequestParam(defaultValue = "cruiseLine") String sort,
+      @RequestParam(defaultValue = "nearestDate") String sort,
       @RequestParam(defaultValue = "asc") String dir,
       @RequestParam(required = false) String startDate,
       @RequestParam(required = false) String endDate,
