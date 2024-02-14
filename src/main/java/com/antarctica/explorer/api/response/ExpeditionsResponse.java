@@ -2,14 +2,16 @@ package com.antarctica.explorer.api.response;
 
 import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 
-public record ExpeditionPageResponse(
+public record ExpeditionsResponse(
     List<ExpeditionDTO> data, int itemsPerPage, long totalItems, int totalPages, int currentPage) {
 
-  public ExpeditionPageResponse(Page<ExpeditionDTO> page) {
+  public ExpeditionsResponse(Page<Map<String, Object>> page) {
     this(
-        page.getContent(),
+        page.getContent().stream().map(ExpeditionDTO::new).collect(Collectors.toList()),
         page.getSize(),
         page.getTotalElements(),
         page.getTotalPages(),

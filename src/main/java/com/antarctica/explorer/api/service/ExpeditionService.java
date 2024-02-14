@@ -1,17 +1,15 @@
 package com.antarctica.explorer.api.service;
 
-import com.antarctica.explorer.api.dto.ExpeditionDTO;
 import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
-import com.antarctica.explorer.api.response.ExpeditionPageResponse;
+import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -117,7 +115,7 @@ public class ExpeditionService {
     return (!obj.isEmpty()) ? new ExpeditionResponse(obj) : null;
   }
 
-  public ExpeditionPageResponse findAll(
+  public ExpeditionsResponse findAll(
       ExpeditionFilter filter, int page, int size, String sortField, Sort.Direction dir) {
 
     Sort sort =
@@ -136,15 +134,10 @@ public class ExpeditionService {
             filter.duration().min(),
             filter.duration().max());
 
-    return new ExpeditionPageResponse(
-        result.getContent().stream().map(ExpeditionDTO::new).collect(Collectors.toList()),
-        result.getSize(),
-        result.getTotalElements(),
-        result.getTotalPages(),
-        result.getNumber());
+    return new ExpeditionsResponse(result);
   }
 
-  public ExpeditionPageResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
+  public ExpeditionsResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(), page, size, sortField, dir);
   }
 }
