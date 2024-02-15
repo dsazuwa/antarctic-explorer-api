@@ -15,15 +15,18 @@ public class ScraperService {
   private final CruiseLineService cruiseLineService;
   private final VesselService vesselService;
   private final ExpeditionService expeditionService;
+  private final ItineraryService itineraryService;
 
   @Autowired
   public ScraperService(
       CruiseLineService cruiseLineService,
       VesselService vesselService,
-      ExpeditionService expeditionService) {
+      ExpeditionService expeditionService,
+      ItineraryService itineraryService) {
     this.cruiseLineService = cruiseLineService;
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
+    this.itineraryService = itineraryService;
   }
 
   @Scheduled(cron = "0 0 0 */7 * ?")
@@ -31,10 +34,11 @@ public class ScraperService {
     List<Scraper> scrapers =
         new ArrayList<>(
             Arrays.asList(
-                new AuroraScraper(cruiseLineService, vesselService, expeditionService)
-//                ,
+                new AuroraScraper(
+                    cruiseLineService, vesselService, expeditionService, itineraryService)
                 //                new HurtigrutenScraper(cruiseLineService, expeditionService),
-//                new LindbladScraper(cruiseLineService, vesselService, expeditionService)
+//                new LindbladScraper(
+//                    cruiseLineService, vesselService, expeditionService, itineraryService)
                 //                ,
                 //                new PonantScraper(cruiseLineService, expeditionService),
                 //                new SeabournScraper(cruiseLineService, expeditionService),

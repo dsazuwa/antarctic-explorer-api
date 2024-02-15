@@ -3,6 +3,7 @@ package com.antarctica.explorer.api.scraper;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
+import com.antarctica.explorer.api.service.ItineraryService;
 import com.antarctica.explorer.api.service.VesselService;
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -21,6 +22,7 @@ public abstract class Scraper {
   protected CruiseLine cruiseLine;
   protected VesselService vesselService;
   protected ExpeditionService expeditionService;
+  protected ItineraryService itineraryService;
   protected WebDriverWait wait;
   private WebDriver driver;
 
@@ -28,10 +30,12 @@ public abstract class Scraper {
       CruiseLineService cruiseLineService,
       VesselService vesselService,
       ExpeditionService expeditionService,
+      ItineraryService itineraryService,
       String cruiseLineName) {
     this.cruiseLine = cruiseLineService.getByName(cruiseLineName);
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
+    this.itineraryService = itineraryService;
 
     initializeDriver();
   }

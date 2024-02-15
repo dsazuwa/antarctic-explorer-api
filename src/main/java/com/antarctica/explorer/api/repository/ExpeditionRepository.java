@@ -22,46 +22,87 @@ public interface ExpeditionRepository
             WITH vessels AS (
               SELECT
                 v.vessel_id,
+                v.name,
                 jsonb_build_object(
                   'id', v.vessel_id,
-                  'name', v.name
+                  'name', v.name,
+                  'description', v.description,
+                  'cabins', v.cabins,
+                  'capacity', v.capacity,
+                  'photo_url', v.photo_url,
+                  'website', v.website
                 ) AS vessel
               FROM antarctica.vessels v
+            ),
+            itineraries AS (
+              SELECT
+                i.itinerary_id,
+                i.expedition_id,
+                i.name,
+                i.departing_from,
+                i.arriving_at,
+                i.duration,
+                i.map_url,
+                json_agg(DISTINCT jsonb_build_object(
+                  'id', d.detail_id,
+                  'day', d.day,
+                  'header', d.header,
+                  'content', d.content
+                )) AS schedule
+              FROM antarctica.itineraries i
+              JOIN antarctica.itinerary_details d On d.itinerary_id = i.itinerary_id
+              GROUP BY i.itinerary_id
             )
             SELECT
               e.expedition_id AS id,
               e.name,
+              c.name AS cruise_line,
+              jsonb_build_object(
+                'id', c.cruise_line_id,
+                'name', c.name,
+                'logo', c.logo
+              ) AS cruise_line,
               e.description,
               e.highlights,
-              e.departing_from,
-              e.arriving_at,
               e.duration,
               e.starting_price,
               e.website,
               e.photo_url,
+              json_agg(DISTINCT jsonb_build_object(
+                'id', g.photo_id,
+                'url', g.photo_url,
+                'alt', g.alt
+              )) AS gallery,
               json_agg(DISTINCT v.vessel) AS vessels,
               json_agg(DISTINCT jsonb_build_object(
                 'id', i.itinerary_id,
-                'day', i.day,
-                'header', i.header,
-                'content', i.content
-              )) as itinerary,
+                'name', i.name,
+                'start_port', i.departing_from,
+                'end_port', i.arriving_at,
+                'duration', i.duration,
+                'map_url', i.map_url,
+                'schedule', i.schedule
+              )) AS itineraries,
               jsonb_agg(DISTINCT jsonb_build_object(
+                'itinerary_id', i.itinerary_id,
+                'itinerary_name', i.name,
                 'id', d.departure_id,
                 'name', d.name,
-                'departing_from', d.departing_from,
-                'arriving_at', d.arriving_at,
+                'start_port', i.departing_from,
+                'end_port', i.arriving_at,
                 'start_date', d.start_date,
                 'end_date', d.end_date,
                 'starting_price', d.starting_price,
-                'vessel', v.vessel
+                'vessel_id', v.vessel_id
               )) as departures
             FROM antarctica.expeditions e
-            LEFT JOIN antarctica.itineraries i ON i.expedition_id = e.expedition_id
-            LEFT JOIN antarctica.departures d ON d.expedition_id = e.expedition_id
+            JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
+            LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
+            LEFT JOIN antarctica.departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
+            LEFT JOIN antarctica.gallery g ON g.expedition_id = e.expedition_id
             WHERE e.expedition_id = :p_expedition_id
-            GROUP BY e.expedition_id
+            GROUP BY e.expedition_id, c.cruise_line_id
           """,
       nativeQuery = true)
   Map<String, Object> getById(@Param("p_expedition_id") int id);
@@ -69,45 +110,45 @@ public interface ExpeditionRepository
   @Query(
       value =
           """
-          WITH combined_table AS (
-            SELECT
-              e.expedition_id as id,
-              c.name as cruise_line,
-              min(v.capacity) as capacity,
-              e.name,
-              e.description,
-              e.departing_from,
-              e.arriving_at,
-              e.duration,
-              min(d.start_date) as nearest_date,
-              e.starting_price,
-              e.website,
-              e.photo_url
-            FROM antarctica.expeditions e
-            JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
-            LEFT JOIN (
-              SELECT *
-              FROM antarctica.departures d
+            WITH combined_table AS (
+              SELECT
+                e.expedition_id as id,
+                c.name as cruise_line,
+                min(v.capacity) as capacity,
+                e.name,
+                e.description,
+                e.departing_from,
+                e.arriving_at,
+                e.duration,
+                min(d.start_date) as nearest_date,
+                e.starting_price,
+                e.website,
+                e.photo_url
+              FROM antarctica.expeditions e
+              JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
+              LEFT JOIN (
+                SELECT *
+                FROM antarctica.departures d
+                WHERE
+                  (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
+                  (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
+              ) d ON e.expedition_id = d.expedition_id
+              LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
               WHERE
-                (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
-                (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
-            ) d ON e.expedition_id = d.expedition_id
-            LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
-            WHERE
-              (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
-              (v.capacity BETWEEN :min_capacity AND :max_capacity) AND
-              (
-                CASE
-                  WHEN POSITION('-' IN e.duration) > 0 THEN
-                    CAST(SPLIT_PART(e.duration, '-', 1) AS INTEGER) BETWEEN :min_duration AND :max_duration
-                    OR CAST(SPLIT_PART(e.duration, '-', 2) AS INTEGER) BETWEEN :min_duration AND :max_duration
-                  ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
-                END
-              )
-            GROUP BY e.expedition_id, c.name
-          )
-          SELECT * FROM combined_table e
-        """,
+                (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
+                (v.capacity BETWEEN :min_capacity AND :max_capacity) AND
+                (
+                  CASE
+                    WHEN POSITION('-' IN e.duration) > 0 THEN
+                      CAST(SPLIT_PART(e.duration, '-', 1) AS INTEGER) BETWEEN :min_duration AND :max_duration
+                      OR CAST(SPLIT_PART(e.duration, '-', 2) AS INTEGER) BETWEEN :min_duration AND :max_duration
+                    ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
+                  END
+                )
+              GROUP BY e.expedition_id, c.name
+            )
+            SELECT * FROM combined_table e
+          """,
       countQuery =
           """
           SELECT count(*)
@@ -133,7 +174,7 @@ public interface ExpeditionRepository
               END
             )
           GROUP BY e.expedition_id, c.name
-        """,
+          """,
       nativeQuery = true,
       queryRewriter = ExpeditionQueryWriter.class)
   Page<Map<String, Object>> findAllExpeditionDTO(

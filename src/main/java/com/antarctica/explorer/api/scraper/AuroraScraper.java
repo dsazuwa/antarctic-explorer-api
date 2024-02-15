@@ -1,17 +1,16 @@
 package com.antarctica.explorer.api.scraper;
 
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
+import com.antarctica.explorer.api.service.ItineraryService;
 import com.antarctica.explorer.api.service.VesselService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,8 +27,14 @@ public class AuroraScraper extends Scraper {
   public AuroraScraper(
       CruiseLineService cruiseLineService,
       VesselService vesselService,
-      ExpeditionService expeditionService) {
-    super(cruiseLineService, vesselService, expeditionService, "Aurora Expeditions");
+      ExpeditionService expeditionService,
+      ItineraryService itineraryService) {
+    super(
+        cruiseLineService,
+        vesselService,
+        expeditionService,
+        itineraryService,
+        "Aurora Expeditions");
   }
 
   @Override
@@ -78,17 +83,16 @@ public class AuroraScraper extends Scraper {
     if (doc.select(PORT_SELECTOR).isEmpty()) return;
 
     Expedition expedition = processExpedition(doc, element, name, website);
-    scrapeItinerary(doc, expedition);
+    scrapeGallery(doc, expedition);
     scrapeDeparture(doc, expedition);
   }
 
   private Expedition processExpedition(Document doc, Element element, String name, String website) {
-    String durationSelector = "div.col > p.font-weight-bold";
     String photoSelector = "a > div.embed-responsive-item";
     String descriptionSelector = "div.container > div.row.section > div > p";
     String priceSelector = "div.col > p.price > span.price__value";
 
-    String duration = element.select(durationSelector).text().replaceAll("[A-Za-z\\s]", "");
+    String duration = extractDuration(doc);
     BigDecimal startingPrice = extractPrice(element, priceSelector);
     String photoUrl = extractPhotoUrl(element, photoSelector, "style", "url('", "')");
 
@@ -114,26 +118,18 @@ public class AuroraScraper extends Scraper {
         photoUrl);
   }
 
-  private void scrapeItinerary(Document doc, Expedition expedition) {
-    String itinerarySelector = "div.section-itinerary > div.accordion > div > div";
-    String headerSelector = "a.media > div.media-body > h4";
-    String contentSelector = "div.collapse > div.generic-content > p";
+  private void scrapeGallery(Document doc, Expedition expedition) {
+    String gallerySelector = "div.gallery-wrapper > div";
+    String imageSelector = "div.carousel-item > a";
 
-    doc.select(itinerarySelector)
-        .forEach(
-            itinerary -> {
-              String[] headerParts = itinerary.select(headerSelector).text().split(" ");
-              String day = headerParts[0] + " " + headerParts[1];
-              String header =
-                  String.join(" ", Arrays.copyOfRange(headerParts, 2, headerParts.length));
+    for (Element photo :
+        Objects.requireNonNull(doc.selectFirst(gallerySelector)).select(imageSelector)) {
+      String url = photo.attr("href");
+      if (url.isEmpty()) continue;
 
-              String[] content =
-                  itinerary.select(contentSelector).stream()
-                      .map(Element::text)
-                      .toArray(String[]::new);
-
-              expeditionService.saveItinerary(expedition, day, header, content);
-            });
+      String alt = photo.select("p").text();
+      expeditionService.saveGalleryImg(expedition, url, alt.isEmpty() ? null : alt);
+    }
   }
 
   private void scrapeDeparture(Document doc, Expedition expedition) {
@@ -143,45 +139,32 @@ public class AuroraScraper extends Scraper {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
     String mainWebsite = getCurrentUrl();
 
-    doc.select(optionSelector)
-        .forEach(
-            option -> {
-              String[] dates = option.text().split(" - ");
-              LocalDate startDate = LocalDate.parse(dates[0], formatter);
-              LocalDate endDate = LocalDate.parse(dates[1], formatter);
+    for (Element option : doc.select(optionSelector)) {
+      String[] dates = option.text().split(" - ");
+      LocalDate startDate = LocalDate.parse(dates[0], formatter);
+      LocalDate endDate = LocalDate.parse(dates[1], formatter);
 
-              String name = option.attr("value");
-              String website = mainWebsite + "?code=" + name;
-              navigateTo(
-                  website,
-                  () ->
-                      wait.until(
-                          ExpectedConditions.textToBePresentInElement(
-                              findElements("div.details > dl.clearfix > dd").get(2), name)));
+      String name = option.attr("value");
+      String website = mainWebsite + "?code=" + name;
+      navigateTo(
+          website,
+          () ->
+              wait.until(
+                  ExpectedConditions.textToBePresentInElement(
+                      findElements("div.details > dl.clearfix > dd").get(2), name)));
 
-              Document departureDoc = getParsedPageSource();
-              BigDecimal startingPrice = extractPrice(departureDoc, priceSelector);
-              if (startingPrice == null) return;
-              String[] ports = extractPorts(departureDoc);
+      Document departureDoc = getParsedPageSource();
 
-              Vessel vessel = getVessel(departureDoc);
-              if (vessel == null) {
-                Optional<Vessel> randVessel = vesselService.findOneByCruiseLIne(cruiseLine);
-                if (randVessel.isEmpty()) return;
-                vessel = randVessel.get();
-              }
-
-              expeditionService.saveDeparture(
-                  expedition,
-                  vessel,
-                  name,
-                  ports[0],
-                  ports[1],
-                  startDate,
-                  endDate,
-                  startingPrice,
-                  website);
-            });
+      expeditionService.saveDeparture(
+          expedition,
+          getVessel(departureDoc),
+          getItinerary(departureDoc, expedition),
+          name,
+          startDate,
+          endDate,
+          extractPrice(departureDoc, priceSelector),
+          website);
+    }
   }
 
   private Vessel getVessel(Document doc) {
@@ -226,6 +209,41 @@ public class AuroraScraper extends Scraper {
         cruiseLine, name, description, capacity, cabins, website, photoUrl);
   }
 
+  private Itinerary getItinerary(Document doc, Expedition expedition) {
+    String mapSelector = "div.map-wrapper > a";
+    String itinerarySelector = "div.section-itinerary > div.accordion > div > div";
+    String headerSelector = "a.media > div.media-body > h4";
+    String contentSelector = "div.collapse > div.generic-content > p";
+
+    String[] ports = extractPorts(doc);
+    String mapUrl = doc.select(mapSelector).attr("href");
+
+    List<Itinerary> existingItinerary =
+        itineraryService.getItinerary(expedition, ports[0], ports[1]);
+    if (!existingItinerary.isEmpty()) return existingItinerary.get(0);
+
+    String duration = extractDuration(doc);
+    Itinerary itinerary =
+        itineraryService.saveItinerary(
+            expedition, "Expedition", ports[0], ports[1], duration, mapUrl);
+
+    for (Element element : doc.select(itinerarySelector)) {
+      String[] headerParts = element.select(headerSelector).text().split(" ");
+      String day = headerParts[0] + " " + headerParts[1];
+      String header = String.join(" ", Arrays.copyOfRange(headerParts, 2, headerParts.length));
+
+      String[] content =
+          element.select(contentSelector).stream()
+              .map(Element::text)
+              .filter(text -> !text.isEmpty())
+              .toArray(String[]::new);
+
+      itineraryService.saveItineraryDetail(itinerary, day, header, content);
+    }
+
+    return itinerary;
+  }
+
   private String[] extractHighlights(Document doc) {
     String[] highlights =
         doc.select("div.container > div.section > div.col-xl-8 > div.section > p > span").stream()
@@ -238,6 +256,10 @@ public class AuroraScraper extends Scraper {
     return doc.select("div.section > ul > li > span").stream()
         .map(Element::text)
         .toArray(String[]::new);
+  }
+
+  private String extractDuration(Document doc) {
+    return Objects.requireNonNull(doc.select(PORT_SELECTOR).get(0).select("span").last()).text();
   }
 
   private String[] extractPorts(Document doc) {

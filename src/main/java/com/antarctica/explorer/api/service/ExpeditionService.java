@@ -3,7 +3,7 @@ package com.antarctica.explorer.api.service;
 import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
-import com.antarctica.explorer.api.repository.ItineraryRepository;
+import com.antarctica.explorer.api.repository.GalleryRepository;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import java.math.BigDecimal;
@@ -18,16 +18,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExpeditionService {
   private final ExpeditionRepository expeditionRepository;
-  private final ItineraryRepository itineraryRepository;
   private final DepartureRepository departureRepository;
+  private final GalleryRepository galleryRepository;
 
   public ExpeditionService(
       ExpeditionRepository repository,
-      ItineraryRepository itineraryRepository,
-      DepartureRepository departureRepository) {
+      DepartureRepository departureRepository,
+      GalleryRepository galleryRepository) {
     this.expeditionRepository = repository;
-    this.itineraryRepository = itineraryRepository;
     this.departureRepository = departureRepository;
+    this.galleryRepository = galleryRepository;
   }
 
   public Expedition saveIfNotExist(
@@ -74,7 +74,7 @@ public class ExpeditionService {
         cruiseLine,
         website,
         name,
-        new String[]{description},
+        new String[] {description},
         null,
         departingFrom,
         arrivingAt,
@@ -83,31 +83,21 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public void saveItinerary(Expedition expedition, String day, String header, String[] content) {
-    itineraryRepository.save(new Itinerary(expedition, day, header, content));
-  }
-
   public void saveDeparture(
       Expedition expedition,
       Vessel vessel,
+      Itinerary itinerary,
       String name,
-      String departingFrom,
-      String arrivingAt,
       LocalDate startDate,
       LocalDate endDate,
       BigDecimal price,
       String website) {
     departureRepository.save(
-        new Departure(
-            expedition,
-            vessel,
-            name,
-            departingFrom,
-            arrivingAt,
-            startDate,
-            endDate,
-            price,
-            website));
+        new Departure(expedition, vessel, itinerary, name, startDate, endDate, price, website));
+  }
+
+  public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
+    galleryRepository.save(new Gallery(expedition, photoUrl, alt));
   }
 
   public ExpeditionResponse getById(int id) {

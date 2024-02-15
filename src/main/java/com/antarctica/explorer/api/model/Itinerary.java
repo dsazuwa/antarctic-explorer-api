@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(schema = "antarctica", name = "itineraries")
 public class Itinerary {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "itinerary_id")
@@ -18,22 +19,36 @@ public class Itinerary {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Expedition expedition;
 
-  @Column(name = "day", nullable = false)
-  private String day;
+  @Column(name = "name", nullable = false)
+  private String name;
 
-  @Column(name = "header", nullable = false)
-  private String header;
+  @Column(name = "departing_from", nullable = false)
+  private String startPort;
 
-  @Column(name = "content", columnDefinition = "TEXT[]")
-  private String[] content;
+  @Column(name = "arriving_at", nullable = false)
+  private String endPort;
+
+  @Column(name = "duration")
+  private String duration;
+
+  @Column(name = "map_url", columnDefinition = "TEXT")
+  private String mapUrl;
 
   protected Itinerary() {}
 
-  public Itinerary(Expedition expedition, String day, String header, String[] content) {
+  public Itinerary(
+      Expedition expedition,
+      String name,
+      String startPort,
+      String endPort,
+      String duration,
+      String mapUrl) {
     this.expedition = expedition;
-    this.day = day;
-    this.header = header;
-    this.content = content;
+    this.name = name;
+    this.startPort = startPort;
+    this.endPort = endPort;
+    this.duration = duration;
+    this.mapUrl = mapUrl;
   }
 
   public Integer getId() {
@@ -44,15 +59,23 @@ public class Itinerary {
     return expedition;
   }
 
-  public String getDay() {
-    return day;
+  public String getName() {
+    return this.name;
   }
 
-  public String getHeader() {
-    return header;
+  public String getStartPort() {
+    return startPort;
   }
 
-  public String[] getContent() {
-    return content;
+  public String getEndPort() {
+    return endPort;
+  }
+
+  public String getDuration() {
+    return duration;
+  }
+
+  public String getMapUrl() {
+    return mapUrl;
   }
 }

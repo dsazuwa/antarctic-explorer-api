@@ -4,6 +4,7 @@ import com.antarctica.explorer.api.model.Expedition;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
+import com.antarctica.explorer.api.service.ItineraryService;
 import com.antarctica.explorer.api.service.VesselService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,8 +31,14 @@ public class LindbladScraper extends Scraper {
   public LindbladScraper(
       CruiseLineService cruiseLineService,
       VesselService vesselService,
-      ExpeditionService expeditionService) {
-    super(cruiseLineService, vesselService, expeditionService, "Lindblad Expeditions");
+      ExpeditionService expeditionService,
+      ItineraryService itineraryService) {
+    super(
+        cruiseLineService,
+        vesselService,
+        expeditionService,
+        itineraryService,
+        "Lindblad Expeditions");
   }
 
   @Override
@@ -187,7 +194,7 @@ public class LindbladScraper extends Scraper {
                       .map(Element::text)
                       .toArray(String[]::new);
 
-              expeditionService.saveItinerary(expedition, day, header, content);
+              //              expeditionService.saveItinerary(expedition, day, header, content);
             });
   }
 
@@ -220,16 +227,16 @@ public class LindbladScraper extends Scraper {
         String vesselName = card.select(vesselSelector).text();
         Vessel vessel = vesselService.getByName(vesselName);
 
-        expeditionService.saveDeparture(
-            expedition,
-            vessel,
-            name.equalsIgnoreCase("Expedition") || name.isEmpty() ? null : name,
-            ports.length != 2 ? null : ports[0],
-            ports.length != 2 ? null : ports[1],
-            dates[0],
-            dates[1],
-            price,
-            null);
+        //        expeditionService.saveDeparture(
+        //            expedition,
+        //            vessel,
+        //            name.isEmpty() ? null : name,
+        //            ports.length != 2 ? null : ports[0],
+        //            ports.length != 2 ? null : ports[1],
+        //            dates[0],
+        //            dates[1],
+        //            price,
+        //            null);
       }
     }
   }

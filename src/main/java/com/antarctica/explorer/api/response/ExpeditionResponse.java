@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 public record ExpeditionResponse(
@@ -12,15 +13,14 @@ public record ExpeditionResponse(
     String name,
     String[] description,
     String[] highlights,
-    String departingFrom,
-    String arrivingAt,
     String duration,
     BigDecimal startingPrice,
     String website,
     String photoUrl,
     CruiseLine cruiseLine,
-    Vessel[] vessels,
-    Itinerary[] itinerary,
+    Gallery[] gallery,
+    Map<Integer, Vessel> vessels,
+    Map<Integer, Itinerary> itineraries,
     Departure[] departures) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
@@ -28,15 +28,14 @@ public record ExpeditionResponse(
         (String) resultMap.get("name"),
         (String[]) resultMap.get("description"),
         (String[]) resultMap.get("highlights"),
-        (String) resultMap.get("departing_from"),
-        (String) resultMap.get("arriving_at"),
         (String) resultMap.get("duration"),
         (BigDecimal) resultMap.get("starting_price"),
         (String) resultMap.get("website"),
         (String) resultMap.get("photo_url"),
         mapCruiseLine((String) resultMap.get("cruise_line")),
+        mapToGallery((String) resultMap.get("gallery")),
         mapVessel((String) resultMap.get("vessels")),
-        mapItinerary((String) resultMap.get("itinerary")),
+        mapItinerary((String) resultMap.get("itineraries")),
         mapDepartures((String) resultMap.get("departures")));
   }
 
@@ -47,47 +46,89 @@ public record ExpeditionResponse(
     return new CruiseLine(obj.get("name").getAsString(), obj.get("logo").getAsString());
   }
 
-  private static Vessel[] mapVessel(String json) {
-    if (json.isEmpty()) return new Vessel[0];
+  private static Gallery[] mapToGallery(String json) {
+    if (json.isEmpty()) return new Gallery[0];
 
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
-    Vessel[] vessels = new Vessel[arr.size()];
+    Gallery[] gallery = new Gallery[arr.size()];
 
     for (int i = 0; i < arr.size(); i++) {
-      JsonObject vesselObj = arr.get(i).getAsJsonObject();
-      vessels[i] = new Vessel(vesselObj.get("id").getAsInt(), vesselObj.get("name").getAsString());
+      JsonObject obj = arr.get(i).getAsJsonObject();
+      JsonElement alt = obj.get("alt");
+
+      gallery[i] =
+          new Gallery(alt.isJsonNull() ? null : alt.getAsString(), obj.get("url").getAsString());
     }
 
-    return vessels;
+    return gallery;
   }
 
-  private static Itinerary[] mapItinerary(String json) {
-    if (json.isEmpty()) return new Itinerary[0];
+  private static Map<Integer, Vessel> mapVessel(String json) {
+    Map<Integer, Vessel> map = new HashMap<>();
 
-    JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
-    Itinerary[] itineraries = new Itinerary[arr.size()];
+    if (!json.isEmpty()) {
+      JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
 
-    for (int i = 0; i < arr.size(); i++) {
-      JsonObject itineraryObj = arr.get(i).getAsJsonObject();
+      for (int i = 0; i < arr.size(); i++) {
+        JsonObject obj = arr.get(i).getAsJsonObject();
+        JsonElement cabin = obj.get("cabins");
+        int id = obj.get("id").getAsInt();
 
-      itineraries[i] =
-          new Itinerary(
-              itineraryObj.get("day").getAsString(),
-              itineraryObj.get("header").getAsString(),
-              getContent(itineraryObj));
+        Vessel vessel =
+            new Vessel(
+                obj.get("name").getAsString(),
+                getArray(obj, "description"),
+                cabin.isJsonNull() ? null : cabin.getAsInt(),
+                obj.get("capacity").getAsInt(),
+                obj.get("photo_url").getAsString(),
+                obj.get("website").getAsString());
+
+        map.put(id, vessel);
+      }
     }
 
-    return itineraries;
+    return map;
   }
 
-  private static String[] getContent(JsonObject obj) {
-    JsonArray contentArr = obj.get("content").getAsJsonArray();
-    String[] content = new String[contentArr.size()];
-    for (int j = 0; j < contentArr.size(); j++) {
-      JsonElement element = contentArr.get(j);
-      content[j] = element.getAsString();
+  private static Map<Integer, Itinerary> mapItinerary(String json) {
+    Map<Integer, Itinerary> map = new HashMap<>();
+
+    if (!json.isEmpty()) {
+      JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+
+      for (int i = 0; i < arr.size(); i++) {
+        JsonObject obj = arr.get(i).getAsJsonObject();
+        int id = obj.get("id").getAsInt();
+
+        Itinerary itinerary =
+            new Itinerary(
+                obj.get("name").getAsString(),
+                obj.get("start_port").getAsString(),
+                obj.get("end_port").getAsString(),
+                obj.get("duration").getAsInt(),
+                obj.get("map_url").getAsString(),
+                mapSchedule(obj.get("schedule").getAsJsonArray()));
+
+        map.put(id, itinerary);
+      }
     }
-    return content;
+
+    return map;
+  }
+
+  private static Schedule[] mapSchedule(JsonArray arr) {
+    Schedule[] schedule = new Schedule[arr.size()];
+
+    for (int j = 0; j < arr.size(); j++) {
+      JsonObject element = arr.get(j).getAsJsonObject();
+      schedule[j] =
+          new Schedule(
+              element.get("day").getAsString(),
+              element.get("header").getAsString(),
+              getArray(element, "content"));
+    }
+
+    return schedule;
   }
 
   private static Departure[] mapDepartures(String json) {
@@ -97,38 +138,62 @@ public record ExpeditionResponse(
     Departure[] departures = new Departure[arr.size()];
 
     for (int i = 0; i < arr.size(); i++) {
-      JsonObject departureObj = arr.get(i).getAsJsonObject();
-      JsonObject vesselObj = departureObj.get("vessel").getAsJsonObject();
+      JsonObject obj = arr.get(i).getAsJsonObject();
+      JsonElement name = obj.get("name");
+      JsonElement price = obj.get("starting_price");
 
-      JsonElement name = departureObj.get("name");
-      JsonElement startPort = departureObj.get("departing_from");
-      JsonElement endPort = departureObj.get("arriving_at");
       departures[i] =
           new Departure(
+              obj.get("itinerary_id").getAsInt(),
+              obj.get("vessel_id").getAsInt(),
               name.isJsonNull() ? null : name.getAsString(),
-              startPort.isJsonNull() ? null : startPort.getAsString(),
-              endPort.isJsonNull() ? null : endPort.getAsString(),
-              departureObj.get("start_date").getAsString(),
-              departureObj.get("end_date").getAsString(),
-              departureObj.get("starting_price").getAsBigDecimal(),
-              new Vessel(vesselObj.get("id").getAsInt(), vesselObj.get("name").getAsString()));
+              obj.get("start_date").getAsString(),
+              obj.get("end_date").getAsString(),
+              price.isJsonNull() ? null : price.getAsBigDecimal());
     }
 
     return departures;
   }
 
+  private static String[] getArray(JsonObject obj, String memberName) {
+    JsonArray arr = obj.get(memberName).getAsJsonArray();
+    String[] content = new String[arr.size()];
+
+    for (int j = 0; j < arr.size(); j++) {
+      JsonElement element = arr.get(j);
+      content[j] = element.getAsString();
+    }
+
+    return content;
+  }
+
+  public record Schedule(String day, String header, String[] content) {}
+
+  public record Itinerary(
+      String name,
+      String startPort,
+      String endPort,
+      int duration,
+      String mapUrl,
+      Schedule[] schedules) {}
+
   public record CruiseLine(String name, String logo) {}
 
-  public record Itinerary(String day, String header, String[] content) {}
+  public record Gallery(String alt, String url) {}
+
+  public record Vessel(
+      String name,
+      String[] description,
+      Integer cabin,
+      Integer capacity,
+      String photoUrl,
+      String website) {}
 
   public record Departure(
+      int itineraryId,
+      int vesselId,
       String name,
-      String departingFrom,
-      String arrivingAt,
       String startDate,
       String endDate,
-      BigDecimal startingPrice,
-      Vessel vessel) {}
-
-  public record Vessel(int id, String name) {}
+      BigDecimal startingPrice) {}
 }

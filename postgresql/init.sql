@@ -1,12 +1,16 @@
-ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT fk_vessel_id;
-ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT fk_expedition_id;
-ALTER TABLE IF EXISTS antarctica.itineraries DROP CONSTRAINT fk_expedition_id;
-ALTER TABLE IF EXISTS antarctica.vessels DROP CONSTRAINT fk_cruise_line_id;
-ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT fk_cruise_line_id;
+ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_itinerary_id;
+ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_vessel_id;
+ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.itineraries DROP CONSTRAINT IF EXISTS fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.vessels DROP CONSTRAINT IF EXISTS fk_cruise_line_id;
+ALTER TABLE IF EXISTS antarctica.gallery DROP CONSTRAINT IF EXISTS fk_expedition;
+ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT IF EXISTS fk_cruise_line_id;
 
 DROP TABLE IF EXISTS antarctica.departures;
+DROP TABLE IF EXISTS antarctica.itinerary_details;
 DROP TABLE IF EXISTS antarctica.itineraries;
 DROP TABLE IF EXISTS antarctica.vessels;
+DROP TABLE IF EXISTS antarctica.gallery;
 DROP TABLE IF EXISTS antarctica.expeditions;
 DROP TABLE IF EXISTS antarctica.cruise_lines;
 
@@ -40,6 +44,15 @@ CREATE TABLE antarctica.expeditions (
   CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
+CREATE TABLE antarctica.gallery (
+  photo_id SERIAL,
+  expedition_id INTEGER NOT NULL,
+  photo_url TEXT NOT NULL,
+  alt TEXT,
+  PRIMARY KEY (photo_id),
+  CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
 CREATE TABLE antarctica.vessels (
   vessel_id SERIAL,
   cruise_line_id INTEGER NOT NULL,
@@ -56,27 +69,39 @@ CREATE TABLE antarctica.vessels (
 CREATE TABLE antarctica.itineraries (
   itinerary_id SERIAL,
   expedition_id INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  departing_from VARCHAR(100),
+  arriving_at VARCHAR(100),
+  duration VARCHAR(10) NOT NULL,
+  map_url TEXT,
+  PRIMARY KEY (itinerary_id),
+  CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE TABLE antarctica.itinerary_details (
+  detail_id SERIAL,
+  itinerary_id INTEGER NOT NULL,
   day VARCHAR(10) NOT NULL,
   header VARCHAR(255) NOT NULL,
   content TEXT[] NOT NULL,
-  PRIMARY KEY (itinerary_id),
-  CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
+  PRIMARY KEY (detail_id),
+  CONSTRAINT fk_itinerary_id FOREIGN KEY (itinerary_id) REFERENCES antarctica.itineraries (itinerary_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 CREATE TABLE antarctica.departures (
   departure_id SERIAL,
   expedition_id INTEGER NOT NULL,
   vessel_id INTEGER NOT NULL,
+  itinerary_id INTEGER NOT NULL,
   name VARCHAR,
-  departing_from VARCHAR(100),
-  arriving_at VARCHAR(100),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   starting_price DECIMAL(10, 4),
   website TEXT,
   PRIMARY KEY (departure_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT fk_vessel_id FOREIGN KEY (vessel_id) REFERENCES antarctica.vessels (vessel_id) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT fk_vessel_id FOREIGN KEY (vessel_id) REFERENCES antarctica.vessels (vessel_id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT fk_itinerary_id FOREIGN KEY (itinerary_id) REFERENCES antarctica.itineraries (itinerary_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DO $$
@@ -87,7 +112,7 @@ BEGIN
       'Aurora Expeditions',
       'https://www.aurora-expeditions.com/destination',
       NULL,
-      'https://www.aurora-expeditions.com/find-an-expedition/?search=&destinations[]=antarctica-cruises&destinations[]=antarctic-peninsula&destinations[]=weddell-sea&destinations[]=south-georgia-island&destinations[]=falkland-islands-malvinas&destinations[]=antarctic-circle&destinations[]=patagonia&departDates=&voyage_types[]=expedition',
+      'https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition',
       'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
     ),
 --    (

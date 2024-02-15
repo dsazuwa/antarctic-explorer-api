@@ -24,14 +24,13 @@ public class Departure {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Vessel vessel;
 
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "itinerary_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Itinerary itinerary;
+
   @Column(name = "name")
   private String name;
-
-  @Column(name = "departing_from")
-  private String departingFrom;
-
-  @Column(name = "arriving_at")
-  private String arrivingAt;
 
   @Column(name = "start_date", nullable = false)
   private LocalDate startDate;
@@ -39,7 +38,7 @@ public class Departure {
   @Column(name = "end_date", nullable = false)
   private LocalDate endDate;
 
-  @Column(name = "starting_price", nullable = false)
+  @Column(name = "starting_price")
   private BigDecimal startingPrice;
 
   @Column(name = "website")
@@ -50,18 +49,16 @@ public class Departure {
   public Departure(
       Expedition expedition,
       Vessel vessel,
+      Itinerary itinerary,
       String name,
-      String departingFrom,
-      String arrivingAt,
       LocalDate startDate,
       LocalDate endDate,
       BigDecimal startingPrice,
       String website) {
     this.expedition = expedition;
     this.vessel = vessel;
+    this.itinerary = itinerary;
     this.name = name;
-    this.departingFrom = departingFrom;
-    this.arrivingAt = arrivingAt;
     this.startDate = startDate;
     this.endDate = endDate;
     this.startingPrice = startingPrice;
@@ -80,16 +77,12 @@ public class Departure {
     return vessel;
   }
 
+  public Itinerary getItinerary() {
+    return itinerary;
+  }
+
   public String getName() {
     return name;
-  }
-
-  public String getDepartingFrom() {
-    return departingFrom;
-  }
-
-  public String getArrivingAt() {
-    return arrivingAt;
   }
 
   public LocalDate getStartDate() {
