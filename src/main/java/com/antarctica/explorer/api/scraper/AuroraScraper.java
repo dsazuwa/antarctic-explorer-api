@@ -93,16 +93,10 @@ public class AuroraScraper extends Scraper {
     String photoUrl = extractPhotoUrl(element, photoSelector, "style", "url('", "')");
 
     Elements descriptionElements = doc.select(descriptionSelector);
-    String description =
+    String[] description =
         (descriptionElements.isEmpty())
             ? null
-            : descriptionElements.stream()
-                .map(Element::text)
-                .collect(
-                    StringBuilder::new,
-                    (sb, text) -> sb.append(text).append("\n"),
-                    StringBuilder::append)
-                .toString();
+            : descriptionElements.stream().map(Element::text).toArray(String[]::new);
 
     String[] highlights = extractHighlights(doc);
     String[] ports = extractPorts(doc);
@@ -133,14 +127,10 @@ public class AuroraScraper extends Scraper {
               String header =
                   String.join(" ", Arrays.copyOfRange(headerParts, 2, headerParts.length));
 
-              String content =
+              String[] content =
                   itinerary.select(contentSelector).stream()
                       .map(Element::text)
-                      .collect(
-                          StringBuilder::new,
-                          (sb, text) -> sb.append(text).append("\n"),
-                          StringBuilder::append)
-                      .toString();
+                      .toArray(String[]::new);
 
               expeditionService.saveItinerary(expedition, day, header, content);
             });

@@ -10,7 +10,7 @@ import java.util.Map;
 public record ExpeditionResponse(
     int id,
     String name,
-    String description,
+    String[] description,
     String[] highlights,
     String departingFrom,
     String arrivingAt,
@@ -26,7 +26,7 @@ public record ExpeditionResponse(
     this(
         (Integer) resultMap.get("id"),
         (String) resultMap.get("name"),
-        (String) resultMap.get("description"),
+        (String[]) resultMap.get("description"),
         (String[]) resultMap.get("highlights"),
         (String) resultMap.get("departing_from"),
         (String) resultMap.get("arriving_at"),
@@ -69,14 +69,25 @@ public record ExpeditionResponse(
 
     for (int i = 0; i < arr.size(); i++) {
       JsonObject itineraryObj = arr.get(i).getAsJsonObject();
+
       itineraries[i] =
           new Itinerary(
               itineraryObj.get("day").getAsString(),
               itineraryObj.get("header").getAsString(),
-              itineraryObj.get("content").getAsString());
+              getContent(itineraryObj));
     }
 
     return itineraries;
+  }
+
+  private static String[] getContent(JsonObject obj) {
+    JsonArray contentArr = obj.get("content").getAsJsonArray();
+    String[] content = new String[contentArr.size()];
+    for (int j = 0; j < contentArr.size(); j++) {
+      JsonElement element = contentArr.get(j);
+      content[j] = element.getAsString();
+    }
+    return content;
   }
 
   private static Departure[] mapDepartures(String json) {
@@ -108,7 +119,7 @@ public record ExpeditionResponse(
 
   public record CruiseLine(String name, String logo) {}
 
-  public record Itinerary(String day, String header, String content) {}
+  public record Itinerary(String day, String header, String[] content) {}
 
   public record Departure(
       String name,

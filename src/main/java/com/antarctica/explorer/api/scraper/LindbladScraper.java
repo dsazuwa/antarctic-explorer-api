@@ -119,7 +119,8 @@ public class LindbladScraper extends Scraper {
     if (!newsletterRemoved) removeNewsletter();
 
     Document doc = getDocument();
-    String description = doc.select(DESCRIPTION_SELECTOR).text();
+    String[] description =
+        doc.select(DESCRIPTION_SELECTOR).stream().map(Element::text).toArray(String[]::new);
     String[] ports = extractPorts(doc);
     String[] highlights =
         doc.select(highlightSelector).stream().map(Element::text).toArray(String[]::new);
@@ -181,14 +182,10 @@ public class LindbladScraper extends Scraper {
               String day = element.select(daySelector).text();
               String header =
                   Objects.requireNonNull(element.select(headerSelector).first()).ownText();
-              String content =
+              String[] content =
                   element.select(contentSelector).stream()
                       .map(Element::text)
-                      .collect(
-                          StringBuilder::new,
-                          (sb, text) -> sb.append(text).append("\n"),
-                          StringBuilder::append)
-                      .toString();
+                      .toArray(String[]::new);
 
               expeditionService.saveItinerary(expedition, day, header, content);
             });

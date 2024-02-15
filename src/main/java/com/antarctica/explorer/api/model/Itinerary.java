@@ -24,12 +24,12 @@ public class Itinerary {
   @Column(name = "header", nullable = false)
   private String header;
 
-  @Column(name = "content", columnDefinition = "TEXT")
-  private String content;
+  @Column(name = "content", columnDefinition = "TEXT[]")
+  private String[] content;
 
   protected Itinerary() {}
 
-  public Itinerary(Expedition expedition, String day, String header, String content) {
+  public Itinerary(Expedition expedition, String day, String header, String[] content) {
     this.expedition = expedition;
     this.day = day;
     this.header = header;
@@ -52,7 +52,7 @@ public class Itinerary {
     return header;
   }
 
-  public String getContent() {
+  public String[] getContent() {
     return content;
   }
 }

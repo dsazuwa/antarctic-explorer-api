@@ -23,7 +23,7 @@ record Expedition(
     Integer id,
     String website,
     String name,
-    String description,
+    String[] description,
     String departingFrom,
     String arrivingAt,
     String duration,

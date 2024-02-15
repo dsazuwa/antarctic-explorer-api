@@ -4,8 +4,8 @@ import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.ItineraryRepository;
-import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
+import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class ExpeditionService {
       CruiseLine cruiseLine,
       String website,
       String name,
-      String description,
+      String[] description,
       String[] highlights,
       String departingFrom,
       String arrivingAt,
@@ -74,7 +74,7 @@ public class ExpeditionService {
         cruiseLine,
         website,
         name,
-        description,
+        new String[]{description},
         null,
         departingFrom,
         arrivingAt,
@@ -83,7 +83,7 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public void saveItinerary(Expedition expedition, String day, String header, String content) {
+  public void saveItinerary(Expedition expedition, String day, String header, String[] content) {
     itineraryRepository.save(new Itinerary(expedition, day, header, content));
   }
 

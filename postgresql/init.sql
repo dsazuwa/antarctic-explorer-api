@@ -29,7 +29,7 @@ CREATE TABLE antarctica.expeditions (
   cruise_line_id INTEGER NOT NULL,
   website TEXT,
   name VARCHAR(255) NOT NULL,
-  description TEXT,
+  description TEXT[],
   highlights TEXT[],
   departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
@@ -58,7 +58,7 @@ CREATE TABLE antarctica.itineraries (
   expedition_id INTEGER NOT NULL,
   day VARCHAR(10) NOT NULL,
   header VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
+  content TEXT[] NOT NULL,
   PRIMARY KEY (itinerary_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

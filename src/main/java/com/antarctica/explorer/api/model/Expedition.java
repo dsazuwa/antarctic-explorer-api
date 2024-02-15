@@ -24,8 +24,8 @@ public class Expedition {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "description", columnDefinition = "TEXT")
-  private String description;
+  @Column(name = "description", columnDefinition = "TEXT[]")
+  private String[] description;
 
   @Column(name = "highlights", columnDefinition = "TEXT[]")
   private String[] highlights;
@@ -51,7 +51,7 @@ public class Expedition {
       CruiseLine cruiseLine,
       String website,
       String name,
-      String description,
+      String[] description,
       String[] highlights,
       String departingFrom,
       String arrivingAt,
@@ -86,7 +86,7 @@ public class Expedition {
     return name;
   }
 
-  public String getDescription() {
+  public String[] getDescription() {
     return description;
   }
 
