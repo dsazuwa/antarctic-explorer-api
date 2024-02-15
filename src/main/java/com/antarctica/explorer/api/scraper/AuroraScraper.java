@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -173,7 +174,7 @@ public class AuroraScraper extends Scraper {
               if (startingPrice == null) return;
               String[] ports = extractPorts(departureDoc);
 
-              Vessel vessel = scrapeVessel(departureDoc);
+              Vessel vessel = getVessel(departureDoc);
               if (vessel == null) {
                 Optional<Vessel> randVessel = vesselService.findOneByCruiseLIne(cruiseLine);
                 if (randVessel.isEmpty()) return;
@@ -193,10 +194,8 @@ public class AuroraScraper extends Scraper {
             });
   }
 
-  private Vessel scrapeVessel(Document doc) {
+  private Vessel getVessel(Document doc) {
     String shipSelector = "div.details > dl.clearfix > dd";
-    String capacitySelector = "div > p > span.prop";
-    String photoSelector = "div.col-xl-4.py-4 > p > img";
 
     Element shipElement = doc.select(shipSelector).get(4).selectFirst("a");
     if (shipElement == null) return null;
@@ -204,18 +203,37 @@ public class AuroraScraper extends Scraper {
     String website = shipElement.attr("href");
 
     Optional<Vessel> vessel = vesselService.findByName(name);
-    if (vessel.isPresent()) return vessel.get();
+    return vessel.orElseGet(() -> scrapeVessel(website, name));
+  }
 
-    navigateTo(website);
-    Document shipDoc = getParsedPageSource();
+  private Vessel scrapeVessel(String website, String name) {
+    String descriptionSelector = "div.generic-content > p";
+    String detailSelector = "div > p > span.prop";
+    String photoSelector = "div.col-xl-4.py-4 > p > img";
+
+    navigateTo(website, descriptionSelector);
+    Document doc = getParsedPageSource();
+
+    Elements descriptionElements = doc.select(descriptionSelector);
+    String[] description =
+        IntStream.range(0, descriptionElements.size())
+            .filter(i -> i < 4)
+            .mapToObj(i -> descriptionElements.get(i).text())
+            .filter(text -> !text.isEmpty())
+            .toArray((String[]::new));
+
     int capacity =
         Integer.parseInt(
-            Objects.requireNonNull(shipDoc.selectFirst(capacitySelector))
-                .text()
-                .replaceAll("\\D", ""));
-    String photoUrl = shipDoc.select(photoSelector).attr("src");
+            Objects.requireNonNull(doc.selectFirst(detailSelector)).text().replaceAll("\\D", ""));
 
-    return vesselService.saveIfNotExist(cruiseLine, name, capacity, website, photoUrl);
+    int cabins =
+        Integer.parseInt(
+            Objects.requireNonNull(doc.select(detailSelector).get(1)).text().replaceAll("\\D", ""));
+
+    String photoUrl = doc.select(photoSelector).attr("src");
+
+    return vesselService.saveIfNotExist(
+        cruiseLine, name, description, capacity, cabins, website, photoUrl);
   }
 
   private String[] extractHighlights(Document doc) {

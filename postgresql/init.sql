@@ -45,6 +45,8 @@ CREATE TABLE antarctica.vessels (
   cruise_line_id INTEGER NOT NULL,
   name VARCHAR NOT NULL,
   capacity INTEGER NOT NULL,
+  cabins INTEGER NOT NULL,
+  description TEXT[],
   website TEXT,
   photo_url TEXT NOT NULL,
   PRIMARY KEY (vessel_id),
@@ -85,7 +87,7 @@ BEGIN
       'Aurora Expeditions',
       'https://www.aurora-expeditions.com/destination',
       NULL,
-      'https://www.aurora-expeditions.com/find-an-expedition/?destinations%5B%5D=antarctica-cruises&destinations%5B%5D=antarctic-peninsula&destinations%5B%5D=weddell-sea&destinations%5B%5D=south-georgia-island&destinations%5B%5D=falkland-islands-malvinas&destinations%5B%5D=antarctic-circle',
+      'https://www.aurora-expeditions.com/find-an-expedition/?search=&destinations[]=antarctica-cruises&destinations[]=antarctic-peninsula&destinations[]=weddell-sea&destinations[]=south-georgia-island&destinations[]=falkland-islands-malvinas&destinations[]=antarctic-circle&destinations[]=patagonia&departDates=&voyage_types[]=expedition',
       'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
     ),
 --    (

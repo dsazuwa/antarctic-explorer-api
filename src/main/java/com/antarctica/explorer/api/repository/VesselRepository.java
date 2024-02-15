@@ -20,7 +20,9 @@ public interface VesselRepository extends JpaRepository<Vessel, Integer> {
             SELECT
               v.name,
               c.name AS cruise_line,
+              v.description,
               v.capacity,
+              v.cabins,
               v.photo_url,
               v.website
             FROM antarctica.vessels v
@@ -36,7 +38,9 @@ public interface VesselRepository extends JpaRepository<Vessel, Integer> {
             SELECT
               v.name,
               c.name AS cruise_line,
+              v.description,
               v.capacity,
+              v.cabins,
               v.photo_url,
               v.website
             FROM antarctica.vessels v

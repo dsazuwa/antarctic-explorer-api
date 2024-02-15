@@ -19,11 +19,19 @@ public class VesselService {
   }
 
   public Vessel saveIfNotExist(
-      CruiseLine cruiseLine, String name, int capacity, String website, String photoUrl) {
+      CruiseLine cruiseLine,
+      String name,
+      String[] description,
+      int capacity,
+      int cabins,
+      String website,
+      String photoUrl) {
     Optional<Vessel> existingVessel = vesselRepository.findByName(name);
 
     return existingVessel.orElseGet(
-        () -> vesselRepository.save(new Vessel(cruiseLine, name, capacity, website, photoUrl)));
+        () ->
+            vesselRepository.save(
+                new Vessel(cruiseLine, name, description, capacity, cabins, website, photoUrl)));
   }
 
   public VesselsResponse getAllVessels() {

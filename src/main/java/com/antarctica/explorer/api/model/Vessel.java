@@ -20,8 +20,14 @@ public class Vessel {
   @Column(name = "name", nullable = false)
   private String name;
 
+  @Column(name = "description", columnDefinition = "TEXT[]", nullable = false)
+  private String[] description;
+
   @Column(name = "capacity", nullable = false)
   private Integer capacity;
+
+  @Column(name = "cabins", nullable = false)
+  private Integer cabins;
 
   @Column(name = "website", columnDefinition = "TEXT")
   private String website;
@@ -32,10 +38,19 @@ public class Vessel {
   protected Vessel() {}
 
   public Vessel(
-      CruiseLine cruiseLine, String name, Integer capacity, String website, String photoUrl) {
+      CruiseLine cruiseLine,
+      String name,
+      String[] description,
+      Integer capacity,
+      Integer cabins,
+      String website,
+      String photoUrl) {
+
     this.cruiseLine = cruiseLine;
     this.name = name;
+    this.description = description;
     this.capacity = capacity;
+    this.cabins = cabins;
     this.website = website;
     this.photoUrl = photoUrl;
   }
@@ -54,6 +69,14 @@ public class Vessel {
 
   public Integer getCapacity() {
     return capacity;
+  }
+
+  public Integer getCabins() {
+    return cabins;
+  }
+
+  public String[] getDescription() {
+    return description;
   }
 
   public String getWebsite() {

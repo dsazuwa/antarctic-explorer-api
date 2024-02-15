@@ -18,6 +18,7 @@ public record ExpeditionResponse(
     BigDecimal startingPrice,
     String website,
     String photoUrl,
+    CruiseLine cruiseLine,
     Vessel[] vessels,
     Itinerary[] itinerary,
     Departure[] departures) {
@@ -33,9 +34,17 @@ public record ExpeditionResponse(
         (BigDecimal) resultMap.get("starting_price"),
         (String) resultMap.get("website"),
         (String) resultMap.get("photo_url"),
+        mapCruiseLine((String) resultMap.get("cruise_line")),
         mapVessel((String) resultMap.get("vessels")),
         mapItinerary((String) resultMap.get("itinerary")),
         mapDepartures((String) resultMap.get("departures")));
+  }
+
+  private static CruiseLine mapCruiseLine(String json) {
+    if (json.isEmpty()) return null;
+
+    JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+    return new CruiseLine(obj.get("name").getAsString(), obj.get("logo").getAsString());
   }
 
   private static Vessel[] mapVessel(String json) {
@@ -96,6 +105,8 @@ public record ExpeditionResponse(
 
     return departures;
   }
+
+  public record CruiseLine(String name, String logo) {}
 
   public record Itinerary(String day, String header, String content) {}
 

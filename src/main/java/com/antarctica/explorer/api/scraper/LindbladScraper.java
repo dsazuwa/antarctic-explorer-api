@@ -16,7 +16,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LindbladScraper extends Scraper {
-  private static final String SHIP_SELECTOR = "div.ship-card";
   private static final String EXPEDITION_SELECTOR = "div.card_cardContainer__vyvNi";
   private static final String DESCRIPTION_SELECTOR =
       "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
@@ -24,6 +23,7 @@ public class LindbladScraper extends Scraper {
       "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz > header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
   private static final String ITINERARY_SELECTOR =
       "div.sc-36842228-3.hBGyOc > div.sc-ad096f17-1.ebIpYW";
+  private static final String SHIP_SELECTOR = "div[data-module=ship]";
 
   private boolean newsletterRemoved;
 
@@ -38,8 +38,6 @@ public class LindbladScraper extends Scraper {
   public void scrape() {
     try {
       newsletterRemoved = false;
-
-      scrapeVessels();
       scrapeExpeditions();
     } finally {
       quitDriver();
@@ -52,7 +50,7 @@ public class LindbladScraper extends Scraper {
   }
 
   private void acceptCookie() {
-    String cookieSelector = "button.acceptBtn.button.button--primary";
+    String cookieSelector = "button.sc-baf605bd-1.flHA-dN";
 
     waitForPresenceOfElement(cookieSelector);
     WebElement acceptCookieButton = findElement(cookieSelector);
@@ -70,19 +68,9 @@ public class LindbladScraper extends Scraper {
     }
   }
 
-  private void scrapeVessels() {
-    navigateTo(cruiseLine.getFleetWebsite());
-    acceptCookie();
-    getDocument(
-            "section[id=ships] > button.button.filterable-grid__load-button",
-            "(//div.filterable-grid__grid/div.ship-card)[last()]",
-            "section[data-segmentid='Daily Expedition Reports']")
-        .select(SHIP_SELECTOR)
-        .forEach(this::scrapeVessel);
-  }
-
   private void scrapeExpeditions() {
     navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
+    acceptCookie();
     loadLazyImage();
     getParsedPageSource().select(EXPEDITION_SELECTOR).forEach(this::processExpedition);
   }
@@ -97,28 +85,11 @@ public class LindbladScraper extends Scraper {
     }
   }
 
-  private void scrapeVessel(Element element) {
-    String locationSelector = "div.ship-card__locations";
-    String nameSelector = "h3.ship-card__title";
-    String capacitySelector = "div.ship-card__guests";
-    String linkSelector = "div.ship-card > a";
-    String pictureSelector =
-        "picture.responsive-image--ratio.ship-card__picture.responsive-image--ratio-3x2 > img";
-
-    if (!element.select(locationSelector).text().contains("Antarctica")) return;
-
-    String name = element.select(nameSelector).text();
-    String website = cruiseLine.getWebsite() + element.select(linkSelector).attr("href");
-    int capacity = Integer.parseInt(element.select(capacitySelector).text().split(" ")[0]);
-    String photoUrl = element.select(pictureSelector).attr("src");
-
-    vesselService.saveIfNotExist(cruiseLine, name, capacity, website, photoUrl);
-  }
-
   private void processExpedition(Element element) {
     Expedition expedition = scrapeExpedition(element);
 
     Document doc = getParsedPageSource();
+    scrapeVessels(doc);
     scrapeItineraries(doc, expedition);
     scrapeDepartures(doc, expedition);
   }
@@ -141,15 +112,13 @@ public class LindbladScraper extends Scraper {
 
     navigateTo(
         website,
-        new String[] {DESCRIPTION_SELECTOR, PORT_SELECTOR, ITINERARY_SELECTOR, departureSelector});
+        new String[] {
+          DESCRIPTION_SELECTOR, SHIP_SELECTOR, PORT_SELECTOR, ITINERARY_SELECTOR, departureSelector
+        });
 
     if (!newsletterRemoved) removeNewsletter();
 
-    Document doc =
-        getDocument(
-            "ol[data-module=departureCardList] > button.sc-baf605bd-1.cwYkyy",
-            "(//ol[@data-module='departureCardList']/li)[last()]",
-            "section[aria-label='Newsletter sign up']");
+    Document doc = getDocument();
     String description = doc.select(DESCRIPTION_SELECTOR).text();
     String[] ports = extractPorts(doc);
     String[] highlights =
@@ -166,6 +135,39 @@ public class LindbladScraper extends Scraper {
         duration,
         price,
         photoUrl);
+  }
+
+  private void scrapeVessels(Document doc) {
+    String nameSelector = "h3";
+    String descriptionSelector = "div > p.sc-1a030b44-1.ka-dLeA";
+    String detailSelector = "div.sc-90fd9a9-5.cdDXJF > p.sc-dd73f2f5-0.sc-90fd9a9-7.gQUCHt.hMywje";
+    String linkSelector = "div.sc-90fd9a9-10.bgbWLg > a.sc-baf605bd-2.gXAMNb";
+    String pictureSelector = "div.sc-90fd9a9-11.fmQQTH > img";
+
+    doc.select(SHIP_SELECTOR)
+        .forEach(
+            element -> {
+              String name = element.select(nameSelector).text();
+              String[] description =
+                  element.select(descriptionSelector).stream()
+                      .map(Element::text)
+                      .filter(text -> !text.isEmpty())
+                      .toArray(String[]::new);
+
+              int capacity =
+                  Integer.parseInt(
+                      Objects.requireNonNull(element.select(detailSelector).get(0)).text());
+
+              int cabins =
+                  Integer.parseInt(
+                      Objects.requireNonNull(element.select(detailSelector).get(1)).text());
+
+              String website = cruiseLine.getWebsite() + element.select(linkSelector).attr("href");
+              String photoUrl = element.select(pictureSelector).attr("src");
+
+              vesselService.saveIfNotExist(
+                  cruiseLine, name, description, capacity, cabins, website, photoUrl);
+            });
   }
 
   private void scrapeItineraries(Document doc, Expedition expedition) {
@@ -235,8 +237,10 @@ public class LindbladScraper extends Scraper {
     }
   }
 
-  private Document getDocument(
-      String buttonSelector, String lastChildXPathExpression, String bottomSelector) {
+  private Document getDocument() {
+    String buttonSelector = "ol[data-module=departureCardList] > button.sc-baf605bd-1.cwYkyy",
+        lastChildXPathExpression = "(//ol[@data-module='departureCardList']/li)[last()]",
+        bottomSelector = "section[aria-label='Newsletter sign up']";
 
     while (true) {
       WebElement button;
