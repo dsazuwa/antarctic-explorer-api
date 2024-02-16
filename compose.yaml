@@ -15,16 +15,6 @@ services:
        - ./postgresql/data:/var/lib/postgresql/data
        - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  elasticsearch:
-    image: elasticsearch:8.11.3
-    environment:
-      - 'ELASTIC_PASSWORD=secret'
-      - 'discovery.type=single-node'
-      - 'xpack.security.enabled=false'
-    ports:
-      - "9201:9200"
-      - "9301:9300"
-
   api:
     container_name: antarctica-explorer-api
     build:
@@ -39,4 +29,3 @@ services:
       - spring.datasource.password=${DB_PASSWORD}
     depends_on:
       - db
-      - elasticsearch
