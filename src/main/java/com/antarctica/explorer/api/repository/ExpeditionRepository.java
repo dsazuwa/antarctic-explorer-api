@@ -52,6 +52,29 @@ public interface ExpeditionRepository
               FROM antarctica.itineraries i
               JOIN antarctica.itinerary_details d On d.itinerary_id = i.itinerary_id
               GROUP BY i.itinerary_id
+            ),
+            departures AS (
+              SELECT
+                i.itinerary_id,
+                d.departure_id,
+                d.vessel_id,
+                d.starting_price,
+                jsonb_build_object(
+                  'itinerary_id', i.itinerary_id,
+                  'itinerary_name', i.name,
+                  'id', d.departure_id,
+                  'name', d.name,
+                  'start_port', i.departing_from,
+                  'end_port', i.arriving_at,
+                  'start_date', d.start_date,
+                  'end_date', d.end_date,
+                  'starting_price', d.starting_price,
+                  'vessel_id', v.vessel_id
+                ) AS departures
+              FROM itineraries i
+              LEFT JOIN antarctica.departures d ON d.itinerary_id = i.itinerary_id
+              LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
+              WHERE d.starting_price IS NOT NULL
             )
             SELECT
               e.expedition_id AS id,
@@ -83,22 +106,11 @@ public interface ExpeditionRepository
                 'map_url', i.map_url,
                 'schedule', i.schedule
               )) AS itineraries,
-              jsonb_agg(DISTINCT jsonb_build_object(
-                'itinerary_id', i.itinerary_id,
-                'itinerary_name', i.name,
-                'id', d.departure_id,
-                'name', d.name,
-                'start_port', i.departing_from,
-                'end_port', i.arriving_at,
-                'start_date', d.start_date,
-                'end_date', d.end_date,
-                'starting_price', d.starting_price,
-                'vessel_id', v.vessel_id
-              )) as departures
+              jsonb_agg(DISTINCT d.departures) as departures
             FROM antarctica.expeditions e
             JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
             LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
-            LEFT JOIN antarctica.departures d ON d.itinerary_id = i.itinerary_id
+            LEFT JOIN departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
             LEFT JOIN antarctica.gallery g ON g.expedition_id = e.expedition_id
             WHERE e.expedition_id = :p_expedition_id

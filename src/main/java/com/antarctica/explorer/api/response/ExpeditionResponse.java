@@ -5,7 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public record ExpeditionResponse(
@@ -21,7 +23,7 @@ public record ExpeditionResponse(
     Gallery[] gallery,
     Map<Integer, Vessel> vessels,
     Map<Integer, Itinerary> itineraries,
-    Departure[] departures) {
+    List<Departure>  departures) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
         (Integer) resultMap.get("id"),
@@ -70,7 +72,10 @@ public record ExpeditionResponse(
       JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
 
       for (int i = 0; i < arr.size(); i++) {
-        JsonObject obj = arr.get(i).getAsJsonObject();
+        JsonElement element = arr.get(i);
+        if (element.isJsonNull()) continue;
+
+        JsonObject obj = element.getAsJsonObject();
         JsonElement cabin = obj.get("cabins");
         int id = obj.get("id").getAsInt();
 
@@ -131,25 +136,27 @@ public record ExpeditionResponse(
     return schedule;
   }
 
-  private static Departure[] mapDepartures(String json) {
-    if (json.isEmpty()) return new Departure[0];
+  private static List<Departure>  mapDepartures(String json) {
+    if (json.isEmpty()) return new ArrayList<>();
 
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
-    Departure[] departures = new Departure[arr.size()];
+    List<Departure> departures = new ArrayList<>();
 
-    for (int i = 0; i < arr.size(); i++) {
-      JsonObject obj = arr.get(i).getAsJsonObject();
+    for (JsonElement element : arr) {
+      if (element.isJsonNull()) continue;
+
+      JsonObject obj = element.getAsJsonObject();
       JsonElement name = obj.get("name");
       JsonElement price = obj.get("starting_price");
 
-      departures[i] =
+      departures.add(
           new Departure(
               obj.get("itinerary_id").getAsInt(),
               obj.get("vessel_id").getAsInt(),
               name.isJsonNull() ? null : name.getAsString(),
               obj.get("start_date").getAsString(),
               obj.get("end_date").getAsString(),
-              price.isJsonNull() ? null : price.getAsBigDecimal());
+              price.isJsonNull() ? null : price.getAsBigDecimal()));
     }
 
     return departures;
