@@ -98,9 +98,7 @@ public class AuroraScraper extends Scraper {
 
     Elements descriptionElements = doc.select(descriptionSelector);
     String[] description =
-        (descriptionElements.isEmpty())
-            ? null
-            : descriptionElements.stream().map(Element::text).toArray(String[]::new);
+        (descriptionElements.isEmpty()) ? null : extractDescription(descriptionElements);
 
     String[] highlights = extractHighlights(doc);
     String[] ports = extractPorts(doc);
@@ -155,9 +153,16 @@ public class AuroraScraper extends Scraper {
 
       Document departureDoc = getParsedPageSource();
 
+      Vessel vessel = getVessel(departureDoc);
+      if (vessel == null) {
+        Optional<Vessel> randVessel = vesselService.findOneByCruiseLIne(cruiseLine);
+        if (randVessel.isEmpty()) return;
+        vessel = randVessel.get();
+      }
+
       expeditionService.saveDeparture(
           expedition,
-          getVessel(departureDoc),
+          vessel,
           getItinerary(departureDoc, expedition),
           name,
           startDate,
@@ -244,9 +249,23 @@ public class AuroraScraper extends Scraper {
     return itinerary;
   }
 
+  /**
+   * somewhat dirty workaround to address Aurora's habit of including a welcoming message in
+   * description
+   *
+   * @param elements the elements to be processed
+   * @return an array of string representing each paragraph of the description
+   */
+  private String[] extractDescription(Elements elements) {
+    String[] description = elements.stream().map(Element::text).toArray(String[]::new);
+    return (description.length > 1)
+        ? Arrays.copyOfRange(description, 1, description.length)
+        : description;
+  }
+
   private String[] extractHighlights(Document doc) {
     String[] highlights =
-        doc.select("div.container > div.section > div.col-xl-8 > div.section > p > span").stream()
+        doc.select("div.container > div.section > div.col-xl-8 > div.section > p").stream()
             .map(x -> x.text().replace("•", "").replace(".", "").trim())
             .filter(x -> !x.isEmpty())
             .toArray(String[]::new);
