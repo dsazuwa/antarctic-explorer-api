@@ -23,7 +23,7 @@ public record ExpeditionResponse(
     Gallery[] gallery,
     Map<Integer, Vessel> vessels,
     Map<Integer, Itinerary> itineraries,
-    List<Departure>  departures) {
+    List<Departure> departures) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
         (Integer) resultMap.get("id"),
@@ -54,11 +54,11 @@ public record ExpeditionResponse(
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
     Gallery[] gallery = new Gallery[arr.size()];
 
-    for (int i = 0; i < arr.size(); i++) {
+    for (int i = arr.size() - 1, j = 0; i >= 0; i--, j++) {
       JsonObject obj = arr.get(i).getAsJsonObject();
       JsonElement alt = obj.get("alt");
 
-      gallery[i] =
+      gallery[j] =
           new Gallery(alt.isJsonNull() ? null : alt.getAsString(), obj.get("url").getAsString());
     }
 
@@ -136,7 +136,7 @@ public record ExpeditionResponse(
     return schedule;
   }
 
-  private static List<Departure>  mapDepartures(String json) {
+  private static List<Departure> mapDepartures(String json) {
     if (json.isEmpty()) return new ArrayList<>();
 
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
@@ -191,7 +191,7 @@ public record ExpeditionResponse(
   public record Vessel(
       String name,
       String[] description,
-      Integer cabin,
+      Integer cabins,
       Integer capacity,
       String photoUrl,
       String website) {}
