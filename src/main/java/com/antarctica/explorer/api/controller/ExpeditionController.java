@@ -90,11 +90,11 @@ public class ExpeditionController {
   public ResponseEntity<?> findExpeditionDepartures(
       @PathVariable String id,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "5") int size,
       @RequestParam(defaultValue = "startDate") String sort,
       @RequestParam(defaultValue = "asc") String dir) {
 
-    if (!"startDate".equalsIgnoreCase(sort) && !"startingPrice".equalsIgnoreCase(sort))
+    if (!"startDate".equalsIgnoreCase(sort) && !"price".equalsIgnoreCase(sort))
       return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
 
     try {

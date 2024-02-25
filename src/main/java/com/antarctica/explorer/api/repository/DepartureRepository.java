@@ -25,6 +25,7 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
                 d.end_date,
                 d.starting_price,
                 d.discounted_price,
+                COALESCE(d.discounted_price, d.starting_price) AS price,
                 d.website
               FROM antarctica.departures d
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
@@ -48,6 +49,7 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
                 d.end_date,
                 d.starting_price,
                 d.discounted_price,
+                COALESCE(d.discounted_price, d.starting_price) AS price,
                 d.website
               FROM antarctica.departures d
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
