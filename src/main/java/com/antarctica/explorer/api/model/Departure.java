@@ -41,6 +41,9 @@ public class Departure {
   @Column(name = "starting_price")
   private BigDecimal startingPrice;
 
+  @Column(name = "discounted_price")
+  private BigDecimal discountedPrice;
+
   @Column(name = "website")
   private String website;
 
@@ -54,6 +57,7 @@ public class Departure {
       LocalDate startDate,
       LocalDate endDate,
       BigDecimal startingPrice,
+      BigDecimal discountedPrice,
       String website) {
     this.expedition = expedition;
     this.vessel = vessel;
@@ -62,6 +66,7 @@ public class Departure {
     this.startDate = startDate;
     this.endDate = endDate;
     this.startingPrice = startingPrice;
+    this.discountedPrice = discountedPrice;
     this.website = website;
   }
 
@@ -95,6 +100,10 @@ public class Departure {
 
   public BigDecimal getStartingPrice() {
     return startingPrice;
+  }
+
+  public BigDecimal getDiscountedPrice() {
+    return discountedPrice;
   }
 
   public String getWebsite() {

@@ -132,7 +132,8 @@ public class AuroraScraper extends Scraper {
 
   private void scrapeDeparture(Document doc, Expedition expedition) {
     String optionSelector = "div.details > dl.clearfix > dd > select > option";
-    String priceSelector = "dd > h4 > span.price__value";
+    String startingPriceSelector = "dd > h4 > span.price__value";
+    String discountedPriceSelector = "dd > h6.old-price > span.price__value";
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
     String mainWebsite = getCurrentUrl();
@@ -167,7 +168,8 @@ public class AuroraScraper extends Scraper {
           name,
           startDate,
           endDate,
-          extractPrice(departureDoc, priceSelector),
+          extractPrice(departureDoc, startingPriceSelector),
+          extractPrice(departureDoc, discountedPriceSelector),
           website);
     }
   }

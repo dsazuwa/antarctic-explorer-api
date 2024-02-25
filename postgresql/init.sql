@@ -97,6 +97,7 @@ CREATE TABLE antarctica.departures (
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   starting_price DECIMAL(10, 4),
+  discounted_price DECIMAL(10, 4),
   website TEXT,
   PRIMARY KEY (departure_id),
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION,

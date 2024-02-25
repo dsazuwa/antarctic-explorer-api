@@ -14,16 +14,17 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
           """
             WITH d AS (
               SELECT
-                d.departure_id as id,
+                d.departure_id AS id,
                 d.name,
-                i.name as itinerary,
-                v.name as vessel,
+                i.name AS itinerary,
+                v.name AS vessel,
                 i.departing_from,
                 i.arriving_at,
                 i.duration,
                 d.start_date,
                 d.end_date,
                 d.starting_price,
+                d.discounted_price,
                 d.website
               FROM antarctica.departures d
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
@@ -36,16 +37,17 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
           """
             WITH d AS (
               SELECT
-                d.departure_id as id,
+                d.departure_id AS id,
                 d.name,
-                i.name as itinerary,
-                v.name as vessel,
+                i.name AS itinerary,
+                v.name AS vessel,
                 i.departing_from,
                 i.arriving_at,
                 i.duration,
                 d.start_date,
                 d.end_date,
                 d.starting_price,
+                d.discounted_price,
                 d.website
               FROM antarctica.departures d
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id

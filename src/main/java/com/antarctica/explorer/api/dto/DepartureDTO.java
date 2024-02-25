@@ -15,6 +15,7 @@ public record DepartureDTO(
     Date startDate,
     Date endDate,
     BigDecimal startingPrice,
+    BigDecimal discountedPrice,
     String website) {
 
   public DepartureDTO(Map<String, Object> resultMap) {
@@ -29,6 +30,7 @@ public record DepartureDTO(
         (Date) resultMap.get("start_date"),
         (Date) resultMap.get("end_date"),
         (BigDecimal) resultMap.get("starting_price"),
+        (BigDecimal) resultMap.get("discounted_price"),
         (String) resultMap.get("website"));
   }
 }

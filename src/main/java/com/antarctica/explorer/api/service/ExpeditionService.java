@@ -91,10 +91,20 @@ public class ExpeditionService {
       String name,
       LocalDate startDate,
       LocalDate endDate,
-      BigDecimal price,
+      BigDecimal startingPrice,
+      BigDecimal discountedPrice,
       String website) {
     departureRepository.save(
-        new Departure(expedition, vessel, itinerary, name, startDate, endDate, price, website));
+        new Departure(
+            expedition,
+            vessel,
+            itinerary,
+            name,
+            startDate,
+            endDate,
+            startingPrice,
+            discountedPrice,
+            website));
   }
 
   public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
@@ -134,6 +144,7 @@ public class ExpeditionService {
 
   public DeparturesResponse findExpeditionDepartures(
       int expeditionId, int page, int size, String sortField, Sort.Direction dir) {
+
     Page<Map<String, Object>> result =
         departureRepository.findExpeditionDepartures(
             PageRequest.of(page, size, Sort.by(dir, sortField)), expeditionId);
