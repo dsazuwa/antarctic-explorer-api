@@ -4,6 +4,7 @@ import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.GalleryRepository;
+import com.antarctica.explorer.api.response.DeparturesResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import java.math.BigDecimal;
@@ -129,5 +130,14 @@ public class ExpeditionService {
 
   public ExpeditionsResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(), page, size, sortField, dir);
+  }
+
+  public DeparturesResponse findExpeditionDepartures(
+      int expeditionId, int page, int size, String sortField, Sort.Direction dir) {
+    Page<Map<String, Object>> result =
+        departureRepository.findExpeditionDepartures(
+            PageRequest.of(page, size, Sort.by(dir, sortField)), expeditionId);
+
+    return new DeparturesResponse(result);
   }
 }

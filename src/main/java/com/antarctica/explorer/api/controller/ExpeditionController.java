@@ -23,21 +23,6 @@ public class ExpeditionController {
     this.service = service;
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<?> getExpedition(@PathVariable String id) {
-    try {
-      ExpeditionResponse expedition = service.getById(Integer.parseInt(id));
-
-      return (expedition != null)
-          ? ResponseEntity.ok(expedition)
-          : ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(new ErrorResponse("Expedition with ID " + id + " not found"));
-    } catch (NumberFormatException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid expedition ID: " + id));
-    }
-  }
-
   //  TODO: resolve startDate and endDate not binding when using @ModelAttribute ExpeditionFilter
   @GetMapping
   public ResponseEntity<?> findAllExpeditions(
@@ -53,7 +38,10 @@ public class ExpeditionController {
       @RequestParam(name = "capacity.min", required = false) Integer capacityMin,
       @RequestParam(name = "capacity.max", required = false) Integer capacityMax) {
 
-    if (isInvalidSortField(sort))
+    if (!"name".equalsIgnoreCase(sort)
+        && !"cruiseLine".equalsIgnoreCase(sort)
+        && !"startingPrice".equalsIgnoreCase(sort)
+        && !"nearestDate".equalsIgnoreCase(sort))
       return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
 
     try {
@@ -83,10 +71,46 @@ public class ExpeditionController {
     }
   }
 
-  private boolean isInvalidSortField(String sort) {
-    return !"name".equalsIgnoreCase(sort)
-        && !"cruiseLine".equalsIgnoreCase(sort)
-        && !"startingPrice".equalsIgnoreCase(sort)
-        && !"nearestDate".equalsIgnoreCase(sort);
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getExpedition(@PathVariable String id) {
+    try {
+      ExpeditionResponse expedition = service.getById(Integer.parseInt(id));
+
+      return (expedition != null)
+          ? ResponseEntity.ok(expedition)
+          : ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body(new ErrorResponse("Expedition with ID " + id + " not found"));
+    } catch (NumberFormatException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ErrorResponse("Invalid expedition ID: " + id));
+    }
+  }
+
+  @GetMapping("/{id}/departures")
+  public ResponseEntity<?> findExpeditionDepartures(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "startDate") String sort,
+      @RequestParam(defaultValue = "asc") String dir) {
+
+    if (!"startDate".equalsIgnoreCase(sort) && !"startingPrice".equalsIgnoreCase(sort))
+      return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
+
+    try {
+      return ResponseEntity.ok(
+          service.findExpeditionDepartures(
+              Integer.parseInt(id),
+              Math.max(0, page),
+              Math.max(0, size),
+              sort,
+              dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
+    } catch (NumberFormatException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ErrorResponse("Invalid expedition ID: " + id));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ErrorResponse(e.getMessage()));
+    }
   }
 }
