@@ -77,22 +77,23 @@ public class AuroraScraper extends Scraper {
     Elements title = element.select("h4.mb-2 > a");
     String name = title.text();
     String website = title.attr("href");
+    String duration = element.select("div.col > p.font-weight-bold").text().split(" ")[0];
 
     navigateTo(website);
     Document doc = getParsedPageSource();
     if (doc.select(PORT_SELECTOR).isEmpty()) return;
 
-    Expedition expedition = processExpedition(doc, element, name, website);
+    Expedition expedition = processExpedition(doc, element, name, website, duration);
     scrapeGallery(doc, expedition);
     scrapeDeparture(doc, expedition);
   }
 
-  private Expedition processExpedition(Document doc, Element element, String name, String website) {
+  private Expedition processExpedition(
+      Document doc, Element element, String name, String website, String duration) {
     String photoSelector = "a > div.embed-responsive-item";
     String descriptionSelector = "div.container > div.row.section > div > p";
     String priceSelector = "div.col > p.price > span.price__value";
 
-    String duration = extractDuration(doc);
     BigDecimal startingPrice = extractPrice(element, priceSelector);
     String photoUrl = extractPhotoUrl(element, photoSelector, "style", "url('", "')");
 
@@ -189,7 +190,6 @@ public class AuroraScraper extends Scraper {
   private Vessel scrapeVessel(String website, String name) {
     String descriptionSelector = "div.generic-content > p";
     String detailSelector = "div > p > span.prop";
-    String photoSelector = "div.col-xl-4.py-4 > p > img";
 
     navigateTo(website, descriptionSelector);
     Document doc = getParsedPageSource();
@@ -210,7 +210,10 @@ public class AuroraScraper extends Scraper {
         Integer.parseInt(
             Objects.requireNonNull(doc.select(detailSelector).get(1)).text().replaceAll("\\D", ""));
 
-    String photoUrl = doc.select(photoSelector).attr("src");
+    String photoUrl =
+        name.equalsIgnoreCase("Greg Mortimer")
+            ? "https://upload.wikimedia.org/wikipedia/commons/6/6f/Greg_Mortimer_IMO_9834648_P_Antarctica_03-01-2020.jpg"
+            : "https://www.auroraexpeditions.com.au/wp-content/uploads/2020/01/Sylvia-Earle-in-Antarctica-scaled.jpg";
 
     return vesselService.saveIfNotExist(
         cruiseLine, name, description, capacity, cabins, website, photoUrl);
@@ -229,7 +232,8 @@ public class AuroraScraper extends Scraper {
         itineraryService.getItinerary(expedition, ports[0], ports[1]);
     if (!existingItinerary.isEmpty()) return existingItinerary.get(0);
 
-    String duration = extractDuration(doc);
+    String duration =
+        Objects.requireNonNull(doc.select(PORT_SELECTOR).get(0).select("span").last()).text();
     Itinerary itinerary =
         itineraryService.saveItinerary(
             expedition, "Expedition", ports[0], ports[1], duration, mapUrl);
@@ -277,10 +281,6 @@ public class AuroraScraper extends Scraper {
     return doc.select("div.section > ul > li > span").stream()
         .map(Element::text)
         .toArray(String[]::new);
-  }
-
-  private String extractDuration(Document doc) {
-    return Objects.requireNonNull(doc.select(PORT_SELECTOR).get(0).select("span").last()).text();
   }
 
   private String[] extractPorts(Document doc) {
