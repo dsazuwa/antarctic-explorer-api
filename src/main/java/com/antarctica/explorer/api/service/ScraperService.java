@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ScraperService {
-  private static final int MAX_RETRIES = 3;
 
   private final CruiseLineService cruiseLineService;
   private final VesselService vesselService;
@@ -49,28 +48,14 @@ public class ScraperService {
                 //
                 ));
 
-    scrapers.forEach(this::scrapeWithRetry);
-  }
-
-  private void scrapeWithRetry(Scraper scraper) {
-    String scraperName = scraper.getClass().getSimpleName();
-
-    for (int attempt = 1; true; attempt++)
-      try {
-        scraper.scrape();
-        System.out.println(scraperName + " finished scraping");
-        break;
-      } catch (RuntimeException e) {
-        System.out.println(e.getMessage());
-        e.printStackTrace();
-
-        if (attempt > MAX_RETRIES) {
-          System.err.println("Failed to scrape after " + MAX_RETRIES + " attempts");
-          break;
-        }
-
-        System.out.println("Retrying " + scraperName + " (attempt " + attempt + ")");
-        scraper.restartDriver();
-      }
+    try {
+      scrapers.forEach(
+          scraper -> {
+            scraper.scrape();
+            System.out.println(scraper.getClass().getSimpleName() + " finished scraping");
+          });
+    } catch (RuntimeException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }
