@@ -26,7 +26,7 @@ public class Vessel {
   @Column(name = "capacity", nullable = false)
   private Integer capacity;
 
-  @Column(name = "cabins", nullable = false)
+  @Column(name = "cabins")
   private Integer cabins;
 
   @Column(name = "website", columnDefinition = "TEXT")

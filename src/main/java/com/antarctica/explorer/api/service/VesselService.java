@@ -22,8 +22,8 @@ public class VesselService {
       CruiseLine cruiseLine,
       String name,
       String[] description,
-      int capacity,
-      int cabins,
+      Integer capacity,
+      Integer cabins,
       String website,
       String photoUrl) {
     Optional<Vessel> existingVessel = vesselRepository.findByName(name);

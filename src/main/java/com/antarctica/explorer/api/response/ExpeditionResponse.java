@@ -54,11 +54,11 @@ public record ExpeditionResponse(
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
     Gallery[] gallery = new Gallery[arr.size()];
 
-    for (int i = arr.size() - 1, j = 0; i >= 0; i--, j++) {
+    for (int i = arr.size() - 1; i >= 0; i--) {
       JsonObject obj = arr.get(i).getAsJsonObject();
       JsonElement alt = obj.get("alt");
 
-      gallery[j] =
+      gallery[i] =
           new Gallery(alt.isJsonNull() ? null : alt.getAsString(), obj.get("url").getAsString());
     }
 
@@ -104,12 +104,14 @@ public record ExpeditionResponse(
       for (int i = 0; i < arr.size(); i++) {
         JsonObject obj = arr.get(i).getAsJsonObject();
         int id = obj.get("id").getAsInt();
+        JsonElement startPort = obj.get("start_port");
+        JsonElement endPort = obj.get("end_port");
 
         Itinerary itinerary =
             new Itinerary(
                 obj.get("name").getAsString(),
-                obj.get("start_port").getAsString(),
-                obj.get("end_port").getAsString(),
+                startPort.isJsonNull() ? null : startPort.getAsString(),
+                endPort.isJsonNull() ? null : endPort.getAsString(),
                 obj.get("duration").getAsInt(),
                 obj.get("map_url").getAsString(),
                 mapSchedule(obj.get("schedule").getAsJsonArray()));

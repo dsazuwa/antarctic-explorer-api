@@ -58,7 +58,7 @@ CREATE TABLE antarctica.vessels (
   cruise_line_id INTEGER NOT NULL,
   name VARCHAR NOT NULL,
   capacity INTEGER NOT NULL,
-  cabins INTEGER NOT NULL,
+  cabins INTEGER,
   description TEXT[],
   website TEXT,
   photo_url TEXT NOT NULL,
@@ -116,11 +116,13 @@ BEGIN
       'https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition',
       'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
     ),
---    (
---      'Hurtigruten Expeditions',
---      'https://www.hurtigruten.com/en-us/expeditions',
---      'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises'
---    ),
+    (
+      'Hurtigruten Expeditions',
+      'https://www.hurtigruten.com',
+      'https://www.hurtigruten.com/en-us/expeditions/ships/',
+      'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwcBwli1vBRXe-03T9px8R-gI85IRI4GZPzZwChx2Y_sFPGUfzIxNO6m-wrFq8A7Sww4A&usqp=CAU'
+    ),
     (
       'Lindblad Expeditions',
       'https://world.expeditions.com',

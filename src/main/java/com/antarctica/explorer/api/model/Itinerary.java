@@ -22,13 +22,13 @@ public class Itinerary {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "departing_from", nullable = false)
+  @Column(name = "departing_from")
   private String startPort;
 
-  @Column(name = "arriving_at", nullable = false)
+  @Column(name = "arriving_at")
   private String endPort;
 
-  @Column(name = "duration")
+  @Column(name = "duration", nullable = false)
   private String duration;
 
   @Column(name = "map_url", columnDefinition = "TEXT")

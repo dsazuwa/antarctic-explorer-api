@@ -98,6 +98,14 @@ public abstract class Scraper {
     return driver.findElements(By.cssSelector(cssSelector));
   }
 
+  protected WebElement findElement(WebElement element, String cssSelector) {
+    return element.findElement(By.cssSelector(cssSelector));
+  }
+
+  protected List<WebElement> findElements(WebElement element, String cssSelector) {
+    return element.findElements(By.cssSelector(cssSelector));
+  }
+
   protected void navigateTo(String website, Runnable waitFunction) {
     driver.get(website);
     waitFunction.run();

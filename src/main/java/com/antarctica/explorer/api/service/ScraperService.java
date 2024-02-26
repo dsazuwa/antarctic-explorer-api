@@ -34,10 +34,12 @@ public class ScraperService {
         new ArrayList<>(
             Arrays.asList(
                 new AuroraScraper(
+                    cruiseLineService, vesselService, expeditionService, itineraryService),
+                new HurtigrutenScraper(
                     cruiseLineService, vesselService, expeditionService, itineraryService)
-                //                new HurtigrutenScraper(cruiseLineService, expeditionService),
-//                new LindbladScraper(
-//                    cruiseLineService, vesselService, expeditionService, itineraryService)
+                //                new LindbladScraper(
+                //                    cruiseLineService, vesselService, expeditionService,
+                // itineraryService)
                 //                ,
                 //                new PonantScraper(cruiseLineService, expeditionService),
                 //                new SeabournScraper(cruiseLineService, expeditionService),
