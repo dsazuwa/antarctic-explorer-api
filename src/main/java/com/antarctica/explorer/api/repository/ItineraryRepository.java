@@ -6,5 +6,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ItineraryRepository extends JpaRepository<Itinerary, Long> {
-  List<Itinerary> findByExpeditionAndStartPortAndEndPort(Expedition expedition, String startPort, String endPort);
+  List<Itinerary> findByExpedition(Expedition expedition);
+
+  List<Itinerary> findByExpeditionAndName(Expedition expedition, String name);
+
+  List<Itinerary> findByExpeditionAndStartPortAndEndPort(
+      Expedition expedition, String startPort, String endPort);
 }

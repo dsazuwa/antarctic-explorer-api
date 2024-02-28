@@ -108,7 +108,10 @@ public class ExpeditionService {
   }
 
   public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
-    galleryRepository.save(new Gallery(expedition, photoUrl, alt));
+    Optional<Gallery> existingGallery =
+        galleryRepository.findByExpeditionAndPhotoUrl(expedition, photoUrl);
+
+    if (existingGallery.isEmpty()) galleryRepository.save(new Gallery(expedition, photoUrl, alt));
   }
 
   public ExpeditionResponse getById(int id) {

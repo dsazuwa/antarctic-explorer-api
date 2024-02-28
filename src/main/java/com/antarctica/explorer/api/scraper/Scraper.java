@@ -66,10 +66,6 @@ public abstract class Scraper {
     this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
   }
 
-  public void restartDriver() {
-    initializeDriver();
-  }
-
   public void quitDriver() {
     driver.quit();
   }

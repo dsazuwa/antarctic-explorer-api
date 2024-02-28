@@ -106,6 +106,7 @@ public record ExpeditionResponse(
         int id = obj.get("id").getAsInt();
         JsonElement startPort = obj.get("start_port");
         JsonElement endPort = obj.get("end_port");
+        JsonElement mapUrl = obj.get("map_url");
 
         Itinerary itinerary =
             new Itinerary(
@@ -113,7 +114,7 @@ public record ExpeditionResponse(
                 startPort.isJsonNull() ? null : startPort.getAsString(),
                 endPort.isJsonNull() ? null : endPort.getAsString(),
                 obj.get("duration").getAsInt(),
-                obj.get("map_url").getAsString(),
+                mapUrl.isJsonNull() ? null : mapUrl.getAsString(),
                 mapSchedule(obj.get("schedule").getAsJsonArray()));
 
         map.put(id, itinerary);

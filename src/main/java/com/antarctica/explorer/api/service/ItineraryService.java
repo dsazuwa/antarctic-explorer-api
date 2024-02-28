@@ -35,6 +35,14 @@ public class ItineraryService {
     detailRepository.save(new ItineraryDetail(itinerary, day, header, content));
   }
 
+  public List<Itinerary> getItinerary(Expedition expedition) {
+    return itineraryRepository.findByExpedition(expedition);
+  }
+
+  public List<Itinerary> getItinerary(Expedition expedition, String name) {
+    return itineraryRepository.findByExpeditionAndName(expedition, name);
+  }
+
   public List<Itinerary> getItinerary(Expedition expedition, String startPort, String endPort) {
     return itineraryRepository.findByExpeditionAndStartPortAndEndPort(
         expedition, startPort, endPort);

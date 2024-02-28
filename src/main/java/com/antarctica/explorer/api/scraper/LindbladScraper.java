@@ -1,6 +1,7 @@
 package com.antarctica.explorer.api.scraper;
 
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
@@ -9,10 +10,13 @@ import com.antarctica.explorer.api.service.VesselService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -21,7 +25,7 @@ public class LindbladScraper extends Scraper {
   private static final String DESCRIPTION_SELECTOR =
       "div.sc-c71aec9f-2.dVGsho > p.sc-1a030b44-1.ka-dLeA";
   private static final String PORT_SELECTOR =
-      "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz > header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
+      "header.sc-36842228-9.dFwmLF > h3.sc-36842228-12.jKNlCi > div.sc-12a2b3de-0.kCEMBM > div.sc-12a2b3de-1.fnHsb > span.sc-12a2b3de-3.cvVhAe";
   private static final String ITINERARY_SELECTOR =
       "div.sc-36842228-3.hBGyOc > div.sc-ad096f17-1.ebIpYW";
   private static final String SHIP_SELECTOR = "div[data-module=ship]";
@@ -65,7 +69,7 @@ public class LindbladScraper extends Scraper {
   }
 
   private void removeNewsletter() {
-    String newsletterSelector = "div.sc-7f64236d-1.iUClex > button.sc-ec262d12-0.bMrTos";
+    String newsletterSelector = "div.sc-67e7c0e-1.cqMfmY > button.sc-ec262d12-0.bMrTos";
 
     waitForPresenceOfElement(newsletterSelector);
     WebElement closeButton = findElement(newsletterSelector);
@@ -94,10 +98,11 @@ public class LindbladScraper extends Scraper {
 
   private void processExpedition(Element element) {
     Expedition expedition = scrapeExpedition(element);
+    scrapeItineraries(expedition);
 
-    Document doc = getParsedPageSource();
+    Document doc = getDocument();
+    scrapeGallery(doc, expedition);
     scrapeVessels(doc);
-    scrapeItineraries(doc, expedition);
     scrapeDepartures(doc, expedition);
   }
 
@@ -125,12 +130,12 @@ public class LindbladScraper extends Scraper {
 
     if (!newsletterRemoved) removeNewsletter();
 
-    Document doc = getDocument();
     String[] description =
-        doc.select(DESCRIPTION_SELECTOR).stream().map(Element::text).toArray(String[]::new);
-    String[] ports = extractPorts(doc);
+        findElements(DESCRIPTION_SELECTOR).stream().map(WebElement::getText).toArray(String[]::new);
+    String[] ports =
+        findElements(PORT_SELECTOR).stream().map(WebElement::getText).toArray(String[]::new);
     String[] highlights =
-        doc.select(highlightSelector).stream().map(Element::text).toArray(String[]::new);
+        findElements(highlightSelector).stream().map(WebElement::getText).toArray(String[]::new);
 
     return expeditionService.saveIfNotExist(
         cruiseLine,
@@ -143,6 +148,95 @@ public class LindbladScraper extends Scraper {
         duration,
         price,
         photoUrl);
+  }
+
+  private void scrapeItineraries(Expedition expedition) {
+    String buttonSelector = "div.sc-cde596b-1.fJKQlx > button.sc-cde596b-4.jTBrAO";
+    String boundarySelector = "#day-by-day > h2";
+    String buttonNameSelector = "span.sc-cde596b-2.hRkFEa";
+    String itinerarySelector = "div.sc-36842228-0.Anwop.sc-d6abfba5-0.euRrRz";
+    String itineraryNameSelector =
+        "div.sc-36842228-11.ceeEMz > h3.sc-91ccd5f9-0.sc-36842228-14.EjOQT.VGHIR";
+
+    List<WebElement> buttons = findElements(buttonSelector);
+
+    if (buttons.isEmpty()) scrapeItinerary(findElement(itinerarySelector), expedition);
+    else {
+      waitForPresenceOfElement(boundarySelector);
+      WebElement boundary = findElement(boundarySelector);
+
+      for (WebElement button : buttons) {
+        try {
+          scrollIntoViewAndClick(button, boundary);
+        } catch (ElementClickInterceptedException e) {
+          scrollIntoViewAndClick(button, boundary);
+        }
+
+        wait.until(
+            (WebDriver wd) -> {
+              String buttonName = findElement(button, buttonNameSelector).getText();
+              String itineraryName = findElement(itineraryNameSelector).getText();
+
+              return buttonName.equalsIgnoreCase(itineraryName);
+            });
+
+        scrapeItinerary(findElement(itinerarySelector), expedition);
+      }
+    }
+  }
+
+  private void scrollIntoViewAndClick(WebElement button, WebElement boundary) {
+    getExecutor().executeScript("arguments[0].scrollIntoView(true);", boundary);
+    wait.until(ExpectedConditions.visibilityOf(boundary));
+    button.click();
+  }
+
+  private void scrapeItinerary(WebElement webElement, Expedition expedition) {
+    String nameSelector = "h3.sc-91ccd5f9-0.sc-36842228-14.EjOQT.VGHIR";
+    String detailSelector = "div.sc-ad096f17-1.ebIpYW";
+    String daySelector = "p.sc-dd73f2f5-0.sc-ad096f17-6.bMGjHV.bvzlzR";
+
+    Element element = Jsoup.parse(webElement.getAttribute("innerHTML"));
+    String name = element.select(nameSelector).text();
+
+    String[] ports =
+        element.select(PORT_SELECTOR).stream().map(Element::text).toArray(String[]::new);
+
+    Elements details = element.select(detailSelector);
+    String duration =
+        details.get(details.size() - 1).select(daySelector).text().replaceAll("[^0-9]", "");
+
+    Itinerary itinerary =
+        itineraryService.saveItinerary(expedition, name, ports[0], ports[1], duration, null);
+
+    for (Element detail : details) scrapeItineraryDetail(detail, itinerary);
+  }
+
+  private void scrapeItineraryDetail(Element element, Itinerary itinerary) {
+    String daySelector = "p.sc-dd73f2f5-0.sc-ad096f17-6.bMGjHV.bvzlzR";
+    String headerSelector = "h4.sc-91ccd5f9-0.sc-ad096f17-5.gZhyTX.eSHMXQ";
+    String contentSelector = "p.sc-dd73f2f5-0.sc-1a030b44-0.gQUCHt.dzbrZi";
+
+    String day = element.select(daySelector).text();
+    String header = Objects.requireNonNull(element.select(headerSelector).first()).ownText();
+    String[] content =
+        element.select(contentSelector).stream().map(Element::text).toArray(String[]::new);
+
+    itineraryService.saveItineraryDetail(itinerary, day, header, content);
+  }
+
+  private void scrapeGallery(Document doc, Expedition expedition) {
+    String photoSelector = "div.sc-404189a-6.hsqTTv > img";
+    String gallerySelector = "div.sc-d73cd667-2.dEbNDy > img";
+
+    for (Element photo : doc.select(photoSelector)) scrapeGalleryImg(expedition, photo);
+    for (Element photo : doc.select(gallerySelector)) scrapeGalleryImg(expedition, photo);
+  }
+
+  private void scrapeGalleryImg(Expedition expedition, Element photo) {
+    String url = photo.attr("src").split("\\?io")[0];
+    String alt = photo.attr("alt");
+    expeditionService.saveGalleryImg(expedition, url, alt);
   }
 
   private void scrapeVessels(Document doc) {
@@ -178,67 +272,58 @@ public class LindbladScraper extends Scraper {
             });
   }
 
-  private void scrapeItineraries(Document doc, Expedition expedition) {
-    String daySelector = "p.sc-dd73f2f5-0.sc-ad096f17-6.bMGjHV.bvzlzR";
-    String headerSelector = "h4.sc-91ccd5f9-0.sc-ad096f17-5.gZhyTX.eSHMXQ";
-    String contentSelector = "p.sc-dd73f2f5-0.sc-1a030b44-0.gQUCHt.dzbrZi";
-
-    doc.select(ITINERARY_SELECTOR)
-        .forEach(
-            element -> {
-              String day = element.select(daySelector).text();
-              String header =
-                  Objects.requireNonNull(element.select(headerSelector).first()).ownText();
-              String[] content =
-                  element.select(contentSelector).stream()
-                      .map(Element::text)
-                      .toArray(String[]::new);
-
-              //              expeditionService.saveItinerary(expedition, day, header, content);
-            });
-  }
-
   private void scrapeDepartures(Document doc, Expedition expedition) {
-    String cardSelector = "ol.sc-487915d1-0.mwJrq > li";
-    String nameSelector = "p.sc-ba3f9bc9-5.eAYUGq";
-    String priceSelector = "div > div.sc-ba3f9bc9-2.jxCzLd > div > p > span.sc-d219990a-2.dxQAZd";
-    String portSelector = "p.sc-ba3f9bc9-5.eAYUGq > span.sc-ba3f9bc9-4.deMCur";
-    String dateSelector = "div > div.sc-ba3f9bc9-1.jVDvlO > div > div > p.sc-ba3f9bc9-10.ILPgp";
-    String vesselSelector = "span.sc-ba3f9bc9-7.iDnmaR > i";
+    String selector = "ol.sc-92502399-0.DfNNS > li";
 
     int year = 0;
-    for (Element card : doc.select(cardSelector)) {
-      Element yearElement = card.selectFirst("h3");
+    for (Element element : doc.select(selector)) {
+      Element yearElement = element.selectFirst("h3");
 
       if (yearElement != null) year = Integer.parseInt(yearElement.text());
-      else {
-        String name = Objects.requireNonNull(card.select(nameSelector).first()).ownText();
-        BigDecimal price = extractPrice(card, priceSelector);
-        String[] ports = card.select(portSelector).text().split(" → ");
-
-        int finalYear = year;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-        LocalDate[] dates =
-            card.select(dateSelector).stream()
-                .map(Element::text)
-                .map(x -> LocalDate.parse(x + ", " + finalYear, formatter))
-                .toArray(LocalDate[]::new);
-
-        String vesselName = card.select(vesselSelector).text();
-        Vessel vessel = vesselService.getByName(vesselName);
-
-        //        expeditionService.saveDeparture(
-        //            expedition,
-        //            vessel,
-        //            name.isEmpty() ? null : name,
-        //            ports.length != 2 ? null : ports[0],
-        //            ports.length != 2 ? null : ports[1],
-        //            dates[0],
-        //            dates[1],
-        //            price,
-        //            null);
-      }
+      else scrapeDeparture(expedition, element, year);
     }
+  }
+
+  private void scrapeDeparture(Expedition expedition, Element element, int year) {
+    String startingPriceSelector = "p > span > span.sc-596b3848-5.iSVNMC";
+    String priceSelector = "p > span.sc-596b3848-2.KSERt";
+    String dateSelector = "div > p.sc-ab43b34d-9.eFOFNH";
+    String linkSelector = "a";
+    String vesselSelector = "div.sc-ab43b34d-8.eVwwkY > i";
+    String nameSelector = "p.sc-ab43b34d-6.kmWQpO";
+
+    BigDecimal price = extractPrice(element, priceSelector);
+    BigDecimal startingPrice = extractPrice(element, startingPriceSelector);
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
+    LocalDate[] dates =
+        element.select(dateSelector).stream()
+            .map(Element::text)
+            .map(x -> LocalDate.parse(x + ", " + year, formatter))
+            .toArray(LocalDate[]::new);
+
+    String website = cruiseLine.getWebsite() + element.select(linkSelector).attr("href");
+
+    String vesselName = element.select(vesselSelector).text();
+    Vessel vessel = vesselService.getByName(vesselName);
+
+    String itineraryName = Objects.requireNonNull(element.select(nameSelector).first()).ownText();
+    List<Itinerary> itinerary =
+        itineraryName.equalsIgnoreCase("Expedition")
+            ? itineraryService.getItinerary(expedition)
+            : itineraryService.getItinerary(expedition, itineraryName);
+    if (itinerary.isEmpty()) return;
+
+    expeditionService.saveDeparture(
+        expedition,
+        vessel,
+        itinerary.get(0),
+        null,
+        dates[0],
+        dates[1],
+        startingPrice == null ? price : startingPrice,
+        startingPrice == null ? null : price,
+        website);
   }
 
   private Document getDocument() {
@@ -268,12 +353,5 @@ public class LindbladScraper extends Scraper {
     }
 
     return getParsedPageSource();
-  }
-
-  private String[] extractPorts(Document doc) {
-    String[] ports = doc.select(PORT_SELECTOR).stream().map(Element::text).toArray(String[]::new);
-
-    if (ports.length != 2) throw new NoSuchElementException("Ports not found");
-    return ports;
   }
 }
