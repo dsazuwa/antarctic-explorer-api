@@ -227,7 +227,7 @@ public class HurtigrutenScraper extends Scraper {
 
     return itineraryService.saveItinerary(
         expedition,
-        "Expedition",
+        null,
         null,
         null,
         expedition.getDuration(),

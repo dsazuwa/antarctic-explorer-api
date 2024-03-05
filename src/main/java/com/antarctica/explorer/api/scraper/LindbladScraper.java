@@ -207,7 +207,13 @@ public class LindbladScraper extends Scraper {
         details.get(details.size() - 1).select(daySelector).text().replaceAll("[^0-9]", "");
 
     Itinerary itinerary =
-        itineraryService.saveItinerary(expedition, name, ports[0], ports[1], duration, null);
+        itineraryService.saveItinerary(
+            expedition,
+            name.equalsIgnoreCase("Expedition") ? null : name,
+            ports[0],
+            ports[1],
+            duration,
+            null);
 
     for (Element detail : details) scrapeItineraryDetail(detail, itinerary);
   }

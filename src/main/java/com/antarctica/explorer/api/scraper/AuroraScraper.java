@@ -238,8 +238,7 @@ public class AuroraScraper extends Scraper {
     String duration =
         Objects.requireNonNull(doc.select(PORT_SELECTOR).get(0).select("span").last()).text();
     Itinerary itinerary =
-        itineraryService.saveItinerary(
-            expedition, "Expedition", ports[0], ports[1], duration, mapUrl);
+        itineraryService.saveItinerary(expedition, null, ports[0], ports[1], duration, mapUrl);
 
     for (Element element : doc.select(itinerarySelector)) {
       String[] headerParts = element.select(headerSelector).text().split(" ");

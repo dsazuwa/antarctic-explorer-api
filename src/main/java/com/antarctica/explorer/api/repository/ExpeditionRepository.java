@@ -38,7 +38,7 @@ public interface ExpeditionRepository
               SELECT
                 i.itinerary_id,
                 i.expedition_id,
-                i.name,
+                COALESCE(i.name, 'Itinerary #' || i.itinerary_id) AS name,
                 i.departing_from,
                 i.arriving_at,
                 i.duration,
@@ -61,7 +61,7 @@ public interface ExpeditionRepository
                 d.starting_price,
                 jsonb_build_object(
                   'itinerary_id', i.itinerary_id,
-                  'itinerary_name', i.name,
+                  'itinerary_name', COALESCE(i.name, 'Itinerary #' || i.itinerary_id),
                   'id', d.departure_id,
                   'name', d.name,
                   'start_port', i.departing_from,

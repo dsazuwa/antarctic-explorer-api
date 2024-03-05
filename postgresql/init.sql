@@ -69,7 +69,7 @@ CREATE TABLE antarctica.vessels (
 CREATE TABLE antarctica.itineraries (
   itinerary_id SERIAL,
   expedition_id INTEGER NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
   departing_from VARCHAR(100),
   arriving_at VARCHAR(100),
   duration VARCHAR(10) NOT NULL,
@@ -148,6 +148,6 @@ BEGIN
 --    (
 --      'Viking Expeditions',
 --      'https://www.vikingcruises.com',
---      'https://www.vikingcruises.com/expeditions/search-cruises/index.html?Regions=Antarctica'
+--      'https://www.vikingcruises.com/expeditions/search-cruises/index.html?Countries=Antarctica|Argentina|Falkland%20Islands|Georgia%20and%20the%20South%20Sandwich%20Islands'
 --    );
 END $$;

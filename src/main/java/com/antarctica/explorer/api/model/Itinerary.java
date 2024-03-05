@@ -19,7 +19,7 @@ public class Itinerary {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Expedition expedition;
 
-  @Column(name = "name", nullable = false)
+  @Column(name = "name")
   private String name;
 
   @Column(name = "departing_from")

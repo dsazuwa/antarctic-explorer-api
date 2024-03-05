@@ -22,7 +22,7 @@ public record ExpeditionResponse(
     CruiseLine cruiseLine,
     Gallery[] gallery,
     Map<Integer, Vessel> vessels,
-    Map<Integer, Itinerary> itineraries,
+    List<Itinerary> itineraries,
     List<Departure> departures) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
@@ -95,33 +95,32 @@ public record ExpeditionResponse(
     return map;
   }
 
-  private static Map<Integer, Itinerary> mapItinerary(String json) {
-    Map<Integer, Itinerary> map = new HashMap<>();
+  private static List<Itinerary> mapItinerary(String json) {
+    List<Itinerary> list = new ArrayList<>();
 
     if (!json.isEmpty()) {
       JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
 
       for (int i = 0; i < arr.size(); i++) {
         JsonObject obj = arr.get(i).getAsJsonObject();
-        int id = obj.get("id").getAsInt();
+
         JsonElement startPort = obj.get("start_port");
         JsonElement endPort = obj.get("end_port");
         JsonElement mapUrl = obj.get("map_url");
 
-        Itinerary itinerary =
+        list.add(
             new Itinerary(
+                obj.get("id").getAsInt(),
                 obj.get("name").getAsString(),
                 startPort.isJsonNull() ? null : startPort.getAsString(),
                 endPort.isJsonNull() ? null : endPort.getAsString(),
                 obj.get("duration").getAsInt(),
                 mapUrl.isJsonNull() ? null : mapUrl.getAsString(),
-                mapSchedule(obj.get("schedule").getAsJsonArray()));
-
-        map.put(id, itinerary);
+                mapSchedule(obj.get("schedule").getAsJsonArray())));
       }
     }
 
-    return map;
+    return list;
   }
 
   private static Schedule[] mapSchedule(JsonArray arr) {
@@ -180,6 +179,7 @@ public record ExpeditionResponse(
   public record Schedule(String day, String header, String[] content) {}
 
   public record Itinerary(
+      int id,
       String name,
       String startPort,
       String endPort,
