@@ -210,7 +210,7 @@ public class HurtigrutenScraper extends Scraper {
 
     for (int i = 0; i < findElements(imageSelector).size(); i++) {
       WebElement element = findElements(imageSelector).get(i);
-      waitUntilImageLoaded(element);
+      lazyLoadImage(element);
 
       String src = element.getAttribute("src");
 
@@ -223,15 +223,14 @@ public class HurtigrutenScraper extends Scraper {
   }
 
   private Itinerary saveItinerary(Expedition expedition) {
-    String mapSelector = "div > div > span > img";
+    String mapSelector =
+        "div.react-transform-component.transform-component-module_content__FBWxo  > span > img";
+
+    WebElement map = findElement(mapSelector);
+    lazyLoadImage(map);
 
     return itineraryService.saveItinerary(
-        expedition,
-        null,
-        null,
-        null,
-        expedition.getDuration(),
-        findElement(mapSelector).getAttribute("src"));
+        expedition, null, null, null, expedition.getDuration(), map.getAttribute("src"));
   }
 
   private void saveItineraryDetails(Itinerary itinerary) {
@@ -314,13 +313,11 @@ public class HurtigrutenScraper extends Scraper {
   }
 
   private void lazyLoadImages(String selector, String imageSelector) {
-    for (WebElement item : findElements(selector)) {
-      getExecutor().executeScript("arguments[0].scrollIntoView(true);", item);
-      waitUntilImageLoaded(findElement(item, imageSelector));
-    }
+    for (WebElement item : findElements(selector)) lazyLoadImage(findElement(item, imageSelector));
   }
 
-  private void waitUntilImageLoaded(WebElement element) {
+  private void lazyLoadImage(WebElement element) {
+    getExecutor().executeScript("arguments[0].scrollIntoView(true);", element);
     wait.until(
         (WebDriver wd) -> {
           String currentSrc = element.getAttribute("src");
