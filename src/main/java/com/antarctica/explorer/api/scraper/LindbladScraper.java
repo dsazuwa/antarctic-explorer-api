@@ -292,8 +292,7 @@ public class LindbladScraper extends Scraper {
     String vesselSelector = "div.sc-ab43b34d-8.eVwwkY > i";
     String nameSelector = "p.sc-ab43b34d-6.kmWQpO";
 
-    BigDecimal price = extractPrice(element, priceSelector);
-    BigDecimal startingPrice = extractPrice(element, startingPriceSelector);
+    BigDecimal[] prices = extractPrices(element, startingPriceSelector, priceSelector);
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
     LocalDate[] dates =
@@ -321,8 +320,8 @@ public class LindbladScraper extends Scraper {
         null,
         dates[0],
         dates[1],
-        startingPrice == null ? price : startingPrice,
-        startingPrice == null ? null : price,
+        prices[0],
+        prices[1],
         website);
   }
 

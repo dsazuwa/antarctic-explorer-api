@@ -162,6 +162,9 @@ public class AuroraScraper extends Scraper {
         vessel = randVessel.get();
       }
 
+      BigDecimal[] prices =
+          extractPrices(departureDoc, startingPriceSelector, discountedPriceSelector);
+
       expeditionService.saveDeparture(
           expedition,
           vessel,
@@ -169,8 +172,8 @@ public class AuroraScraper extends Scraper {
           name,
           startDate,
           endDate,
-          extractPrice(departureDoc, startingPriceSelector),
-          extractPrice(departureDoc, discountedPriceSelector),
+          prices[0],
+          prices[1],
           website);
     }
   }

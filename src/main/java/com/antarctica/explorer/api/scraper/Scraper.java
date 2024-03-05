@@ -154,6 +154,24 @@ public abstract class Scraper {
     return (priceElement.isEmpty()) ? null : extractPrice(priceElement.text());
   }
 
+  /**
+   *
+   * @param element the element to be scraped
+   * @param startingPriceSelector starting price css selector
+   * @param discountedPriceSelector discounted price css selector
+   * @return an array of two prices. The first being the starting price and the second, the discounted price
+   */
+  protected BigDecimal[] extractPrices(
+      Element element, String startingPriceSelector, String discountedPriceSelector) {
+    BigDecimal startingPrice = extractPrice(element, startingPriceSelector);
+    BigDecimal discountedPrice = extractPrice(element, discountedPriceSelector);
+
+    return new BigDecimal[] {
+      startingPrice == null ? discountedPrice : startingPrice,
+      startingPrice == null ? null : discountedPrice
+    };
+  }
+
   protected void waitForInvisibilityOfElement(String cssSelector) {
     wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
   }

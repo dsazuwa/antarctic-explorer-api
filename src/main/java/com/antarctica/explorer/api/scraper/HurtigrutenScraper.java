@@ -299,8 +299,7 @@ public class HurtigrutenScraper extends Scraper {
     String startDate = doc.select(startSelector).text() + " " + year;
     String endDate = doc.select(endSelector).get(1).text().replace("Returning ", "") + " " + year;
 
-    BigDecimal discountedPrice = extractPrice(doc, discountedPriceSelector);
-    BigDecimal startingPrice = extractPrice(doc, startingPriceSelector);
+    BigDecimal[] prices = extractPrices(doc, startingPriceSelector, discountedPriceSelector);
 
     expeditionService.saveDeparture(
         expedition,
@@ -309,8 +308,8 @@ public class HurtigrutenScraper extends Scraper {
         null,
         LocalDate.parse(startDate, formatter),
         LocalDate.parse(endDate, formatter),
-        startingPrice == null ? discountedPrice : startingPrice,
-        startingPrice == null ? null : discountedPrice,
+        prices[0],
+        prices[1],
         expedition.getWebsite());
   }
 
