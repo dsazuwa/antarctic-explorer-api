@@ -264,8 +264,10 @@ public class HurtigrutenScraper extends Scraper {
 
     boolean hasNextYear = true;
     while (hasNextYear) {
-      waitForPresenceOfElement(yearSelector);
-      String year = findElement(section, yearSelector).getText();
+
+      WebElement yearElement = findElement(yearSelector);
+      wait.until((WebDriver wd) -> !yearElement.getText().isEmpty());
+      String year = yearElement.getText();
 
       for (WebElement monthButton :
           findElements(section, monthSelector).stream().filter(WebElement::isEnabled).toList()) {
