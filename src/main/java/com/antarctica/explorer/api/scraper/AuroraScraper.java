@@ -258,30 +258,41 @@ public class AuroraScraper extends Scraper {
   }
 
   /**
-   * somewhat dirty workaround to address Aurora's habit of including a welcoming message in
-   * description
+   * somewhat dirty workaround to address Aurora's habit of including a welcome message in
+   * description. It also handles Aurora's interesting layout
    *
    * @param elements the elements to be processed
    * @return an array of string representing each paragraph of the description
    */
   private String[] extractDescription(Elements elements) {
     String[] description = elements.stream().map(Element::text).toArray(String[]::new);
-    return (description.length > 1)
-        ? Arrays.copyOfRange(description, 1, description.length)
-        : description;
+
+    return Arrays.stream(
+            (description.length > 1)
+                ? Arrays.copyOfRange(description, 1, description.length)
+                : description)
+        .filter(x -> !x.contains("•") && !x.isEmpty())
+        .toArray(String[]::new);
   }
 
   private String[] extractHighlights(Document doc) {
     String[] highlights =
-        doc.select("div.container > div.section > div.col-xl-8 > div.section > p").stream()
-            .map(x -> x.text().replace("•", "").replace(".", "").trim())
-            .filter(x -> !x.isEmpty())
-            .toArray(String[]::new);
+        getHighlights(doc, "div.container > div.section > div.col-xl-8 > div.section > p");
+    if (highlights.length != 0) return highlights;
 
+    highlights = getHighlights(doc, "div.container.container-sm > div.section > div.section > p");
     if (highlights.length != 0) return highlights;
 
     return doc.select("div.section > ul > li > span").stream()
         .map(Element::text)
+        .filter(x -> !x.isEmpty())
+        .toArray(String[]::new);
+  }
+
+  private String[] getHighlights(Document doc, String selector) {
+    return doc.select(selector).stream()
+        .map(x -> x.text().replace("•", "").replace(".", "").trim())
+        .filter(x -> !x.isEmpty())
         .toArray(String[]::new);
   }
 
