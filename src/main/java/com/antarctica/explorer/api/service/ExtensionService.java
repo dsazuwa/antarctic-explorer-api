@@ -1,6 +1,7 @@
 package com.antarctica.explorer.api.service;
 
 import com.antarctica.explorer.api.model.CruiseLine;
+import com.antarctica.explorer.api.model.Expedition;
 import com.antarctica.explorer.api.model.Extension;
 import com.antarctica.explorer.api.repository.ExtensionRepository;
 import java.math.BigDecimal;
@@ -15,19 +16,24 @@ public class ExtensionService {
     this.extensionRepository = extensionRepository;
   }
 
-  public void saveExtension(
+  public Extension saveExtension(
       CruiseLine cruiseLine,
       String name,
-      String[] description,
       BigDecimal startingPrice,
-      String duration,
+      int duration,
       String photoUrl,
       String website) {
     Optional<Extension> existingExtension =
         extensionRepository.findByCruiseLineAndName(cruiseLine, name);
 
-    if (existingExtension.isEmpty())
-      extensionRepository.save(
-          new Extension(cruiseLine, name, description, startingPrice, duration, photoUrl, website));
+    return existingExtension.orElseGet(
+        () ->
+            extensionRepository.save(
+                new Extension(cruiseLine, name, startingPrice, duration, photoUrl, website)));
+  }
+
+  public void saveExpeditionExtension(Extension extension, Expedition expedition) {
+    extension.addExpedition(expedition);
+    extensionRepository.save(extension);
   }
 }

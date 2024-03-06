@@ -1,8 +1,6 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.model.Expedition;
-import com.antarctica.explorer.api.model.Itinerary;
-import com.antarctica.explorer.api.model.Vessel;
+import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -105,6 +103,7 @@ public class LindbladScraper extends Scraper {
     scrapeGallery(doc, expedition);
     scrapeVessels(doc);
     scrapeDepartures(doc, expedition);
+    scrapeExtensions(cruiseLine, expedition);
   }
 
   private Expedition scrapeExpedition(Element element) {
@@ -328,6 +327,32 @@ public class LindbladScraper extends Scraper {
         prices[0],
         prices[1],
         website);
+  }
+
+  private void scrapeExtensions(CruiseLine cruiseLine, Expedition expedition) {
+    String extensionSelector = "div.sc-10d5d386-0.hveOpN > div.sc-2a85a787-2.egOkGP";
+    String imgSelector = "img.sc-1c310051-4.hgsOhE";
+    String nameSelector = "p.sc-2a85a787-0.ecbriG";
+    String durationSelector = "p.sc-2a85a787-7.hyLAYw";
+    String priceSelector = "div.sc-2a85a787-9.hCVlkn > p.sc-2a85a787-10.kzWsfu";
+    String linkSelector = "a.sc-baf605bd-2.hWToCq";
+
+    for (WebElement webElement : findElements(extensionSelector)) {
+      Element element = Jsoup.parse(webElement.getAttribute("innerHTML"));
+
+      String photoUrl = element.select(imgSelector).attr("src");
+      String name = element.select(nameSelector).text();
+      int duration =
+          Integer.parseInt(element.select(durationSelector).text().replaceAll("[^0-9]", ""));
+      BigDecimal startingPrice = extractPrice(element, priceSelector);
+      String website = cruiseLine.getWebsite() + element.select(linkSelector).attr("href");
+
+      Extension extension =
+          extensionService.saveExtension(
+              cruiseLine, name, startingPrice, duration, photoUrl, website);
+
+      extensionService.saveExpeditionExtension(extension, expedition);
+    }
   }
 
   private Document getDocument() {

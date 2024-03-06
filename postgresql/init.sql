@@ -113,8 +113,7 @@ CREATE TABLE antarctica.departures (
 CREATE TABLE antarctica.extensions (
   extension_id SERIAL,
   cruise_line_id INTEGER NOT NULL,
-  name VARCHAR NOT NULL,
-  description TEXT[],
+  name VARCHAR NOT NULL, 
   starting_price DECIMAL(10, 4),
   duration INTEGER,
   photo_url TEXT NOT NULL,
