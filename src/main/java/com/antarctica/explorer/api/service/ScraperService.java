@@ -15,17 +15,20 @@ public class ScraperService {
   private final VesselService vesselService;
   private final ExpeditionService expeditionService;
   private final ItineraryService itineraryService;
+  private final DepartureService departureService;
 
   @Autowired
   public ScraperService(
       CruiseLineService cruiseLineService,
       VesselService vesselService,
       ExpeditionService expeditionService,
-      ItineraryService itineraryService) {
+      ItineraryService itineraryService,
+      DepartureService departureService) {
     this.cruiseLineService = cruiseLineService;
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
     this.itineraryService = itineraryService;
+    this.departureService = departureService;
   }
 
   @Scheduled(cron = "0 0 0 */7 * ?")
@@ -34,19 +37,26 @@ public class ScraperService {
         new ArrayList<>(
             Arrays.asList(
                 new AuroraScraper(
-                    cruiseLineService, vesselService, expeditionService, itineraryService),
+                    cruiseLineService,
+                    vesselService,
+                    expeditionService,
+                    itineraryService,
+                    departureService),
                 new HurtigrutenScraper(
-                    cruiseLineService, vesselService, expeditionService, itineraryService),
+                    cruiseLineService,
+                    vesselService,
+                    expeditionService,
+                    itineraryService,
+                    departureService),
                 new LindbladScraper(
-                    cruiseLineService, vesselService, expeditionService, itineraryService)
-                //                ,
-                //                new PonantScraper(cruiseLineService, expeditionService),
-                //                new SeabournScraper(cruiseLineService, expeditionService),
-                //                                new QuarkScraper(cruiseLineService,
-                // expeditionService)
-                //                ,
-                //                new VikingScraper(cruiseLineService, expeditionService)
-                //
+                    cruiseLineService,
+                    vesselService,
+                    expeditionService,
+                    itineraryService,
+                    departureService)
+                //  new PonantScraper(cruiseLineService, expeditionService),
+                //  new QuarkScraper(cruiseLineService, expeditionService),
+                //  new VikingScraper(cruiseLineService, expeditionService)
                 ));
 
     try {

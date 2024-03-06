@@ -1,10 +1,7 @@
 package com.antarctica.explorer.api.scraper;
 
 import com.antarctica.explorer.api.model.CruiseLine;
-import com.antarctica.explorer.api.service.CruiseLineService;
-import com.antarctica.explorer.api.service.ExpeditionService;
-import com.antarctica.explorer.api.service.ItineraryService;
-import com.antarctica.explorer.api.service.VesselService;
+import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
@@ -20,9 +17,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public abstract class Scraper {
   protected CruiseLine cruiseLine;
+
   protected VesselService vesselService;
   protected ExpeditionService expeditionService;
   protected ItineraryService itineraryService;
+  protected DepartureService departureService;
+
   protected WebDriverWait wait;
   private WebDriver driver;
 
@@ -31,11 +31,14 @@ public abstract class Scraper {
       VesselService vesselService,
       ExpeditionService expeditionService,
       ItineraryService itineraryService,
+      DepartureService departureService,
       String cruiseLineName) {
     this.cruiseLine = cruiseLineService.getByName(cruiseLineName);
+
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
     this.itineraryService = itineraryService;
+    this.departureService = departureService;
 
     initializeDriver();
   }
@@ -155,11 +158,11 @@ public abstract class Scraper {
   }
 
   /**
-   *
    * @param element the element to be scraped
    * @param startingPriceSelector starting price css selector
    * @param discountedPriceSelector discounted price css selector
-   * @return an array of two prices. The first being the starting price and the second, the discounted price
+   * @return an array of two prices. The first being the starting price and the second, the
+   *     discounted price
    */
   protected BigDecimal[] extractPrices(
       Element element, String startingPriceSelector, String discountedPriceSelector) {

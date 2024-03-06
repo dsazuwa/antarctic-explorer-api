@@ -1,14 +1,11 @@
 package com.antarctica.explorer.api.service;
 
 import com.antarctica.explorer.api.model.*;
-import com.antarctica.explorer.api.repository.DepartureRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
 import com.antarctica.explorer.api.repository.GalleryRepository;
-import com.antarctica.explorer.api.response.DeparturesResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -18,16 +15,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExpeditionService {
+
   private final ExpeditionRepository expeditionRepository;
-  private final DepartureRepository departureRepository;
   private final GalleryRepository galleryRepository;
 
-  public ExpeditionService(
-      ExpeditionRepository repository,
-      DepartureRepository departureRepository,
-      GalleryRepository galleryRepository) {
+  public ExpeditionService(ExpeditionRepository repository, GalleryRepository galleryRepository) {
     this.expeditionRepository = repository;
-    this.departureRepository = departureRepository;
     this.galleryRepository = galleryRepository;
   }
 
@@ -84,29 +77,6 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public void saveDeparture(
-      Expedition expedition,
-      Vessel vessel,
-      Itinerary itinerary,
-      String name,
-      LocalDate startDate,
-      LocalDate endDate,
-      BigDecimal startingPrice,
-      BigDecimal discountedPrice,
-      String website) {
-    departureRepository.save(
-        new Departure(
-            expedition,
-            vessel,
-            itinerary,
-            name,
-            startDate,
-            endDate,
-            startingPrice,
-            discountedPrice,
-            website));
-  }
-
   public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
     Optional<Gallery> existingGallery =
         galleryRepository.findByExpeditionAndPhotoUrl(expedition, photoUrl);
@@ -143,15 +113,5 @@ public class ExpeditionService {
 
   public ExpeditionsResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(), page, size, sortField, dir);
-  }
-
-  public DeparturesResponse findExpeditionDepartures(
-      int expeditionId, int page, int size, String sortField, Sort.Direction dir) {
-
-    Page<Map<String, Object>> result =
-        departureRepository.findExpeditionDepartures(
-            PageRequest.of(page, size, Sort.by(dir, sortField)), expeditionId);
-
-    return new DeparturesResponse(result);
   }
 }

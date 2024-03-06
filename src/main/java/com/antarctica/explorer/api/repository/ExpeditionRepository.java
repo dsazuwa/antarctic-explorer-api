@@ -8,14 +8,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExpeditionRepository
-    extends JpaRepository<Expedition, Long>, JpaSpecificationExecutor<Expedition> {
+public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
   @Query(
       value =
           """
@@ -58,7 +56,6 @@ public interface ExpeditionRepository
                 i.itinerary_id,
                 d.departure_id,
                 d.vessel_id,
-                d.starting_price,
                 jsonb_build_object(
                   'start_date', d.start_date,
                   'end_date', d.end_date

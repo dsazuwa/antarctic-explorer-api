@@ -3,10 +3,7 @@ package com.antarctica.explorer.api.scraper;
 import com.antarctica.explorer.api.model.Expedition;
 import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
-import com.antarctica.explorer.api.service.CruiseLineService;
-import com.antarctica.explorer.api.service.ExpeditionService;
-import com.antarctica.explorer.api.service.ItineraryService;
-import com.antarctica.explorer.api.service.VesselService;
+import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,12 +33,14 @@ public class LindbladScraper extends Scraper {
       CruiseLineService cruiseLineService,
       VesselService vesselService,
       ExpeditionService expeditionService,
-      ItineraryService itineraryService) {
+      ItineraryService itineraryService,
+      DepartureService departureService) {
     super(
         cruiseLineService,
         vesselService,
         expeditionService,
         itineraryService,
+        departureService,
         "Lindblad Expeditions");
   }
 
@@ -233,10 +232,8 @@ public class LindbladScraper extends Scraper {
 
   private void scrapeGallery(Document doc, Expedition expedition) {
     String photoSelector = "div.sc-404189a-6.hsqTTv > img";
-    String gallerySelector = "div.sc-d73cd667-2.dEbNDy > img";
 
     for (Element photo : doc.select(photoSelector)) scrapeGalleryImg(expedition, photo);
-    for (Element photo : doc.select(gallerySelector)) scrapeGalleryImg(expedition, photo);
   }
 
   private void scrapeGalleryImg(Expedition expedition, Element photo) {
@@ -319,7 +316,7 @@ public class LindbladScraper extends Scraper {
             : itineraryService.getItinerary(expedition, itineraryName);
     if (itinerary.isEmpty()) return;
 
-    expeditionService.saveDeparture(
+    departureService.saveDeparture(
         expedition,
         vessel,
         itinerary.get(0),

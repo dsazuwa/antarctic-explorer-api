@@ -3,10 +3,8 @@ package com.antarctica.explorer.api.scraper;
 import com.antarctica.explorer.api.model.Expedition;
 import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
-import com.antarctica.explorer.api.service.CruiseLineService;
-import com.antarctica.explorer.api.service.ExpeditionService;
-import com.antarctica.explorer.api.service.ItineraryService;
-import com.antarctica.explorer.api.service.VesselService;
+import com.antarctica.explorer.api.service.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,12 +26,14 @@ public class AuroraScraper extends Scraper {
       CruiseLineService cruiseLineService,
       VesselService vesselService,
       ExpeditionService expeditionService,
-      ItineraryService itineraryService) {
+      ItineraryService itineraryService,
+      DepartureService departureService) {
     super(
         cruiseLineService,
         vesselService,
         expeditionService,
         itineraryService,
+        departureService,
         "Aurora Expeditions");
   }
 
@@ -165,7 +165,7 @@ public class AuroraScraper extends Scraper {
       BigDecimal[] prices =
           extractPrices(departureDoc, startingPriceSelector, discountedPriceSelector);
 
-      expeditionService.saveDeparture(
+      departureService.saveDeparture(
           expedition,
           vessel,
           getItinerary(departureDoc, expedition),

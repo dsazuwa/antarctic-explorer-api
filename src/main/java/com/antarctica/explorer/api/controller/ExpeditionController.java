@@ -2,6 +2,7 @@ package com.antarctica.explorer.api.controller;
 
 import com.antarctica.explorer.api.response.ErrorResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
+import com.antarctica.explorer.api.service.DepartureService;
 import com.antarctica.explorer.api.service.ExpeditionFilter;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import java.time.LocalDate;
@@ -16,11 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/expeditions")
 public class ExpeditionController {
-  private final ExpeditionService service;
+  private final ExpeditionService expeditionService;
+  private final DepartureService departureService;
 
   @Autowired
-  public ExpeditionController(ExpeditionService service) {
-    this.service = service;
+  public ExpeditionController(
+      ExpeditionService expeditionService, DepartureService departureService) {
+    this.expeditionService = expeditionService;
+    this.departureService = departureService;
   }
 
   //  TODO: resolve startDate and endDate not binding when using @ModelAttribute ExpeditionFilter
@@ -55,7 +59,7 @@ public class ExpeditionController {
               new ExpeditionFilter.RangedFilter(capacityMin, capacityMax));
 
       return ResponseEntity.ok(
-          service.findAll(
+          expeditionService.findAll(
               filter,
               Math.max(0, page),
               Math.max(0, size),
@@ -74,7 +78,7 @@ public class ExpeditionController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getExpedition(@PathVariable String id) {
     try {
-      ExpeditionResponse expedition = service.getById(Integer.parseInt(id));
+      ExpeditionResponse expedition = expeditionService.getById(Integer.parseInt(id));
 
       return (expedition != null)
           ? ResponseEntity.ok(expedition)
@@ -99,7 +103,7 @@ public class ExpeditionController {
 
     try {
       return ResponseEntity.ok(
-          service.findExpeditionDepartures(
+          departureService.findExpeditionDepartures(
               Integer.parseInt(id),
               Math.max(0, page),
               Math.max(0, size),
