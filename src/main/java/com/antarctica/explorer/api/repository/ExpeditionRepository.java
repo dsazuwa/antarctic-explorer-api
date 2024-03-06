@@ -50,7 +50,7 @@ public interface ExpeditionRepository
                   'content', d.content
                 )) AS schedule
               FROM antarctica.itineraries i
-              JOIN antarctica.itinerary_details d On d.itinerary_id = i.itinerary_id
+              JOIN antarctica.itinerary_details d ON d.itinerary_id = i.itinerary_id
               GROUP BY i.itinerary_id
             ),
             departures AS (
@@ -60,37 +60,52 @@ public interface ExpeditionRepository
                 d.vessel_id,
                 d.starting_price,
                 jsonb_build_object(
-                  'itinerary_id', i.itinerary_id,
-                  'itinerary_name', COALESCE(i.name, 'Itinerary #' || i.itinerary_id),
-                  'id', d.departure_id,
-                  'name', d.name,
-                  'start_port', i.departing_from,
-                  'end_port', i.arriving_at,
                   'start_date', d.start_date,
-                  'end_date', d.end_date,
-                  'starting_price', d.starting_price,
-                  'vessel_id', v.vessel_id
+                  'end_date', d.end_date
                 ) AS departures
               FROM itineraries i
               LEFT JOIN antarctica.departures d ON d.itinerary_id = i.itinerary_id
               LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
               WHERE d.starting_price IS NOT NULL
+            ),
+            expeditions AS (
+              SELECT
+                c.cruise_line_id,
+                jsonb_build_object(
+                  'id', e.expedition_id,
+                  'logo', c.logo,
+                  'cruise_line', c.name,
+                  'name', e.name,
+                  'duration', e.duration,
+                  'nearest_date', min(d.start_date),
+                  'starting_price', e.starting_price,
+                  'photo_url', e.photo_url
+                ) AS expedition
+              FROM antarctica.expeditions e
+              JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
+              LEFT JOIN (SELECT * FROM antarctica.departures d) d ON e.expedition_id = d.expedition_id
+              WHERE c.cruise_line_id =
+                (
+                  SELECT a.cruise_line_id
+                  FROM antarctica.expeditions a
+                  WHERE a.expedition_id = :p_expedition_id
+                )
+              GROUP BY e.expedition_id, c.cruise_line_id
+              LIMIT 3
             )
             SELECT
               e.expedition_id AS id,
               e.name,
-              c.name AS cruise_line,
-              jsonb_build_object(
-                'id', c.cruise_line_id,
-                'name', c.name,
-                'logo', c.logo
-              ) AS cruise_line,
               e.description,
               e.highlights,
               e.duration,
               e.starting_price,
               e.website,
               e.photo_url,
+              jsonb_build_object(
+                'name', c.name,
+                'logo', c.logo
+              ) AS cruise_line,
               json_agg(DISTINCT jsonb_build_object(
                 'id', g.photo_id,
                 'url', g.photo_url,
@@ -106,13 +121,15 @@ public interface ExpeditionRepository
                 'map_url', i.map_url,
                 'schedule', i.schedule
               )) AS itineraries,
-              jsonb_agg(DISTINCT d.departures) as departures
+              jsonb_agg(DISTINCT d.departures) AS departures,
+              jsonb_agg(DISTINCT o.expedition) AS other_expeditions
             FROM antarctica.expeditions e
             JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
+            LEFT JOIN antarctica.gallery g ON g.expedition_id = e.expedition_id
+            LEFT JOIN expeditions o ON o.cruise_line_id = e.cruise_line_id
             LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
             LEFT JOIN departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
-            LEFT JOIN antarctica.gallery g ON g.expedition_id = e.expedition_id
             WHERE e.expedition_id = :p_expedition_id
             GROUP BY e.expedition_id, c.cruise_line_id
           """,
@@ -126,15 +143,12 @@ public interface ExpeditionRepository
               SELECT
                 e.expedition_id as id,
                 c.name as cruise_line,
+                c.logo as logo,
                 min(v.capacity) as capacity,
                 e.name,
-                e.description,
-                e.departing_from,
-                e.arriving_at,
                 e.duration,
                 min(d.start_date) as nearest_date,
                 e.starting_price,
-                e.website,
                 e.photo_url
               FROM antarctica.expeditions e
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
@@ -157,7 +171,7 @@ public interface ExpeditionRepository
                     ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
                   END
                 )
-              GROUP BY e.expedition_id, c.name
+              GROUP BY e.expedition_id, c.name, c.logo
             )
             SELECT * FROM combined_table e
           """,
@@ -185,7 +199,7 @@ public interface ExpeditionRepository
                 ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
               END
             )
-          GROUP BY e.expedition_id, c.name
+          GROUP BY e.expedition_id, c.name, c.logo
           """,
       nativeQuery = true,
       queryRewriter = ExpeditionQueryWriter.class)

@@ -16,7 +16,7 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
               SELECT
                 d.departure_id AS id,
                 d.name,
-                i.name AS itinerary,
+                COALESCE(i.name, 'Itinerary ' || i.itinerary_id) AS itinerary,
                 v.name AS vessel,
                 i.departing_from,
                 i.arriving_at,

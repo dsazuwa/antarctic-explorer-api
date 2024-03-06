@@ -23,7 +23,8 @@ public record ExpeditionResponse(
     Gallery[] gallery,
     Map<Integer, Vessel> vessels,
     List<Itinerary> itineraries,
-    List<Departure> departures) {
+    List<Departure> departures,
+    Expedition[] otherExpeditions) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
         (Integer) resultMap.get("id"),
@@ -38,7 +39,8 @@ public record ExpeditionResponse(
         mapToGallery((String) resultMap.get("gallery")),
         mapVessel((String) resultMap.get("vessels")),
         mapItinerary((String) resultMap.get("itineraries")),
-        mapDepartures((String) resultMap.get("departures")));
+        mapDepartures((String) resultMap.get("departures")),
+        mapOtherExpeditions((String) resultMap.get("other_expeditions")));
   }
 
   private static CruiseLine mapCruiseLine(String json) {
@@ -146,22 +148,37 @@ public record ExpeditionResponse(
 
     for (JsonElement element : arr) {
       if (element.isJsonNull()) continue;
-
       JsonObject obj = element.getAsJsonObject();
-      JsonElement name = obj.get("name");
-      JsonElement price = obj.get("starting_price");
 
       departures.add(
-          new Departure(
-              obj.get("itinerary_id").getAsInt(),
-              obj.get("vessel_id").getAsInt(),
-              name.isJsonNull() ? null : name.getAsString(),
-              obj.get("start_date").getAsString(),
-              obj.get("end_date").getAsString(),
-              price.isJsonNull() ? null : price.getAsBigDecimal()));
+          new Departure(obj.get("start_date").getAsString(), obj.get("end_date").getAsString()));
     }
 
     return departures;
+  }
+
+  private static Expedition[] mapOtherExpeditions(String json) {
+    if (json.isEmpty()) return new Expedition[0];
+
+    JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+    Expedition[] expeditions = new Expedition[arr.size()];
+
+    for (int i = arr.size() - 1; i >= 0; i--) {
+      JsonObject obj = arr.get(i).getAsJsonObject();
+
+      expeditions[i] =
+          new Expedition(
+              obj.get("id").getAsInt(),
+              obj.get("logo").getAsString(),
+              obj.get("cruise_line").getAsString(),
+              obj.get("name").getAsString(),
+              obj.get("duration").getAsString(),
+              obj.get("nearest_date").getAsString(),
+              obj.get("starting_price").getAsBigDecimal(),
+              obj.get("photo_url").getAsString());
+    }
+
+    return expeditions;
   }
 
   private static String[] getArray(JsonObject obj, String memberName) {
@@ -199,11 +216,15 @@ public record ExpeditionResponse(
       String photoUrl,
       String website) {}
 
-  public record Departure(
-      int itineraryId,
-      int vesselId,
+  public record Departure(String startDate, String endDate) {}
+
+  public record Expedition(
+      int id,
+      String logo,
+      String cruiseLine,
       String name,
-      String startDate,
-      String endDate,
-      BigDecimal startingPrice) {}
+      String duration,
+      String nearestDate,
+      BigDecimal startingPrice,
+      String photoUrl) {}
 }
