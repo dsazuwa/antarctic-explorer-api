@@ -24,6 +24,7 @@ public record ExpeditionResponse(
     Map<Integer, Vessel> vessels,
     List<Itinerary> itineraries,
     List<Departure> departures,
+    Extension[] extensions,
     Expedition[] otherExpeditions) {
   public ExpeditionResponse(Map<String, Object> resultMap) {
     this(
@@ -40,6 +41,7 @@ public record ExpeditionResponse(
         mapVessel((String) resultMap.get("vessels")),
         mapItinerary((String) resultMap.get("itineraries")),
         mapDepartures((String) resultMap.get("departures")),
+        mapExtensions((String) resultMap.get("extensions")),
         mapOtherExpeditions((String) resultMap.get("other_expeditions")));
   }
 
@@ -157,6 +159,31 @@ public record ExpeditionResponse(
     return departures;
   }
 
+  private static Extension[] mapExtensions(String json) {
+    if (json.isEmpty()) return new Extension[0];
+
+    JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+    Extension[] extensions = new Extension[arr.size()];
+
+    for (int i = arr.size() - 1; i >= 0; i--) {
+      JsonObject obj = arr.get(i).getAsJsonObject();
+
+      JsonElement startingPrice = obj.get("starting_price");
+      JsonElement duration = obj.get("duration");
+      JsonElement website = obj.get("website");
+
+      extensions[i] =
+          new Extension(
+              obj.get("name").getAsString(),
+              startingPrice.isJsonNull() ? null : startingPrice.getAsBigDecimal(),
+              duration.isJsonNull() ? null : duration.getAsInt(),
+              website.isJsonNull() ? null : website.getAsString(),
+              obj.get("photo_url").getAsString());
+    }
+
+    return extensions;
+  }
+
   private static Expedition[] mapOtherExpeditions(String json) {
     if (json.isEmpty()) return new Expedition[0];
 
@@ -217,6 +244,9 @@ public record ExpeditionResponse(
       String website) {}
 
   public record Departure(String startDate, String endDate) {}
+
+  public record Extension(
+      String name, BigDecimal startingPrice, Integer duration, String website, String photoUrl) {}
 
   public record Expedition(
       int id,

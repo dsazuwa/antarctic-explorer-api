@@ -65,6 +65,20 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
               WHERE d.starting_price IS NOT NULL
             ),
+            extensions AS (
+              SELECT
+                exp.expedition_id,
+                jsonb_build_object(
+                  'name', ext.name,
+                  'duration', ext.duration,
+                  'starting_price', ext.starting_price,
+                  'photo_url', ext.photo_url,
+                  'website', ext.website
+                ) AS extension
+              FROM antarctica.expeditions_extensions ee
+              JOIN antarctica.extensions ext ON ext.extension_id = ee.extension_id
+              JOIN antarctica.expeditions exp ON exp.expedition_id = ee.expedition_id
+            ),
             expeditions AS (
               SELECT
                 c.cruise_line_id,
@@ -119,11 +133,13 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                 'schedule', i.schedule
               )) AS itineraries,
               jsonb_agg(DISTINCT d.departures) AS departures,
+              jsonb_agg(DISTINCT ext.extension) AS extensions,
               jsonb_agg(DISTINCT o.expedition) AS other_expeditions
             FROM antarctica.expeditions e
             JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
             LEFT JOIN antarctica.gallery g ON g.expedition_id = e.expedition_id
             LEFT JOIN expeditions o ON o.cruise_line_id = e.cruise_line_id
+            LEFT JOIN extensions ext ON ext.expedition_id = e.expedition_id
             LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
             LEFT JOIN departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
