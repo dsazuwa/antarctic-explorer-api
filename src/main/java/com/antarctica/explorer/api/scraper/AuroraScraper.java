@@ -4,7 +4,6 @@ import com.antarctica.explorer.api.model.Expedition;
 import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,13 +26,15 @@ public class AuroraScraper extends Scraper {
       VesselService vesselService,
       ExpeditionService expeditionService,
       ItineraryService itineraryService,
-      DepartureService departureService) {
+      DepartureService departureService,
+      ExtensionService extensionService) {
     super(
         cruiseLineService,
         vesselService,
         expeditionService,
         itineraryService,
         departureService,
+        extensionService,
         "Aurora Expeditions");
   }
 

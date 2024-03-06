@@ -1,3 +1,6 @@
+ALTER TABLE IF EXISTS antarctica.expeditions_extensions DROP CONSTRAINT IF EXISTS fk_extension_id;
+ALTER TABLE IF EXISTS antarctica.expeditions_extensions DROP CONSTRAINT IF EXISTS fk_expedition_id;
+ALTER TABLE IF EXISTS antarctica.extensions DROP CONSTRAINT IF EXISTS fk_cruise_line_id;
 ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_itinerary_id;
 ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_vessel_id;
 ALTER TABLE IF EXISTS antarctica.departures DROP CONSTRAINT IF EXISTS fk_expedition_id;
@@ -6,6 +9,8 @@ ALTER TABLE IF EXISTS antarctica.vessels DROP CONSTRAINT IF EXISTS fk_cruise_lin
 ALTER TABLE IF EXISTS antarctica.gallery DROP CONSTRAINT IF EXISTS fk_expedition;
 ALTER TABLE IF EXISTS antarctica.expeditions DROP CONSTRAINT IF EXISTS fk_cruise_line_id;
 
+DROP TABLE IF EXISTS antarctica.expeditions_extensions;
+DROP TABLE IF EXISTS antarctica.extensions;
 DROP TABLE IF EXISTS antarctica.departures;
 DROP TABLE IF EXISTS antarctica.itinerary_details;
 DROP TABLE IF EXISTS antarctica.itineraries;
@@ -103,6 +108,26 @@ CREATE TABLE antarctica.departures (
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT fk_vessel_id FOREIGN KEY (vessel_id) REFERENCES antarctica.vessels (vessel_id) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT fk_itinerary_id FOREIGN KEY (itinerary_id) REFERENCES antarctica.itineraries (itinerary_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE TABLE antarctica.extensions (
+  extension_id SERIAL,
+  cruise_line_id INTEGER NOT NULL,
+  name VARCHAR NOT NULL,
+  description TEXT[],
+  starting_price DECIMAL(10, 4),
+  duration INTEGER,
+  photo_url TEXT NOT NULL,
+  website TEXT,
+  PRIMARY KEY (extension_id),
+  CONSTRAINT fk_cruise_line_id FOREIGN KEY (cruise_line_id) REFERENCES antarctica.cruise_lines (cruise_line_id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE TABLE antarctica.expeditions_extensions (
+  expedition_id INTEGER NOT NULL,
+  extension_id INTEGER NOT NULL,
+  CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT fk_extension_id FOREIGN KEY (extension_id) REFERENCES antarctica.extensions (extension_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DO $$

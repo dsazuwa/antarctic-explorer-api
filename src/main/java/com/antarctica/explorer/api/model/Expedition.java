@@ -3,6 +3,7 @@ package com.antarctica.explorer.api.model;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Set;
 import org.hibernate.annotations.*;
 
 @Entity
@@ -44,6 +45,13 @@ public class Expedition {
 
   @Column(name = "photo_url", columnDefinition = "TEXT")
   private String photoUrl;
+
+  @ManyToMany
+  @JoinTable(
+      name = "expeditions_extensions",
+      joinColumns = @JoinColumn(name = "expedition_id"),
+      inverseJoinColumns = @JoinColumn(name = "extension_id"))
+  private Set<Extension> extensions;
 
   protected Expedition() {}
 
@@ -112,5 +120,9 @@ public class Expedition {
 
   public String getPhotoUrl() {
     return photoUrl;
+  }
+
+  public Set<Extension> getExtensions() {
+    return extensions;
   }
 }

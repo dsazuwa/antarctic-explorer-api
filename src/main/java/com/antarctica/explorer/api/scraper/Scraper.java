@@ -22,6 +22,7 @@ public abstract class Scraper {
   protected ExpeditionService expeditionService;
   protected ItineraryService itineraryService;
   protected DepartureService departureService;
+  protected ExtensionService extensionService;
 
   protected WebDriverWait wait;
   private WebDriver driver;
@@ -32,6 +33,7 @@ public abstract class Scraper {
       ExpeditionService expeditionService,
       ItineraryService itineraryService,
       DepartureService departureService,
+      ExtensionService extensionService,
       String cruiseLineName) {
     this.cruiseLine = cruiseLineService.getByName(cruiseLineName);
 
@@ -39,6 +41,7 @@ public abstract class Scraper {
     this.expeditionService = expeditionService;
     this.itineraryService = itineraryService;
     this.departureService = departureService;
+    this.extensionService = extensionService;
 
     initializeDriver();
   }

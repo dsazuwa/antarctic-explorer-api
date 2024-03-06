@@ -16,6 +16,7 @@ public class ScraperService {
   private final ExpeditionService expeditionService;
   private final ItineraryService itineraryService;
   private final DepartureService departureService;
+  private final ExtensionService extensionService;
 
   @Autowired
   public ScraperService(
@@ -23,12 +24,14 @@ public class ScraperService {
       VesselService vesselService,
       ExpeditionService expeditionService,
       ItineraryService itineraryService,
-      DepartureService departureService) {
+      DepartureService departureService,
+      ExtensionService extensionService) {
     this.cruiseLineService = cruiseLineService;
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
     this.itineraryService = itineraryService;
     this.departureService = departureService;
+    this.extensionService = extensionService;
   }
 
   @Scheduled(cron = "0 0 0 */7 * ?")
@@ -41,19 +44,22 @@ public class ScraperService {
                     vesselService,
                     expeditionService,
                     itineraryService,
-                    departureService),
+                    departureService,
+                    extensionService),
                 new HurtigrutenScraper(
                     cruiseLineService,
                     vesselService,
                     expeditionService,
                     itineraryService,
-                    departureService),
+                    departureService,
+                    extensionService),
                 new LindbladScraper(
                     cruiseLineService,
                     vesselService,
                     expeditionService,
                     itineraryService,
-                    departureService)
+                    departureService,
+                    extensionService)
                 //  new PonantScraper(cruiseLineService, expeditionService),
                 //  new QuarkScraper(cruiseLineService, expeditionService),
                 //  new VikingScraper(cruiseLineService, expeditionService)
@@ -67,6 +73,7 @@ public class ScraperService {
           });
     } catch (RuntimeException e) {
       System.out.println(e.getMessage());
+      e.printStackTrace();
     }
   }
 }

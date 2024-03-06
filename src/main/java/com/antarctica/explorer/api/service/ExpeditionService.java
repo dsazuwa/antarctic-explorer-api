@@ -77,13 +77,6 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
-    Optional<Gallery> existingGallery =
-        galleryRepository.findByExpeditionAndPhotoUrl(expedition, photoUrl);
-
-    if (existingGallery.isEmpty()) galleryRepository.save(new Gallery(expedition, photoUrl, alt));
-  }
-
   public ExpeditionResponse getById(int id) {
     Map<String, Object> obj = expeditionRepository.getById(id);
     return (!obj.isEmpty()) ? new ExpeditionResponse(obj) : null;
@@ -113,5 +106,12 @@ public class ExpeditionService {
 
   public ExpeditionsResponse findAll(int page, int size, String sortField, Sort.Direction dir) {
     return findAll(new ExpeditionFilter(), page, size, sortField, dir);
+  }
+
+  public void saveGalleryImg(Expedition expedition, String photoUrl, String alt) {
+    Optional<Gallery> existingGallery =
+        galleryRepository.findByExpeditionAndPhotoUrl(expedition, photoUrl);
+
+    if (existingGallery.isEmpty()) galleryRepository.save(new Gallery(expedition, photoUrl, alt));
   }
 }

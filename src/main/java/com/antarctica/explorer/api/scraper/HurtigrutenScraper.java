@@ -36,13 +36,15 @@ public class HurtigrutenScraper extends Scraper {
       VesselService vesselService,
       ExpeditionService expeditionService,
       ItineraryService itineraryService,
-      DepartureService departureService) {
+      DepartureService departureService,
+      ExtensionService extensionService) {
     super(
         cruiseLineService,
         vesselService,
         expeditionService,
         itineraryService,
         departureService,
+        extensionService,
         "Hurtigruten Expeditions");
   }
 
