@@ -1,6 +1,7 @@
 package com.antarctica.explorer.api.scraper;
 
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.model.Extension;
 import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.*;
@@ -9,10 +10,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AuroraScraper extends Scraper {
@@ -86,6 +90,7 @@ public class AuroraScraper extends Scraper {
 
     Expedition expedition = processExpedition(doc, element, name, website, duration);
     scrapeGallery(doc, expedition);
+    scrapeExtensions(expedition);
     scrapeDeparture(doc, expedition);
   }
 
@@ -129,6 +134,37 @@ public class AuroraScraper extends Scraper {
 
       String alt = photo.select("p").text();
       expeditionService.saveGalleryImg(expedition, url, alt.isEmpty() ? null : alt);
+    }
+  }
+
+  private void scrapeExtensions(Expedition expedition) {
+    String extensionSelector = "div.col-lg-4.py-3 > div.block-offer.block-offer--condense";
+    String nameSelector = "h4";
+    String priceSelector = "div.col > p.price";
+    String durationSelector = "div.col > p.days";
+    String imgSelector = "a > div";
+    String linkSelector = "a";
+
+    WebElement toursSection = findElement(By.id("content-tours"));
+    List<WebElement> tours = findElements(toursSection, extensionSelector);
+
+    for (WebElement webElement : tours) {
+      Element element = Jsoup.parse(webElement.getAttribute("innerHTML"));
+      String name = element.select(nameSelector).text();
+      BigDecimal startingPrice = extractPrice(element, priceSelector);
+
+      String[] parts = element.select(durationSelector).text().split(" / ");
+      String durationString = parts[0].replaceAll("[^0-9]", "");
+      int duration = Integer.parseInt(durationString);
+
+      String photoUrl = extractPhotoUrl(element, imgSelector, "style", "url('", "')");
+      String website = element.select(linkSelector).attr("href");
+
+      Extension extension =
+          extensionService.saveExtension(
+              cruiseLine, name, startingPrice, duration, photoUrl, website);
+
+      extensionService.saveExpeditionExtension(extension, expedition);
     }
   }
 
