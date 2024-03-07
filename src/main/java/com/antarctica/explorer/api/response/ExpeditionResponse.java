@@ -163,6 +163,8 @@ public record ExpeditionResponse(
     if (json.isEmpty()) return new Extension[0];
 
     JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+    if (arr.size() == 1 && arr.get(0).isJsonNull()) return new Extension[0];
+
     Extension[] extensions = new Extension[arr.size()];
 
     for (int i = arr.size() - 1; i >= 0; i--) {

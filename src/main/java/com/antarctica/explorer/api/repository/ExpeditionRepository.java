@@ -36,7 +36,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               SELECT
                 i.itinerary_id,
                 i.expedition_id,
-                COALESCE(i.name, 'Itinerary #' || i.itinerary_id) AS name,
+                COALESCE(i.name, 'Itinerary ' || i.itinerary_id) AS name,
                 i.departing_from,
                 i.arriving_at,
                 i.duration,
@@ -101,6 +101,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                   FROM antarctica.expeditions a
                   WHERE a.expedition_id = :p_expedition_id
                 )
+                AND e.expedition_id <> :p_expedition_id
               GROUP BY e.expedition_id, c.cruise_line_id
               LIMIT 3
             )
