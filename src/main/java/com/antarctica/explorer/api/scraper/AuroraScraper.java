@@ -237,7 +237,7 @@ public class AuroraScraper extends Scraper {
     Elements descriptionElements = doc.select(descriptionSelector);
     String[] description =
         IntStream.range(0, descriptionElements.size())
-            .filter(i -> i < 4)
+            .filter(i -> i < 3)
             .mapToObj(i -> descriptionElements.get(i).text())
             .filter(text -> !text.isEmpty())
             .toArray((String[]::new));
