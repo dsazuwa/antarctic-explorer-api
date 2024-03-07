@@ -16,6 +16,10 @@ public class ExtensionService {
     this.extensionRepository = extensionRepository;
   }
 
+  public Optional<Extension> getExtension(CruiseLine cruiseLine, String name) {
+    return extensionRepository.findByCruiseLineAndName(cruiseLine, name);
+  }
+
   public Extension saveExtension(
       CruiseLine cruiseLine,
       String name,
@@ -33,6 +37,27 @@ public class ExtensionService {
   }
 
   public void saveExpeditionExtension(Extension extension, Expedition expedition) {
+    extension.addExpedition(expedition);
+    extensionRepository.save(extension);
+  }
+
+  public void saveExtension(
+      CruiseLine cruiseLine,
+      Expedition expedition,
+      String name,
+      BigDecimal startingPrice,
+      int duration,
+      String photoUrl,
+      String website) {
+    Optional<Extension> existingExtension =
+        extensionRepository.findByCruiseLineAndName(cruiseLine, name);
+
+    Extension extension =
+        existingExtension.orElseGet(
+            () ->
+                extensionRepository.save(
+                    new Extension(cruiseLine, name, startingPrice, duration, photoUrl, website)));
+
     extension.addExpedition(expedition);
     extensionRepository.save(extension);
   }

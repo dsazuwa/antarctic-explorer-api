@@ -194,6 +194,8 @@ public record ExpeditionResponse(
 
     for (int i = arr.size() - 1; i >= 0; i--) {
       JsonObject obj = arr.get(i).getAsJsonObject();
+      JsonElement nearestDate = obj.get("nearest_date");
+      JsonElement price = obj.get("starting_price");
 
       expeditions[i] =
           new Expedition(
@@ -202,8 +204,8 @@ public record ExpeditionResponse(
               obj.get("cruise_line").getAsString(),
               obj.get("name").getAsString(),
               obj.get("duration").getAsString(),
-              obj.get("nearest_date").getAsString(),
-              obj.get("starting_price").getAsBigDecimal(),
+              nearestDate.isJsonNull() ? null : nearestDate.getAsString(),
+              price.isJsonNull() ? null : price.getAsBigDecimal(),
               obj.get("photo_url").getAsString());
     }
 

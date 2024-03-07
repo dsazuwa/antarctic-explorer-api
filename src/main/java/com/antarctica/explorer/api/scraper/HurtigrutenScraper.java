@@ -1,16 +1,15 @@
 package com.antarctica.explorer.api.scraper;
 
 import com.antarctica.explorer.api.model.Expedition;
+import com.antarctica.explorer.api.model.Extension;
 import com.antarctica.explorer.api.model.Itinerary;
 import com.antarctica.explorer.api.model.Vessel;
 import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -71,6 +70,8 @@ public class HurtigrutenScraper extends Scraper {
         Itinerary itinerary = saveItinerary(expedition);
         saveItineraryDetails(itinerary);
         scrapeDeparture(expedition, itinerary);
+
+        scrapeExtensions(expedition);
       }
     } finally {
       quitDriver();
@@ -315,6 +316,48 @@ public class HurtigrutenScraper extends Scraper {
         expedition.getWebsite());
   }
 
+  private void scrapeExtensions(Expedition expedition) {
+    String sectionSelector = "div[name='excursions']";
+    String btnSelector = "a.aurora-button.aurora-button-color-dark";
+    String extensionSelector = "a.flex.font-normal";
+    String nameSelector = "h3";
+    String imgSelector = "img";
+    String priceSelector = "p.text-white.h3-text";
+    String infoSelector = "div.infoblock > div.aurora-list-item.dd";
+
+    WebElement a = findElement(sectionSelector);
+    List<WebElement> btns = findElements(a, btnSelector);
+    if (btns.isEmpty()) return;
+
+    int lastIndex = btns.size() == 1 ? 0 : btns.size() - 1;
+    navigateTo(btns.get(lastIndex).getAttribute("href"), extensionSelector);
+
+    lazyLoadImages(extensionSelector, imgSelector);
+    List<Element> elements =
+        findElements(extensionSelector).stream()
+            .map((x -> Jsoup.parse(x.getAttribute("outerHTML"))))
+            .collect(Collectors.toList());
+
+    for (Element element : elements) {
+      String name = element.select(nameSelector).text();
+      String website = cruiseLine.getWebsite() + element.select("a").attr("href");
+      String photoUrl = element.select(imgSelector).attr("src");
+
+      Optional<Extension> extension = extensionService.getExtension(cruiseLine, name);
+      if (extension.isPresent()) {
+        extensionService.saveExpeditionExtension(extension.get(), expedition);
+        continue;
+      }
+
+      navigateTo(website);
+      BigDecimal startingPrice = extractPrice(findElement(priceSelector).getText());
+      int duration = Integer.parseInt(findElements(infoSelector).get(0).getText());
+
+      extensionService.saveExtension(
+          cruiseLine, expedition, name, startingPrice, duration, photoUrl, website);
+    }
+  }
+
   private void lazyLoadImages(String selector, String imageSelector) {
     for (WebElement item : findElements(selector)) lazyLoadImage(findElement(item, imageSelector));
   }
@@ -324,7 +367,7 @@ public class HurtigrutenScraper extends Scraper {
     wait.until(
         (WebDriver wd) -> {
           String currentSrc = element.getAttribute("src");
-          return !currentSrc.contains("data:image/gif;base64");
+          return currentSrc != null && !currentSrc.contains("data:image/gif;base64");
         });
   }
 }
