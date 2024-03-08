@@ -176,7 +176,8 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
               WHERE
                 (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
-                (v.capacity BETWEEN :min_capacity AND :max_capacity) AND
+                (:min_capacity IS NULL OR v.capacity >= :min_capacity) AND
+                (:max_capacity IS NULL OR v.capacity <= :max_capacity) AND
                 (
                   CASE
                     WHEN POSITION('-' IN e.duration) > 0 THEN
@@ -204,7 +205,8 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
           LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
           WHERE
             (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
-            (v.capacity BETWEEN :min_capacity AND :max_capacity) AND
+            (:min_capacity IS NULL OR v.capacity >= :min_capacity) AND
+            (:max_capacity IS NULL OR v.capacity <= :max_capacity) AND
             (
               CASE
                 WHEN POSITION('-' IN e.duration) > 0 THEN

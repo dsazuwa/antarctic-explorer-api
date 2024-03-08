@@ -37,8 +37,10 @@ public class ExpeditionController {
       @RequestParam(required = false) String startDate,
       @RequestParam(required = false) String endDate,
       @RequestParam(required = false) String[] cruiseLines,
-      @RequestParam(name = "duration.min", required = false) Integer durationMin,
-      @RequestParam(name = "duration.max", required = false) Integer durationMax,
+      @RequestParam(name = "duration.min", defaultValue = "" + Integer.MIN_VALUE)
+          Integer durationMin,
+      @RequestParam(name = "duration.max", defaultValue = "" + Integer.MAX_VALUE)
+          Integer durationMax,
       @RequestParam(name = "capacity.min", required = false) Integer capacityMin,
       @RequestParam(name = "capacity.max", required = false) Integer capacityMax) {
 

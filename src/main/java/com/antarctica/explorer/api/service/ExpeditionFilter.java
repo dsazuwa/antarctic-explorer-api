@@ -1,7 +1,5 @@
 package com.antarctica.explorer.api.service;
 
-import java.time.LocalDate;
-
 public record ExpeditionFilter(
     String startDate,
     String endDate,
@@ -18,20 +16,18 @@ public record ExpeditionFilter(
     this.startDate = startDate;
     this.endDate = endDate;
     this.cruiseLines = cruiseLines == null ? new String[0] : cruiseLines;
-    this.duration =
-        duration == null ? new RangedFilter(Integer.MIN_VALUE, Integer.MAX_VALUE) : duration;
-    this.capacity =
-        capacity == null ? new RangedFilter(Integer.MIN_VALUE, Integer.MAX_VALUE) : capacity;
+    this.duration = duration;
+    this.capacity = capacity;
   }
 
   public ExpeditionFilter() {
-    this(null, null, null, null, null);
+    this(
+        null,
+        null,
+        null,
+        new RangedFilter(Integer.MIN_VALUE, Integer.MAX_VALUE),
+        new RangedFilter(null, null));
   }
 
-  public record RangedFilter(Integer min, Integer max) {
-    public RangedFilter(Integer min, Integer max) {
-      this.min = min == null ? Integer.MIN_VALUE : min;
-      this.max = max == null ? Integer.MAX_VALUE : max;
-    }
-  }
+  public record RangedFilter(Integer min, Integer max) {}
 }
