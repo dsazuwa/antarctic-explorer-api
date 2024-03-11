@@ -67,9 +67,16 @@ public abstract class Scraper {
 
   protected void initializeDriver() {
     ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
+    options.addArguments(
+        "--headless",
+        "--disable-gpu",
+        "--disable-extensions",
+        "--disable-infobars",
+        "--disable-notifications",
+        "--no-sandbox",
+        "--disable-dev-shm-usage");
     this.driver = new ChromeDriver(options);
-    this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
   }
 
   public void quitDriver() {
