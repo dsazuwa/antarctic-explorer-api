@@ -1,48 +1,105 @@
 TABLE antarctica.cruise_lines {
   cruise_line_id SERIAL
-  name VARCHAR [NOT NULL]
-  website VARCHAR [NOT NULL]
+  name VARCHAR(50) [NOT NULL]
+  website VARCHAR(255) [NOT NULL]
+  fleet_website VARCHAR(255) [NOT NULL]
+  expedition_website VARCHAR(255) [NOT NULL]
+  logo TEXT [NOT NULL]
   PRIMARY KEY (cruise_line_id)
 }
 
 TABLE antarctica.expeditions {
-  expedition_id SERIAL
   cruise_line_id INTEGER [NOT NULL]
-  website VARCHAR [NOT NULL]
-  title VARCHAR [NOT NULL]
-  description TEXT [NOT NULL]
-  starting_price DECIMAL(10, 4) [NOT NULL]
-  num_days INTEGER [NOT NULL]
-  num_countries INTEGER [NOT NULL]
-  created_at TIMESTAMP [NOT NULL]
-  updated_at TIMESTAMP [NOT NULL]
+  expedition_id SERIAL
+  website TEXT
+  name VARCHAR(255) [NOT NULL]
+  description TEXT[]
+  highlights TEXT[]
+  departing_from VARCHAR(100)
+  arriving_at VARCHAR(100)
+  duration VARCHAR(50) [NOT NULL]
+  starting_price DECIMAL(10, 4)
+  photo_url TEXT
   PRIMARY KEY (expedition_id)
 }
-
 ref: antarctica.expeditions.cruise_line_id > antarctica.cruise_lines.cruise_line_id
 
-TABLE antarctica.cruises {
-  cruise_id SERIAL
+TABLE antarctica.gallery {
+  photo_id SERIAL
   expedition_id INTEGER [NOT NULL]
-  start_date DATE [NOT NULL]
-  end_date DATE [NOT NULL]
-  created_at TIMESTAMP [NOT NULL]
-  updated_at TIMESTAMP [NOT NULL]
+  photo_url TEXT [NOT NULL]
+  alt TEXT
+  PRIMARY KEY (photo_id)
+}
+ref: antarctica.gallery.expedition_id > antarctica.expeditions.expedition_id
+
+TABLE antarctica.vessels {
+  cruise_line_id INTEGER [NOT NULL]
+  vessel_id SERIAL
+  name VARCHAR [NOT NULL]
+  capacity INTEGER [NOT NULL]
+  cabins INTEGER
+  description TEXT[]
+  website TEXT
+  photo_url TEXT [NOT NULL]
   PRIMARY KEY (cruise_id)
 }
+ref: antarctica.vessels.cruise_line_id > antarctica.cruise_lines.cruise_line_id
 
-ref: antarctica.cruises.expedition_id > antarctica.expeditions.expedition_id
-
-TABLE antarctica.activities {
-  activity_id SERIAL
+TABLE antarctica.itineraries {
+  itinerary_id SERIAL
   expedition_id INTEGER [NOT NULL]
-  name VARCHAR [NOT NULL]
-  description TEXT
-  is_included BOOLEAN [NOT NULL]
-  price DECIMAL(10, 4)
-  created_at TIMESTAMP [NOT NULL]
-  updated_at TIMESTAMP [NOT NULL]
-  PRIMARY KEY (activity_id)
+  name VARCHAR(255)
+  departing_from VARCHAR(100)
+  arriving_at VARCHAR(100)
+  duration VARCHAR(10) [NOT NULL]
+  map_url TEXT
+  PRIMARY KEY (itinerary_id)
 }
+ref: antarctica.itineraries.expedition_id > antarctica.expeditions.expedition_id
 
-ref: antarctica.activities.expedition_id > antarctica.expeditions.expedition_id
+TABLE antarctica.itinerary_details {
+  detail_id SERIAL
+  itinerary_id INTEGER [NOT NULL]
+  day VARCHAR(10) [NOT NULL]
+  header VARCHAR(255) [NOT NULL]
+  content TEXT[] [NOT NULL]
+  PRIMARY KEY (detail_id)
+}
+ref: antarctica.itinerary_details.itinerary_id > antarctica.itineraries.itinerary_id
+
+TABLE antarctica.departures {
+  departure_id SERIAL
+  expedition_id INTEGER [NOT NULL]
+  vessel_id INTEGER [NOT NULL]
+  itinerary_id INTEGER [NOT NULL]
+  name VARCHAR
+  start_date DATE [NOT NULL]
+  end_date DATE [NOT NULL]
+  starting_price DECIMAL(10, 4)
+  discounted_price DECIMAL(10, 4)
+  website TEXT
+  PRIMARY KEY (departure_id)
+}
+ref: antarctica.departures.expedition_id > antarctica.expeditions.expedition_id
+ref: antarctica.departures.vessel_id > antarctica.vessels.vessel_id
+ref: antarctica.departures.itinerary_id > antarctica.itineraries.itinerary_id
+
+TABLE antarctica.extensions {
+  extension_id SERIAL
+  cruise_line_id INTEGER [NOT NULL]
+  name VARCHAR [NOT NULL]
+  starting_price DECIMAL(10, 4)
+  duration INTEGER
+  photo_url TEXT [NOT NULL]
+  website TEXT
+  PRIMARY KEY (extension_id)
+}
+ref: antarctica.extensions.cruise_line_id > antarctica.cruise_lines.cruise_line_id
+
+TABLE antarctica.expeditions_extensions {
+  extension_id INTEGER [NOT NULL]
+  expedition_id INTEGER [NOT NULL]
+}
+ref: antarctica.expeditions_extensions.expedition_id > antarctica.expeditions.expedition_id
+ref: antarctica.expeditions_extensions.extension_id > antarctica.extensions.extension_id

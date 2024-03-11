@@ -138,21 +138,21 @@ BEGIN
       'https://www.aurora-expeditions.com/destination',
       NULL,
       'https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition',
-      'https://media.glassdoor.com/sql/2542964/aurora-expeditions-squarelogo-1643802057576.png'
+      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007648/antarctica-explorer/AuroraLogo.png'
     ),
     (
       'Hurtigruten Expeditions',
       'https://www.hurtigruten.com',
       'https://www.hurtigruten.com/en-us/expeditions/ships/',
       'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises',
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwcBwli1vBRXe-03T9px8R-gI85IRI4GZPzZwChx2Y_sFPGUfzIxNO6m-wrFq8A7Sww4A&usqp=CAU'
+      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007537/antarctica-explorer/HurtigrutenLogo.png'
     ),
     (
       'Lindblad Expeditions',
       'https://world.expeditions.com',
       'https://world.expeditions.com/about/fleet#ships',
       'https://world.expeditions.com/book?destinations.name=Antarctica&destinations.name=Patagonia',
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIYnZRyYN0tIRpXDqp-e0F104zX1L1jm3PTQyGa02Gbg&s'
+      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007542/antarctica-explorer/LindbladLogo.png'
     );
 --    (
 --      'Ponant',
