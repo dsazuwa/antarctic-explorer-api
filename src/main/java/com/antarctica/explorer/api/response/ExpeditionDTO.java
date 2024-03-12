@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.dto;
+package com.antarctica.explorer.api.response;
 
 import java.math.BigDecimal;
 import java.sql.Date;

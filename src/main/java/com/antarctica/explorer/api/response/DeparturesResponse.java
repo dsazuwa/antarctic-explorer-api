@@ -1,6 +1,5 @@
 package com.antarctica.explorer.api.response;
 
-import com.antarctica.explorer.api.dto.DepartureDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

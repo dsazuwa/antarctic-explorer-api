@@ -1,4 +1,4 @@
-package com.antarctica.explorer.api.dto;
+package com.antarctica.explorer.api.response;
 
 import com.antarctica.explorer.api.model.CruiseLine;
 import java.math.BigDecimal;

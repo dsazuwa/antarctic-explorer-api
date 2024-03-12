@@ -1,6 +1,6 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.dto.CruiseLineDTO;
+import com.antarctica.explorer.api.response.CruiseLineDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import java.util.Map;
