@@ -46,7 +46,7 @@ public class CruiseLineService {
                 TreeMap::new));
   }
 
-  public CruiseLineDTO getCruiseLine(Long id) {
+  public CruiseLineDTO getCruiseLine(int id) {
     Optional<CruiseLine> cruiseLine = cruiseLineRepository.findById(id);
     return cruiseLine
         .map(line -> new CruiseLineDTO(line, expeditionRepository.findAllByCruiseLine(line)))
