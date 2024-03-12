@@ -64,7 +64,7 @@ public class ExpeditionController {
           expeditionService.findAll(
               filter,
               Math.max(0, page),
-              Math.max(0, size),
+              Math.max(1, size),
               sort,
               dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
 
@@ -85,10 +85,10 @@ public class ExpeditionController {
       return (expedition != null)
           ? ResponseEntity.ok(expedition)
           : ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(new ErrorResponse("Expedition with ID " + id + " not found"));
+              .body(new ErrorResponse("Expedition with ID (" + id + ") not found"));
     } catch (NumberFormatException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid expedition ID: " + id));
+          .body(new ErrorResponse("Invalid ID: " + id));
     }
   }
 
@@ -108,12 +108,12 @@ public class ExpeditionController {
           departureService.findExpeditionDepartures(
               Integer.parseInt(id),
               Math.max(0, page),
-              Math.max(0, size),
+              Math.max(1, size),
               sort,
               dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
     } catch (NumberFormatException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid expedition ID: " + id));
+          .body(new ErrorResponse("Invalid ID: " + id));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ErrorResponse(e.getMessage()));

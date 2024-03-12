@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/cruiseLines")
+@RequestMapping("/api/cruiselines")
 public class CruiseLineController {
 
   private final CruiseLineService service;
@@ -27,13 +27,17 @@ public class CruiseLineController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> getCruiseLineById(@PathVariable Long id) {
-    CruiseLineDTO cruiseLine = service.getCruiseLine(id);
+  public ResponseEntity<?> getCruiseLineById(@PathVariable String id) {
+    try {
+      CruiseLineDTO cruiseLine = service.getCruiseLine(Long.parseLong(id));
 
-    if (cruiseLine == null)
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ErrorResponse("Cruise line not found"));
-
-    return ResponseEntity.ok(cruiseLine);
+      return (cruiseLine != null)
+          ? ResponseEntity.ok(cruiseLine)
+          : ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body(new ErrorResponse("Cruise line with ID (" + id + ") not found"));
+    } catch (NumberFormatException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ErrorResponse("Invalid ID: " + id));
+    }
   }
 }

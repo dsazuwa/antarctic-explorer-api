@@ -36,10 +36,10 @@ public class VesselController {
       return (vessel != null)
           ? ResponseEntity.ok(vessel)
           : ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(new ErrorResponse("Vessel with ID " + id + " not found"));
+              .body(new ErrorResponse("Vessel with ID (" + id + ") not found"));
     } catch (NumberFormatException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid vessel ID: " + id));
+          .body(new ErrorResponse("Invalid ID: " + id));
     }
   }
 }
