@@ -1,7 +1,8 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.response.ErrorResponse;
+import com.antarctica.explorer.api.response.DeparturesResponse;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
+import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import com.antarctica.explorer.api.service.DepartureService;
 import com.antarctica.explorer.api.service.ExpeditionFilter;
 import com.antarctica.explorer.api.service.ExpeditionService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/expeditions")
@@ -29,7 +31,7 @@ public class ExpeditionController {
 
   //  TODO: resolve startDate and endDate not binding when using @ModelAttribute ExpeditionFilter
   @GetMapping
-  public ResponseEntity<?> findAllExpeditions(
+  public ResponseEntity<ExpeditionsResponse> findAllExpeditions(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "6") int size,
       @RequestParam(defaultValue = "nearestDate") String sort,
@@ -48,7 +50,9 @@ public class ExpeditionController {
         && !"cruiseLine".equalsIgnoreCase(sort)
         && !"startingPrice".equalsIgnoreCase(sort)
         && !"nearestDate".equalsIgnoreCase(sort))
-      return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Invalid sort field. Must be one of 'name', 'cruiseLine', 'startingPrice', or 'nearestDate'.");
 
     try {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -69,31 +73,28 @@ public class ExpeditionController {
               dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
 
     } catch (DateTimeParseException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid date format. Expected format: yyyy-MM-dd"));
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ErrorResponse(e.getMessage()));
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Invalid date format. Expected format: yyyy-MM-dd.");
     }
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> getExpedition(@PathVariable String id) {
+  public ResponseEntity<ExpeditionResponse> getExpedition(@PathVariable String id) {
     try {
       ExpeditionResponse expedition = expeditionService.getById(Integer.parseInt(id));
 
-      return (expedition != null)
-          ? ResponseEntity.ok(expedition)
-          : ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(new ErrorResponse("Expedition with ID (" + id + ") not found"));
+      if (expedition != null) return ResponseEntity.ok(expedition);
+      else
+        throw new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Expedition with ID (" + id + ") not found.");
+
     } catch (NumberFormatException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid ID: " + id));
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID: " + id + '.');
     }
   }
 
   @GetMapping("/{id}/departures")
-  public ResponseEntity<?> findExpeditionDepartures(
+  public ResponseEntity<DeparturesResponse> findExpeditionDepartures(
       @PathVariable String id,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "5") int size,
@@ -101,7 +102,8 @@ public class ExpeditionController {
       @RequestParam(defaultValue = "asc") String dir) {
 
     if (!"startDate".equalsIgnoreCase(sort) && !"price".equalsIgnoreCase(sort))
-      return new ResponseEntity<>("Invalid sort field", HttpStatus.BAD_REQUEST);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Invalid sort field. Must be one of 'startDate' or 'price'.");
 
     try {
       return ResponseEntity.ok(
@@ -112,11 +114,7 @@ public class ExpeditionController {
               sort,
               dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
     } catch (NumberFormatException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid ID: " + id));
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ErrorResponse(e.getMessage()));
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID: " + id + '.');
     }
   }
 }

@@ -1,6 +1,5 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.response.ErrorResponse;
 import com.antarctica.explorer.api.response.VesselResponse;
 import com.antarctica.explorer.api.response.VesselsResponse;
 import com.antarctica.explorer.api.service.VesselService;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/vessels")
@@ -29,17 +29,17 @@ public class VesselController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> getVesselById(@PathVariable String id) {
+  public ResponseEntity<VesselResponse> getVesselById(@PathVariable String id) {
     try {
       VesselResponse vessel = vesselService.getById(Integer.parseInt(id));
 
-      return (vessel != null)
-          ? ResponseEntity.ok(vessel)
-          : ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(new ErrorResponse("Vessel with ID (" + id + ") not found"));
+      if (vessel != null) return ResponseEntity.ok(vessel);
+      else
+        throw new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Vessel with ID (" + id + ") not found.");
+
     } catch (NumberFormatException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ErrorResponse("Invalid ID: " + id));
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID: " + id + '.');
     }
   }
 }
