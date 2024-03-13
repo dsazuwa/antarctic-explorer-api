@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public record ExpeditionResponse(
     String photoUrl,
     CruiseLine cruiseLine,
     Gallery[] gallery,
-    Map<Integer, Vessel> vessels,
+    List<Vessel> vessels,
     List<Itinerary> itineraries,
     List<Departure> departures,
     Extension[] extensions,
@@ -69,8 +68,8 @@ public record ExpeditionResponse(
     return gallery;
   }
 
-  private static Map<Integer, Vessel> mapVessel(String json) {
-    Map<Integer, Vessel> map = new HashMap<>();
+  private static List<Vessel> mapVessel(String json) {
+    List<Vessel> list = new ArrayList<>();
 
     if (!json.isEmpty()) {
       JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
@@ -81,22 +80,20 @@ public record ExpeditionResponse(
 
         JsonObject obj = element.getAsJsonObject();
         JsonElement cabin = obj.get("cabins");
-        int id = obj.get("id").getAsInt();
 
-        Vessel vessel =
+        list.add(
             new Vessel(
+                obj.get("id").getAsInt(),
                 obj.get("name").getAsString(),
                 getArray(obj, "description"),
                 cabin.isJsonNull() ? null : cabin.getAsInt(),
                 obj.get("capacity").getAsInt(),
                 obj.get("photo_url").getAsString(),
-                obj.get("website").getAsString());
-
-        map.put(id, vessel);
+                obj.get("website").getAsString()));
       }
     }
 
-    return map;
+    return list;
   }
 
   private static List<Itinerary> mapItinerary(String json) {
@@ -240,6 +237,7 @@ public record ExpeditionResponse(
   public record Gallery(String alt, String url) {}
 
   public record Vessel(
+      int id,
       String name,
       String[] description,
       Integer cabins,

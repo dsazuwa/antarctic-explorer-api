@@ -261,7 +261,7 @@ Get departures for the expedition with the provided id
       vessel: string | null;
       departingFrom: string | null;
       arrivingAt: string | null;
-      duration: number;
+      duration: string;
       startDate: Date;
       endDate: Date;
       startingPrice: number;
