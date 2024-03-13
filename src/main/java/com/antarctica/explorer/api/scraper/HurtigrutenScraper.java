@@ -14,7 +14,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -105,8 +104,8 @@ public class HurtigrutenScraper extends Scraper {
   private void scrapeVessels() {
     String capacitySelector =
         "div[data-testid=\"tags-container\"] > div[data-testid=\"tag-non-clickable\"]";
-    String highlightSelector = "div.grid.grid-cols-1.gap-3 > div.p-6.bg-white";
-    String descriptionSelector = "div.contentfulTextBlock > p";
+    String highlightSelector = "div.grid.grid-cols-1.gap-3.my-6 > div.p-6.bg-white";
+    String descriptionSelector = "p";
 
     Map<String, Integer> shipCabins =
         new HashMap<>() {
@@ -128,15 +127,15 @@ public class HurtigrutenScraper extends Scraper {
       String name = element.select("h3").text();
       int capacity =
           Integer.parseInt(element.select(capacitySelector).get(1).text().replaceAll("\\D", ""));
-      String photoUrl = element.select("img").attr("src");
+      String photoUrl = getImageUrl(element.select("img").attr("src"));
 
-      navigateTo(website);
+      navigateTo(website, highlightSelector);
+
+      WebElement highlights = findElements(highlightSelector).get(0);
+      List<WebElement> descElements = findElements(highlights, descriptionSelector);
 
       String[] description =
-          findElements(highlightSelector)
-              .get(0)
-              .findElements(By.cssSelector(descriptionSelector))
-              .stream()
+          descElements.stream()
               .map(WebElement::getText)
               .filter(text -> !text.isEmpty())
               .toArray((String[]::new));
@@ -177,7 +176,7 @@ public class HurtigrutenScraper extends Scraper {
     String name = element.select(nameSelector).text();
     String duration = element.select(durationSelector).text().replaceAll("[A-Za-z\\s]", "");
     BigDecimal startingPrice = extractPrice(element, priceSelector);
-    String photoUrl = element.select("img[alt=\"" + name + "\"]").attr("src");
+    String photoUrl = getImageUrl(element.select("img[alt=\"" + name + "\"]").attr("src"));
 
     String[] description =
         findElements(DESCRIPTION_SELECTOR).stream()
@@ -220,7 +219,7 @@ public class HurtigrutenScraper extends Scraper {
 
       if (src.equalsIgnoreCase(
           "https://www.hurtigruten.com/img/placeholder.png?q=75&w=3840&fm=webp")) continue;
-      expeditionService.saveGalleryImg(expedition, src, null);
+      expeditionService.saveGalleryImg(expedition, getImageUrl(src), null);
     }
   }
 
@@ -268,16 +267,16 @@ public class HurtigrutenScraper extends Scraper {
     while (hasNextYear) {
 
       WebElement yearElement = findElement(yearSelector);
-      wait.until((WebDriver wd) -> !yearElement.getText().isEmpty());
       String year = yearElement.getText();
 
-      for (WebElement monthButton :
-          findElements(section, monthSelector).stream().filter(WebElement::isEnabled).toList()) {
-        executor.executeScript("arguments[0].click();", monthButton);
+      if (!year.isEmpty())
+        for (WebElement monthButton :
+            findElements(section, monthSelector).stream().filter(WebElement::isEnabled).toList()) {
+          executor.executeScript("arguments[0].click();", monthButton);
 
-        findElements(section, departureSelector)
-            .forEach(departure -> saveDeparture(departure, year, expedition, itinerary));
-      }
+          findElements(section, departureSelector)
+              .forEach(departure -> saveDeparture(departure, year, expedition, itinerary));
+        }
 
       if (nextButton.isEnabled()) executor.executeScript("arguments[0].click();", nextButton);
       else hasNextYear = false;
@@ -341,7 +340,7 @@ public class HurtigrutenScraper extends Scraper {
     for (Element element : elements) {
       String name = element.select(nameSelector).text();
       String website = cruiseLine.getWebsite() + element.select("a").attr("href");
-      String photoUrl = element.select(imgSelector).attr("src");
+      String photoUrl = getImageUrl(element.select(imgSelector).attr("src"));
 
       Optional<Extension> extension = extensionService.getExtension(cruiseLine, name);
       if (extension.isPresent()) {
@@ -350,8 +349,9 @@ public class HurtigrutenScraper extends Scraper {
       }
 
       navigateTo(website);
-      BigDecimal startingPrice = extractPrice(findElement(priceSelector).getText());
-      int duration = Integer.parseInt(findElements(infoSelector).get(0).getText());
+      Document doc = getParsedPageSource();
+      BigDecimal startingPrice = extractPrice(doc.select(priceSelector).text());
+      int duration = Integer.parseInt(Objects.requireNonNull(doc.selectFirst(infoSelector)).text());
 
       extensionService.saveExtension(
           cruiseLine, expedition, name, startingPrice, duration, photoUrl, website);
@@ -369,5 +369,9 @@ public class HurtigrutenScraper extends Scraper {
           String currentSrc = element.getAttribute("src");
           return currentSrc != null && !currentSrc.contains("data:image/gif;base64");
         });
+  }
+
+  private String getImageUrl(String url) {
+    return url.startsWith("https://") ? url : "https:" + url;
   }
 }
