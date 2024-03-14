@@ -202,16 +202,17 @@ public class AuroraScraper extends Scraper {
       BigDecimal[] prices =
           extractPrices(departureDoc, startingPriceSelector, discountedPriceSelector);
 
-      departureService.saveDeparture(
-          expedition,
-          vessel,
-          getItinerary(departureDoc, expedition),
-          name,
-          startDate,
-          endDate,
-          prices[0],
-          prices[1],
-          website);
+      if (prices[0] != null)
+        departureService.saveDeparture(
+            expedition,
+            vessel,
+            getItinerary(departureDoc, expedition),
+            name,
+            startDate,
+            endDate,
+            prices[0],
+            prices[1],
+            website);
     }
   }
 
