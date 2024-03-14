@@ -166,15 +166,11 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                 e.photo_url
               FROM antarctica.expeditions e
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
-              LEFT JOIN (
-                SELECT *
-                FROM antarctica.departures d
-                WHERE
-                  (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
-                  (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
-              ) d ON e.expedition_id = d.expedition_id
+              LEFT JOIN antarctica.departures d ON e.expedition_id = d.expedition_id
               LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
               WHERE
+                (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
+                (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE)) AND
                 (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
                 (:min_capacity IS NULL OR v.capacity >= :min_capacity) AND
                 (:max_capacity IS NULL OR v.capacity <= :max_capacity) AND
@@ -195,15 +191,11 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
           SELECT count(*)
           FROM antarctica.expeditions e
           JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
-          LEFT JOIN (
-            SELECT *
-            FROM antarctica.departures d
-            WHERE
-              (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
-              (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE))
-          ) d ON e.expedition_id = d.expedition_id
+          LEFT JOIN antarctica.departures d ON e.expedition_id = d.expedition_id
           LEFT JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
           WHERE
+            (:start_date IS NULL OR d.start_date >= CAST(:start_date AS DATE)) AND
+            (:end_date IS NULL OR d.end_date <= CAST(:end_date AS DATE)) AND
             (cardinality(:cruise_lines) = 0 OR c.name = ANY(:cruise_lines)) AND
             (:min_capacity IS NULL OR v.capacity >= :min_capacity) AND
             (:max_capacity IS NULL OR v.capacity <= :max_capacity) AND
