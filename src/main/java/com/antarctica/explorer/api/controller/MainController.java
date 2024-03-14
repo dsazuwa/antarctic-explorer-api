@@ -1,11 +1,9 @@
 package com.antarctica.explorer.api.controller;
 
-import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.response.MainResponse;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import jakarta.validation.constraints.Min;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
@@ -29,8 +27,9 @@ public class MainController {
   public MainResponse getData(
       @RequestParam(defaultValue = "0") @Min(0) int page,
       @RequestParam(defaultValue = "6") @Min(1) int size) {
-    Map<String, CruiseLine> cruiseLines = cruiseLineService.getCruiseLines();
+
     return new MainResponse(
-        cruiseLines, expeditionService.findAll(page, size, "cruiseLine", Sort.Direction.ASC));
+        cruiseLineService.getCruiseLineNames(),
+        expeditionService.findAll(page, size, "nearestDate", Sort.Direction.ASC));
   }
 }

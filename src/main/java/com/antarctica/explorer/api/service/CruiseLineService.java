@@ -1,9 +1,9 @@
 package com.antarctica.explorer.api.service;
 
-import com.antarctica.explorer.api.response.CruiseLineDTO;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.repository.CruiseLineRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
+import com.antarctica.explorer.api.response.CruiseLineDTO;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,6 +44,10 @@ public class CruiseLineService {
                 Function.identity(),
                 (existing, replacement) -> existing,
                 TreeMap::new));
+  }
+
+  public String[] getCruiseLineNames() {
+    return cruiseLineRepository.findAll().stream().map(CruiseLine::getName).toArray(String[]::new);
   }
 
   public CruiseLineDTO getCruiseLine(int id) {
