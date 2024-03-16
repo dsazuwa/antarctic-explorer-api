@@ -2,6 +2,7 @@ package com.antarctica.explorer.api.controller;
 
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.response.CruiseLineDTO;
+import com.antarctica.explorer.api.response.CruiseLineNameResponse;
 import com.antarctica.explorer.api.service.CruiseLineService;
 import jakarta.validation.constraints.Min;
 import java.util.Map;
@@ -25,8 +26,13 @@ public class CruiseLineController {
   }
 
   @GetMapping
-  public Map<String, CruiseLine> getAllCruiseLines() {
-    return service.getCruiseLines();
+  public ResponseEntity<Map<String, CruiseLine>> getAllCruiseLines() {
+    return ResponseEntity.ok(service.getCruiseLines());
+  }
+
+  @GetMapping("/names")
+  public ResponseEntity<CruiseLineNameResponse> getAllNames() {
+    return ResponseEntity.ok(new CruiseLineNameResponse(service.getCruiseLineNames()));
   }
 
   @GetMapping("/{id}")

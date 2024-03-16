@@ -50,56 +50,16 @@ ___
 Contains general input logic and validation: incomes/expenses items, savings and
 account settings.
 
-| Method	 | Path	                             | Description	                         |
-|---------|:----------------------------------|:-------------------------------------|
-| GET	    | /api	                             | Get all cruise lines and expeditions |
-| GET	    | /api/cruise-lines	                | Get all cruise lines                 |
-| GET	    | /api/cruise-lines/{id}	           | Get specified cruise line data       |
-| GET	    | /api/vessels	                     | Get all vessels                      |
-| GET	    | /api/vessels/{id}	                | Get specified vessel data            |
-| GET	    | /api/expeditions	                 | Get all expeditions                  |
-| GET	    | /api/expeditions/{id}	            | Get specified expedition data        |
-| GET	    | /api/expeditions/{id}/departures	 | Get specified expedition departures  |
-
-### GET /api
-
-Retrieve initial data for the web application. Currently reconsidering its
-necessity.
-
-**Parameters**
-
-|   Name | Default |  Type   | Description                                                                        |
-|-------:|:-------:|:-------:|------------------------------------------------------------------------------------|
-| `page` |    0    | Integer | The page index for pagination, where indexing starts from 0. Must not be negative. |
-| `size` |    6    | Integer | The size of the page. Must be greater than 0.                                      |
-
-
-<details>
-  <summary>Response</summary>
-
-  ```js
-      {
-         cruiseLines: string[];
-         expeditions: {
-            data: {
-               id: number;
-               cruiseLine: string;
-               logo: string;
-               name: string;
-               duration: string;
-               startingPrice: number | null;
-               nearestDate: Date | null;
-               photoUrl: string;
-            }[];
-            itemsPerPage: number;
-            totalItems: number;
-            totalPages: number;
-            currentPage: number;
-         }
-      }
-  ```
-
-</details>
+| Method	 | Path	                             | Description	                        |
+|---------|:----------------------------------|:------------------------------------|
+| GET	    | /api/cruise-lines	                | Get all cruise line objects         |
+| GET	    | /api/cruise-lines/names	          | Get all cruise line names           |
+| GET	    | /api/cruise-lines/{id}	           | Get specified cruise line data      |
+| GET	    | /api/vessels	                     | Get all vessels                     |
+| GET	    | /api/vessels/{id}	                | Get specified vessel data           |
+| GET	    | /api/expeditions	                 | Get all expeditions                 |
+| GET	    | /api/expeditions/{id}	            | Get specified expedition data       |
+| GET	    | /api/expeditions/{id}/departures	 | Get specified expedition departures |
 
 ___
 
@@ -128,20 +88,23 @@ Get expeditions with pagination and optional filtering
 
   ```js
       {
-         data: {
-            id: number;
-            cruiseLine: string;
-            logo: string;
-            name: string;
-            duration: string;
-            startingPrice: number | null;
-            nearestDate: Date | null;
-            photoUrl: string;
-         }[],
-         itemsPerPage: number;
-         totalItems: number;
-         totalPages: number;
-         currentPage: number;
+         cruiseLines: string[];
+         expeditions: {
+            data: {
+               id: number;
+               cruiseLine: string;
+               logo: string;
+               name: string;
+               duration: string;
+               startingPrice: number | null;
+               nearestDate: Date | null;
+               photoUrl: string;
+            }[];
+            itemsPerPage: number;
+            totalItems: number;
+            totalPages: number;
+            currentPage: number;
+         }
       }
   ```
 
