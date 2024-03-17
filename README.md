@@ -59,6 +59,16 @@ utility.
 
 ___
 
+## Upcoming Features
+- [ ] Use Spring [Task Execution](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.task-execution-and-scheduling) and [Messaging](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging.kafka) to handle executing long running scrapping tasks
+- [ ] Implement PostgreSQL full text search and expose endpoint for searching expeditions
+- [ ] Scrape
+  - [ ] Quark Expeditions
+  - [ ] Ponant
+  - [ ] Viking Expeditions
+
+___
+
 ## Endpoints
 
 Contains general input logic and validation: incomes/expenses items, savings and
@@ -105,7 +115,6 @@ Get expeditions with pagination and optional filtering
          cruiseLines: string[];
          expeditions: {
             data: {
-                id: number;
                 cruiseLine: {
                     id: number;
                     name: string;
