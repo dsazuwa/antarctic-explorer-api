@@ -53,6 +53,9 @@ public class LindbladScraper extends Scraper {
   public void scrape() {
     try {
       newsletterRemoved = false;
+
+      cruiseLineService.deleteExpeditionsAndExtensions(cruiseLine);
+
       scrapeExpeditions();
     } finally {
       quitDriver();

@@ -47,6 +47,8 @@ public class AuroraScraper extends Scraper {
   @Override
   public void scrape() {
     try {
+      cruiseLineService.deleteExpeditionsAndExtensions(cruiseLine);
+
       navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);
       Elements expeditions = scrapeExpeditions();
 
@@ -194,6 +196,8 @@ public class AuroraScraper extends Scraper {
 
       Document departureDoc = getParsedPageSource();
 
+      Itinerary itinerary = getItinerary(departureDoc, expedition);
+
       Vessel vessel = getVessel(departureDoc);
       if (vessel == null) {
         Optional<Vessel> randVessel = vesselService.findOneByCruiseLIne(cruiseLine);
@@ -206,15 +210,7 @@ public class AuroraScraper extends Scraper {
 
       if (prices[0] != null)
         departureService.saveDeparture(
-            expedition,
-            vessel,
-            getItinerary(departureDoc, expedition),
-            name,
-            startDate,
-            endDate,
-            prices[0],
-            prices[1],
-            website);
+            expedition, vessel, itinerary, name, startDate, endDate, prices[0], prices[1], website);
     }
   }
 

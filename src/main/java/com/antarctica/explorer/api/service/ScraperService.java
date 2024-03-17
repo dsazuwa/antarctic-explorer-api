@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +33,6 @@ public class ScraperService {
     this.extensionService = extensionService;
   }
 
-  @Scheduled(cron = "0 0 0 */7 * ?")
   public void scrapeData() {
     List<Scraper> scrapers =
         new ArrayList<>(
@@ -65,15 +63,10 @@ public class ScraperService {
                 //  new VikingScraper(cruiseLineService, expeditionService)
                 ));
 
-    try {
-      scrapers.forEach(
-          scraper -> {
-            scraper.scrape();
-            System.out.println(scraper.getClass().getSimpleName() + " finished scraping");
-          });
-    } catch (RuntimeException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    scrapers.forEach(
+        scraper -> {
+          scraper.scrape();
+          System.out.println(scraper.getClass().getSimpleName() + " finished scraping");
+        });
   }
 }

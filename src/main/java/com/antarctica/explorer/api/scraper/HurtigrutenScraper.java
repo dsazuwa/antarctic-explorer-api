@@ -51,6 +51,8 @@ public class HurtigrutenScraper extends Scraper {
   @Override
   public void scrape() {
     try {
+      cruiseLineService.deleteExpeditionsAndExtensions(cruiseLine);
+
       scrapeVessels();
 
       navigateTo(cruiseLine.getExpeditionWebsite(), EXPEDITION_SELECTOR);

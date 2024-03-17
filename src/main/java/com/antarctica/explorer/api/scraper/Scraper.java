@@ -18,6 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class Scraper {
   protected CruiseLine cruiseLine;
 
+  protected CruiseLineService cruiseLineService;
   protected VesselService vesselService;
   protected ExpeditionService expeditionService;
   protected ItineraryService itineraryService;
@@ -37,6 +38,7 @@ public abstract class Scraper {
       CruiseLine cruiseLine) {
     this.cruiseLine = cruiseLineService.saveIfNotExist(cruiseLine);
 
+    this.cruiseLineService = cruiseLineService;
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
     this.itineraryService = itineraryService;

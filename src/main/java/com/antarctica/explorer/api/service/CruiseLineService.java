@@ -3,21 +3,28 @@ package com.antarctica.explorer.api.service;
 import com.antarctica.explorer.api.model.CruiseLine;
 import com.antarctica.explorer.api.repository.CruiseLineRepository;
 import com.antarctica.explorer.api.repository.ExpeditionRepository;
+import com.antarctica.explorer.api.repository.ExtensionRepository;
 import com.antarctica.explorer.api.response.CruiseLineDTO;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CruiseLineService {
   private final CruiseLineRepository cruiseLineRepository;
   private final ExpeditionRepository expeditionRepository;
+  private final ExtensionRepository extensionRepository;
 
   public CruiseLineService(
-      CruiseLineRepository repository, ExpeditionRepository expeditionRepository) {
+      CruiseLineRepository repository,
+      ExpeditionRepository expeditionRepository,
+      ExtensionRepository extensionRepository) {
     this.cruiseLineRepository = repository;
     this.expeditionRepository = expeditionRepository;
+    this.extensionRepository = extensionRepository;
   }
 
   public CruiseLine addCruiseLine(CruiseLine cruiseLine) {
@@ -28,6 +35,12 @@ public class CruiseLineService {
     Optional<CruiseLine> existingCruiseLine = cruiseLineRepository.findByName(cruiseLine.getName());
 
     return existingCruiseLine.orElseGet(() -> cruiseLineRepository.save(cruiseLine));
+  }
+
+  @Transactional
+  public void deleteExpeditionsAndExtensions(CruiseLine cruiseLine) {
+    expeditionRepository.deleteByCruiseLineId(cruiseLine.getId());
+    extensionRepository.deleteByCruiseLineId(cruiseLine.getId());
   }
 
   public List<CruiseLine> getAll() {
