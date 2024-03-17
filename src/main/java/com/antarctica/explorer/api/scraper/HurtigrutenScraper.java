@@ -125,8 +125,11 @@ public class HurtigrutenScraper extends Scraper {
     lazyLoadImages(SHIP_SELECTOR, "img");
 
     for (Element element : getParsedPageSource().select(SHIP_SELECTOR)) {
-      String website = cruiseLine.getWebsite() + element.select("a").attr("href");
       String name = element.select("h3").text();
+      Optional<Vessel> vessel = vesselService.findByName(name);
+      if (vessel.isPresent()) continue;
+
+      String website = cruiseLine.getWebsite() + element.select("a").attr("href");
       int capacity =
           Integer.parseInt(element.select(capacitySelector).get(1).text().replaceAll("\\D", ""));
       String photoUrl = getImageUrl(element.select("img").attr("src"));
@@ -142,7 +145,7 @@ public class HurtigrutenScraper extends Scraper {
               .filter(text -> !text.isEmpty())
               .toArray((String[]::new));
 
-      vesselService.saveIfNotExist(
+      vesselService.save(
           cruiseLine,
           name,
           description,
@@ -258,8 +261,10 @@ public class HurtigrutenScraper extends Scraper {
         "div.aurora-layout.aurora-layout-grid-33_67.aurora-layout-border-none > div.aurora-column";
     String nextSelector = "button.btn.relative.btn-flat.white";
     String monthSelector = "button.flex.gap-2.bg-white.p-3.mb-3";
-    String departureSelector = "div.relative.mt-3 > div.p-6.mb-6.bg-white.drop-shadow";
+    String departureSelector = "div[data-testid='selectedVoyage']";
     String yearSelector = "div.flex.gap-2.p-3.mb-3.bg-white > span";
+
+    waitForInvisibilityOfElement("div.spinner");
 
     JavascriptExecutor executor = getExecutor();
     WebElement section = findElements(sectionSelector).get(1);
@@ -267,17 +272,21 @@ public class HurtigrutenScraper extends Scraper {
 
     boolean hasNextYear = true;
     while (hasNextYear) {
-
       WebElement yearElement = findElement(yearSelector);
       String year = yearElement.getText();
 
+      List<WebElement> monthButtons =
+          findElements(section, monthSelector).stream().filter(WebElement::isEnabled).toList();
+
       if (!year.isEmpty())
-        for (WebElement monthButton :
-            findElements(section, monthSelector).stream().filter(WebElement::isEnabled).toList()) {
+        for (WebElement monthButton : monthButtons) {
+          getExecutor()
+              .executeScript(
+                  "arguments[0].scrollIntoView(true);", findElement("div[name='departures']"));
           executor.executeScript("arguments[0].click();", monthButton);
 
-          findElements(section, departureSelector)
-              .forEach(departure -> saveDeparture(departure, year, expedition, itinerary));
+          List<WebElement> departures = findElements(section, departureSelector);
+          departures.forEach(departure -> saveDeparture(departure, year, expedition, itinerary));
         }
 
       if (nextButton.isEnabled()) executor.executeScript("arguments[0].click();", nextButton);

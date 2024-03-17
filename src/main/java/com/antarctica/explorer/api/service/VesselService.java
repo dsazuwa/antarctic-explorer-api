@@ -18,6 +18,19 @@ public class VesselService {
     this.vesselRepository = vesselRepository;
   }
 
+  public Vessel save(
+      CruiseLine cruiseLine,
+      String name,
+      String[] description,
+      Integer capacity,
+      Integer cabins,
+      String website,
+      String photoUrl) {
+
+    return vesselRepository.save(
+        new Vessel(cruiseLine, name, description, capacity, cabins, website, photoUrl));
+  }
+
   public Vessel saveIfNotExist(
       CruiseLine cruiseLine,
       String name,
