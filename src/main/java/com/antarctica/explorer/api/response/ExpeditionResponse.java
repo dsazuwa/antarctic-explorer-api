@@ -44,11 +44,12 @@ public record ExpeditionResponse(
         mapOtherExpeditions((String) resultMap.get("other_expeditions")));
   }
 
-  private static CruiseLine mapCruiseLine(String json) {
+  public static CruiseLine mapCruiseLine(String json) {
     if (json.isEmpty()) return null;
 
     JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-    return new CruiseLine(obj.get("name").getAsString(), obj.get("logo").getAsString());
+    return new CruiseLine(
+        obj.get("id").getAsInt(), obj.get("name").getAsString(), obj.get("logo").getAsString());
   }
 
   private static Gallery[] mapToGallery(String json) {
@@ -197,8 +198,6 @@ public record ExpeditionResponse(
       expeditions[i] =
           new Expedition(
               obj.get("id").getAsInt(),
-              obj.get("logo").getAsString(),
-              obj.get("cruise_line").getAsString(),
               obj.get("name").getAsString(),
               obj.get("duration").getAsString(),
               nearestDate.isJsonNull() ? null : nearestDate.getAsString(),
@@ -232,7 +231,7 @@ public record ExpeditionResponse(
       String mapUrl,
       Schedule[] schedules) {}
 
-  public record CruiseLine(String name, String logo) {}
+  public record CruiseLine(int id, String name, String logo) {}
 
   public record Gallery(String alt, String url) {}
 
@@ -252,8 +251,6 @@ public record ExpeditionResponse(
 
   public record Expedition(
       int id,
-      String logo,
-      String cruiseLine,
       String name,
       String duration,
       String nearestDate,

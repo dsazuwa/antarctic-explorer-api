@@ -44,11 +44,15 @@ installing [Docker Desktop](https://docs.docker.com/desktop/install/windows-inst
     ```
 
 ___
+
 ## Dumping Data
 
-Seed data is provided to allow for a quick demo. On any schema change, be sure to re-dump data from your PostgreSQL database using the `pg_dump` command-line utility.
+Seed data is provided to allow for a quick demo. On any schema change, be sure
+to re-dump data from your PostgreSQL database using the `pg_dump` command-line
+utility.
 
-- One your local terminal, run the following command with the appropriate options.
+- One your local terminal, run the following command with the appropriate
+  options.
 
    ```bash
    docker exec antarctica-explorer-db-1 pg_dump -d <DB_NAME> -U <DB_USER> -a --encoding utf8 -f postgresql/seed.sql
@@ -60,16 +64,16 @@ ___
 Contains general input logic and validation: incomes/expenses items, savings and
 account settings.
 
-| Method	 | Path	                             | Description	                        |
-|---------|:----------------------------------|:------------------------------------|
-| GET	    | /api/cruise-lines	                | Get all cruise line objects         |
-| GET	    | /api/cruise-lines/names	          | Get all cruise line names           |
-| GET	    | /api/cruise-lines/{id}	           | Get specified cruise line data      |
-| GET	    | /api/vessels	                     | Get all vessels                     |
-| GET	    | /api/vessels/{id}	                | Get specified vessel data           |
-| GET	    | /api/expeditions	                 | Get all expeditions                 |
-| GET	    | /api/expeditions/{id}	            | Get specified expedition data       |
-| GET	    | /api/expeditions/{id}/departures	 | Get specified expedition departures |
+| Method	 | Path	                                                 | Description	                         |
+|---------|:------------------------------------------------------|:-------------------------------------|
+| GET	    | /api/cruise-lines	                                    | Get all cruise line objects          |
+| GET	    | /api/cruise-lines/names	                              | Get all cruise line names            |
+| GET	    | /api/cruise-lines/{id}	                               | Get specified cruise line            |
+| GET	    | /api/cruise-lines/{id}/expeditions/{name}	            | Get specified expedition             |
+| GET	    | /api/cruise-lines/{id}/expeditions/{name}/departures	 | Get specified expedition's departure |
+| GET	    | /api/expeditions	                                     | Get all expeditions                  |
+| GET	    | /api/vessels	                                         | Get all vessels                      |
+| GET	    | /api/vessels/{id}	                                    | Get specified vessel                 |
 
 ___
 
@@ -101,14 +105,18 @@ Get expeditions with pagination and optional filtering
          cruiseLines: string[];
          expeditions: {
             data: {
-               id: number;
-               cruiseLine: string;
-               logo: string;
-               name: string;
-               duration: string;
-               startingPrice: number | null;
-               nearestDate: Date | null;
-               photoUrl: string;
+                id: number;
+                cruiseLine: {
+                    id: number;
+                    name: string;
+                    logo: string;
+                };
+                logo: string;
+                name: string;
+                duration: string;
+                startingPrice: number | null;
+                nearestDate: Date | null;
+                photoUrl: string;
             }[];
             itemsPerPage: number;
             totalItems: number;
@@ -122,7 +130,7 @@ Get expeditions with pagination and optional filtering
 
 ___
 
-### GET /api/expeditions/{id}
+### GET /api/cruise-lines/{id}/expeditions/{name}
 
 Get data for the expedition with the provided id.
 
@@ -156,6 +164,7 @@ Get data for the expedition with the provided id.
          website: string;
          photoUrl: string;
          cruiseLine: {
+            id: number;
             name: string;
             logo: string;
          };
@@ -197,8 +206,6 @@ Get data for the expedition with the provided id.
          }[];
          otherExpeditions: {
             id: number;
-            logo: string;
-            cruiseLine: string;
             name: string;
             duration: string;
             nearestDate: Date;
@@ -235,7 +242,7 @@ Get data for the expedition with the provided id.
 
 ___
 
-### GET /api/expeditions/{id}/departures
+### GET /api/cruise-lines/{id}/expeditions/{name}/departures
 
 Get departures for the expedition with the provided id
 

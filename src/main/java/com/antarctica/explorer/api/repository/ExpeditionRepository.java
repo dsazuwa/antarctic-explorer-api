@@ -8,12 +8,18 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
+
+  @Modifying(clearAutomatically = true)
+  @Query("DELETE FROM Expedition e WHERE e.cruiseLine.id = :cruiseLineId")
+  void deleteByCruiseLineId(Integer cruiseLineId);
+
   @Query(
       value =
           """
@@ -84,8 +90,6 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                 c.cruise_line_id,
                 jsonb_build_object(
                   'id', e.expedition_id,
-                  'logo', c.logo,
-                  'cruise_line', c.name,
                   'name', e.name,
                   'duration', e.duration,
                   'nearest_date', min(d.start_date),
@@ -95,13 +99,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               FROM antarctica.expeditions e
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
               LEFT JOIN (SELECT * FROM antarctica.departures d) d ON e.expedition_id = d.expedition_id
-              WHERE c.cruise_line_id =
-                (
-                  SELECT a.cruise_line_id
-                  FROM antarctica.expeditions a
-                  WHERE a.expedition_id = :p_expedition_id
-                )
-                AND e.expedition_id <> :p_expedition_id
+              WHERE c.cruise_line_id = :p_cruise_line_id AND e.name <> :p_name
               GROUP BY e.expedition_id, c.cruise_line_id
               LIMIT 3
             )
@@ -115,6 +113,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               e.website,
               e.photo_url,
               jsonb_build_object(
+                'id', c.cruise_line_id,
                 'name', c.name,
                 'logo', c.logo
               ) AS cruise_line,
@@ -144,11 +143,12 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
             LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
             LEFT JOIN departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
-            WHERE e.expedition_id = :p_expedition_id
+            WHERE c.cruise_line_id = :p_cruise_line_id AND e.name = :p_name
             GROUP BY e.expedition_id, c.cruise_line_id
           """,
       nativeQuery = true)
-  Map<String, Object> getById(@Param("p_expedition_id") int id);
+  Map<String, Object> getByCruiseLineAndName(
+      @Param("p_cruise_line_id") int cruiseLineId, @Param("p_name") String name);
 
   @Query(
       value =
@@ -157,7 +157,11 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               SELECT
                 e.expedition_id as id,
                 c.name as cruise_line,
-                c.logo as logo,
+                jsonb_build_object(
+                  'id', c.cruise_line_id,
+                  'name', c.name,
+                  'logo', c.logo
+                ) AS cruise_line_obj,
                 min(v.capacity) as capacity,
                 e.name,
                 e.duration,
@@ -182,7 +186,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                     ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
                   END
                 )
-              GROUP BY e.expedition_id, c.name, c.logo
+              GROUP BY e.expedition_id, c.cruise_line_id
             )
             SELECT * FROM combined_table e
           """,
@@ -207,7 +211,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
                 ELSE CAST(e.duration AS INTEGER) BETWEEN :min_duration AND :max_duration
               END
             )
-          GROUP BY e.expedition_id, c.name, c.logo
+          GROUP BY e.expedition_id, c.cruise_line_id
           """,
       nativeQuery = true,
       queryRewriter = ExpeditionQueryWriter.class)

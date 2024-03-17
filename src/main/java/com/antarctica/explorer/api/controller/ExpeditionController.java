@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/expeditions")
+@RequestMapping("/api")
 @Validated
 public class ExpeditionController {
   private final ExpeditionService expeditionService;
@@ -32,7 +32,7 @@ public class ExpeditionController {
     this.departureService = departureService;
   }
 
-  @GetMapping
+  @GetMapping("/expeditions")
   public ResponseEntity<ExpeditionsResponse> findAllExpeditions(
       @RequestParam(defaultValue = "0") @Min(0) int page,
       @RequestParam(defaultValue = "6") @Min(1) int size,
@@ -68,19 +68,21 @@ public class ExpeditionController {
             dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<ExpeditionResponse> getExpedition(@PathVariable @Min(1) int id) {
-    ExpeditionResponse expedition = expeditionService.getById(id);
+  @GetMapping("/cruise-lines/{id}/expeditions/{name}")
+  public ResponseEntity<ExpeditionResponse> getExpedition(
+      @PathVariable @Min(1) int id, @PathVariable String name) {
+    ExpeditionResponse expedition = expeditionService.getByCruiseLineAndName(id, name);
 
     if (expedition != null) return ResponseEntity.ok(expedition);
     else
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Expedition with ID (" + id + ") not found.");
+          HttpStatus.NOT_FOUND, "Expedition (" + name + ") not found.");
   }
 
-  @GetMapping("/{id}/departures")
+  @GetMapping("/cruise-lines/{id}/expeditions/{name}/departures")
   public ResponseEntity<DeparturesResponse> findExpeditionDepartures(
       @PathVariable @Min(1) int id,
+      @PathVariable String name,
       @RequestParam(defaultValue = "0") @Min(0) int page,
       @RequestParam(defaultValue = "5") @Min(1) int size,
       @RequestParam(defaultValue = "startDate")
@@ -91,6 +93,7 @@ public class ExpeditionController {
     return ResponseEntity.ok(
         departureService.findExpeditionDepartures(
             id,
+            name,
             page,
             size,
             sort,

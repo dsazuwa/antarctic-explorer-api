@@ -77,8 +77,8 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public ExpeditionResponse getById(int id) {
-    Map<String, Object> obj = expeditionRepository.getById(id);
+  public ExpeditionResponse getByCruiseLineAndName(int cruiseLineId, String name) {
+    Map<String, Object> obj = expeditionRepository.getByCruiseLineAndName(cruiseLineId, name);
     return (!obj.isEmpty()) ? new ExpeditionResponse(obj) : null;
   }
 
