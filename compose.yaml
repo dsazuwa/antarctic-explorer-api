@@ -9,10 +9,12 @@ services:
        POSTGRES_USER: ${DB_USER}
        POSTGRES_PASSWORD: ${DB_PASSWORD}
        POSTGRES_DB: ${DB_NAME}
+       POSTGRES_DB_ENCODING: UTF8
      ports:
        - ${DB_HOST_PORT}:${DB_CONTAINER_PORT}
      volumes:
        - ./postgresql/data:/var/lib/postgresql/data
+       - ./postgresql:/postgresql
        - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   api:

@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS antarctica.cruise_lines;
 
 DROP SCHEMA IF EXISTS antarctica;
 
-CREATE SCHEMA antarctica;
+CREATE SCHEMA IF NOT EXISTS antarctica;
 
 CREATE TABLE antarctica.cruise_lines (
   cruise_line_id SERIAL,
@@ -128,6 +128,8 @@ CREATE TABLE antarctica.expeditions_extensions (
   CONSTRAINT fk_expedition_id FOREIGN KEY (expedition_id) REFERENCES antarctica.expeditions (expedition_id) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT fk_extension_id FOREIGN KEY (extension_id) REFERENCES antarctica.extensions (extension_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
+
+\i /postgresql/seed.sql
 
 --DO $$
 --BEGIN

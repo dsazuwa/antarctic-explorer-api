@@ -44,6 +44,16 @@ installing [Docker Desktop](https://docs.docker.com/desktop/install/windows-inst
     ```
 
 ___
+## Dumping Data
+
+Seed data is provided to allow for a quick demo. On any schema change, be sure to re-dump data from your PostgreSQL database using the `pg_dump` command-line utility.
+
+- One your local terminal, run the following command with the appropriate options.
+
+   ```bash
+   docker exec antarctica-explorer-db-1 pg_dump -d <DB_NAME> -U <DB_USER> -a --encoding utf8 -f postgresql/seed.sql
+
+___
 
 ## Endpoints
 
