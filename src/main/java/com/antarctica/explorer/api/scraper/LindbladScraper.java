@@ -41,7 +41,12 @@ public class LindbladScraper extends Scraper {
         itineraryService,
         departureService,
         extensionService,
-        "Lindblad Expeditions");
+        new CruiseLine(
+            "Lindblad Expeditions",
+            "https://world.expeditions.com",
+            "https://world.expeditions.com/about/fleet#ships",
+            "https://world.expeditions.com/book?destinations.name=Antarctica&destinations.name=Patagonia",
+            "https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007542/antarctica-explorer/LindbladLogo.png"));
   }
 
   @Override

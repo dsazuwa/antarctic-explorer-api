@@ -24,12 +24,10 @@ public class CruiseLineService {
     return cruiseLineRepository.save(cruiseLine);
   }
 
-  public CruiseLine saveIfNotExist(
-      String name, String website, String expeditionWebsite, String logo) {
-    Optional<CruiseLine> existingCruiseLine = cruiseLineRepository.findByName(name);
+  public CruiseLine saveIfNotExist(CruiseLine cruiseLine) {
+    Optional<CruiseLine> existingCruiseLine = cruiseLineRepository.findByName(cruiseLine.getName());
 
-    return existingCruiseLine.orElseGet(
-        () -> cruiseLineRepository.save(new CruiseLine(name, website, expeditionWebsite, logo)));
+    return existingCruiseLine.orElseGet(() -> cruiseLineRepository.save(cruiseLine));
   }
 
   public List<CruiseLine> getAll() {

@@ -1,9 +1,6 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.model.Expedition;
-import com.antarctica.explorer.api.model.Extension;
-import com.antarctica.explorer.api.model.Itinerary;
-import com.antarctica.explorer.api.model.Vessel;
+import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,7 +40,12 @@ public class HurtigrutenScraper extends Scraper {
         itineraryService,
         departureService,
         extensionService,
-        "Hurtigruten Expeditions");
+        new CruiseLine(
+            "Hurtigruten Expeditions",
+            "https://www.hurtigruten.com",
+            "https://www.hurtigruten.com/en-us/expeditions/ships/",
+            "https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises",
+            "https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007537/antarctica-explorer/HurtigrutenLogo.png"));
   }
 
   @Override

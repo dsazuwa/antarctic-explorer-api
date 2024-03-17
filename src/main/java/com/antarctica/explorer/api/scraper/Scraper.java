@@ -34,8 +34,8 @@ public abstract class Scraper {
       ItineraryService itineraryService,
       DepartureService departureService,
       ExtensionService extensionService,
-      String cruiseLineName) {
-    this.cruiseLine = cruiseLineService.getByName(cruiseLineName);
+      CruiseLine cruiseLine) {
+    this.cruiseLine = cruiseLineService.saveIfNotExist(cruiseLine);
 
     this.vesselService = vesselService;
     this.expeditionService = expeditionService;
@@ -53,9 +53,9 @@ public abstract class Scraper {
       String cruiseLineWebsite,
       String expeditionWebsite,
       String cruiseLineLogo) {
-    this.cruiseLine =
-        cruiseLineService.saveIfNotExist(
-            cruiseLineName, cruiseLineWebsite, expeditionWebsite, cruiseLineLogo);
+    //    this.cruiseLine =
+    //        cruiseLineService.saveIfNotExist(
+    //            cruiseLineName, cruiseLineWebsite, expeditionWebsite, cruiseLineLogo);
     this.expeditionService = expeditionService;
 
     initializeDriver();

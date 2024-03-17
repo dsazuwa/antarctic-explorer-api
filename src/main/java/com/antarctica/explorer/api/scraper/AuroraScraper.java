@@ -1,9 +1,6 @@
 package com.antarctica.explorer.api.scraper;
 
-import com.antarctica.explorer.api.model.Expedition;
-import com.antarctica.explorer.api.model.Extension;
-import com.antarctica.explorer.api.model.Itinerary;
-import com.antarctica.explorer.api.model.Vessel;
+import com.antarctica.explorer.api.model.*;
 import com.antarctica.explorer.api.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -39,7 +36,12 @@ public class AuroraScraper extends Scraper {
         itineraryService,
         departureService,
         extensionService,
-        "Aurora Expeditions");
+        new CruiseLine(
+            "Aurora Expeditions",
+            "https://www.aurora-expeditions.com/destination",
+            null,
+            "https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition",
+            "https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007648/antarctica-explorer/AuroraLogo.png"));
   }
 
   @Override

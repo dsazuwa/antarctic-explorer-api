@@ -129,31 +129,10 @@ CREATE TABLE antarctica.expeditions_extensions (
   CONSTRAINT fk_extension_id FOREIGN KEY (extension_id) REFERENCES antarctica.extensions (extension_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
-DO $$
-BEGIN
-  INSERT INTO antarctica.cruise_lines (name, website, fleet_website, expedition_website, logo)
-  VALUES
-    (
-      'Aurora Expeditions',
-      'https://www.aurora-expeditions.com/destination',
-      NULL,
-      'https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition',
-      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007648/antarctica-explorer/AuroraLogo.png'
-    ),
-    (
-      'Hurtigruten Expeditions',
-      'https://www.hurtigruten.com',
-      'https://www.hurtigruten.com/en-us/expeditions/ships/',
-      'https://www.hurtigruten.com/en-us/expeditions/cruises/?forceRefresh=true&destinations=antarctica-cruises',
-      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007537/antarctica-explorer/HurtigrutenLogo.png'
-    ),
-    (
-      'Lindblad Expeditions',
-      'https://world.expeditions.com',
-      'https://world.expeditions.com/about/fleet#ships',
-      'https://world.expeditions.com/book?destinations.name=Antarctica&destinations.name=Patagonia',
-      'https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007542/antarctica-explorer/LindbladLogo.png'
-    );
+--DO $$
+--BEGIN
+--  INSERT INTO antarctica.cruise_lines (name, website, fleet_website, expedition_website, logo)
+--  VALUES
 --    (
 --      'Ponant',
 --      'https://us.ponant.com',
@@ -165,13 +144,8 @@ BEGIN
 --      'https://www.quarkexpeditions.com/expeditions?f%5B0%5D=expedition_region%3Aantarctic'
 --    ),
 --    (
---      'Seaborn Expeditions',
---      'https://www.seabourn.com/en/cruise-destinations/expedition',
---      'https://www.seabourn.com/en/find-a-cruise?destinationIds:(S)'
---    ),
---    (
 --      'Viking Expeditions',
 --      'https://www.vikingcruises.com',
 --      'https://www.vikingcruises.com/expeditions/search-cruises/index.html?Countries=Antarctica|Argentina|Falkland%20Islands|Georgia%20and%20the%20South%20Sandwich%20Islands'
 --    );
-END $$;
+--END $$;
