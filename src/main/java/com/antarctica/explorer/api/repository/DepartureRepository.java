@@ -32,7 +32,7 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
               JOIN antarctica.itineraries i ON i.itinerary_id = d.itinerary_id
-              WHERE c.cruise_line_id = :p_cruise_line_id AND e.name = :p_name AND d.starting_price IS DISTINCT FROM NULL
+              WHERE c.name = :p_cruise_line AND e.name = :p_name AND d.starting_price IS DISTINCT FROM NULL
             )
             SELECT * FROM d
           """,
@@ -58,12 +58,12 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
               JOIN antarctica.vessels v ON v.vessel_id = d.vessel_id
               JOIN antarctica.itineraries i ON i.itinerary_id = d.itinerary_id
-              WHERE c.cruise_line_id = :p_cruise_line_id AND e.name = :p_name AND d.starting_price IS DISTINCT FROM NULL
+              WHERE c.name = :p_cruise_line AND e.name = :p_name AND d.starting_price IS DISTINCT FROM NULL
             )
             SELECT * FROM d
           """,
       nativeQuery = true,
       queryRewriter = ExpeditionQueryWriter.class)
   Page<Map<String, Object>> findExpeditionDepartures(
-      Pageable pageable, @Param("p_cruise_line_id") int id, @Param("p_name") String name);
+      Pageable pageable, @Param("p_cruise_line") String cName, @Param("p_name") String name);
 }

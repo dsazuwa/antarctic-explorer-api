@@ -43,11 +43,11 @@ public class DepartureService {
   }
 
   public DeparturesResponse getExpeditionDepartures(
-      int cruiseLineId, String name, int page, int size, String sortField, Sort.Direction dir) {
+      String cName, String name, int page, int size, String sortField, Sort.Direction dir) {
 
     Page<Map<String, Object>> result =
         departureRepository.findExpeditionDepartures(
-            PageRequest.of(page, size, Sort.by(dir, sortField)), cruiseLineId, name);
+            PageRequest.of(page, size, Sort.by(dir, sortField)), cName, name);
 
     return new DeparturesResponse(result);
   }

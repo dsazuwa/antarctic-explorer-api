@@ -79,16 +79,16 @@ ___
 Contains general input logic and validation: incomes/expenses items, savings and
 account settings.
 
-| Method	 | Path	                                                 | Description	                         |
-|---------|:------------------------------------------------------|:-------------------------------------|
-| GET	    | /api/cruise-lines	                                    | Get all cruise line objects          |
-| GET	    | /api/cruise-lines/names	                              | Get all cruise line names            |
-| GET	    | /api/cruise-lines/{id}	                               | Get specified cruise line            |
-| GET	    | /api/cruise-lines/{id}/expeditions/{name}	            | Get specified expedition             |
-| GET	    | /api/cruise-lines/{id}/expeditions/{name}/departures	 | Get specified expedition's departure |
-| GET	    | /api/expeditions	                                     | Get all expeditions                  |
-| GET	    | /api/vessels	                                         | Get all vessels                      |
-| GET	    | /api/vessels/{id}	                                    | Get specified vessel                 |
+| Method	 | Path	                                                    | Description	                         |
+|---------|:---------------------------------------------------------|:-------------------------------------|
+| GET	    | /api/cruise-lines	                                       | Get all cruise line objects          |
+| GET	    | /api/cruise-lines/names	                                 | Get all cruise line names            |
+| GET	    | /api/cruise-lines/{id}	                                  | Get specified cruise line            |
+| GET	    | /api/cruise-lines/{cName}/expeditions/{name}	            | Get specified expedition             |
+| GET	    | /api/cruise-lines/{cName}/expeditions/{name}/departures	 | Get specified expedition's departure |
+| GET	    | /api/expeditions	                                        | Get all expeditions                  |
+| GET	    | /api/vessels	                                            | Get all vessels                      |
+| GET	    | /api/vessels/{id}	                                       | Get specified vessel                 |
 
 ___
 
@@ -144,7 +144,7 @@ Get expeditions with pagination and optional filtering
 
 ___
 
-### GET /api/cruise-lines/{id}/expeditions/{name}
+### GET /api/cruise-lines/{cName}/expeditions/{name}
 
 Get data for the expedition with the provided name.
 
@@ -272,7 +272,7 @@ Get data for the expedition with the provided name.
 
 ___
 
-### GET /api/cruise-lines/{id}/expeditions/{name}/departures
+### GET /api/cruise-lines/{cName}/expeditions/{name}/departures
 
 Get departures for the expedition with the provided name
 

@@ -99,7 +99,7 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
               FROM antarctica.expeditions e
               JOIN antarctica.cruise_lines c ON c.cruise_line_id = e.cruise_line_id
               LEFT JOIN (SELECT * FROM antarctica.departures d) d ON e.expedition_id = d.expedition_id
-              WHERE c.cruise_line_id = :p_cruise_line_id AND e.name <> :p_name
+              WHERE c.name = :p_cruise_line AND e.name <> :p_name
               GROUP BY e.expedition_id, c.cruise_line_id
               LIMIT 3
             )
@@ -143,12 +143,12 @@ public interface ExpeditionRepository extends JpaRepository<Expedition, Long> {
             LEFT JOIN itineraries i ON i.expedition_id = e.expedition_id
             LEFT JOIN departures d ON d.itinerary_id = i.itinerary_id
             LEFT JOIN vessels v ON v.vessel_id = d.vessel_id
-            WHERE c.cruise_line_id = :p_cruise_line_id AND e.name = :p_name
+            WHERE c.name = :p_cruise_line AND e.name = :p_name
             GROUP BY e.expedition_id, c.cruise_line_id
           """,
       nativeQuery = true)
   Map<String, Object> getByCruiseLineAndName(
-      @Param("p_cruise_line_id") int cruiseLineId, @Param("p_name") String name);
+      @Param("p_cruise_line") String cName, @Param("p_name") String name);
 
   @Query(
       value =

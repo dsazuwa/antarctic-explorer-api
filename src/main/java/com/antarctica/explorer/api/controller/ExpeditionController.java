@@ -8,6 +8,7 @@ import com.antarctica.explorer.api.service.DepartureService;
 import com.antarctica.explorer.api.service.ExpeditionFilter;
 import com.antarctica.explorer.api.service.ExpeditionService;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,10 +70,10 @@ public class ExpeditionController {
             dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC));
   }
 
-  @GetMapping("/cruise-lines/{id}/expeditions/{name}")
+  @GetMapping("/cruise-lines/{cName}/expeditions/{name}")
   public ResponseEntity<ExpeditionDTO> getExpedition(
-      @PathVariable @Min(1) int id,
-      @PathVariable String name,
+      @PathVariable @NotBlank String cName,
+      @PathVariable @NotBlank String name,
       @RequestParam(defaultValue = "0") @Min(0) int page,
       @RequestParam(defaultValue = "5") @Min(1) int size,
       @RequestParam(defaultValue = "startDate")
@@ -80,7 +81,7 @@ public class ExpeditionController {
           String sort,
       @RequestParam(defaultValue = "asc") String dir) {
 
-    ExpeditionResponse expedition = expeditionService.getExpedition(id, name);
+    ExpeditionResponse expedition = expeditionService.getExpedition(cName, name);
 
     if (expedition == null)
       throw new ResponseStatusException(
@@ -88,7 +89,7 @@ public class ExpeditionController {
 
     DeparturesResponse departures =
         departureService.getExpeditionDepartures(
-            id,
+            cName,
             name,
             page,
             size,
@@ -98,10 +99,10 @@ public class ExpeditionController {
     return ResponseEntity.ok(new ExpeditionDTO(expedition, departures));
   }
 
-  @GetMapping("/cruise-lines/{id}/expeditions/{name}/departures")
+  @GetMapping("/cruise-lines/{cName}/expeditions/{name}/departures")
   public ResponseEntity<DeparturesResponse> findExpeditionDepartures(
-      @PathVariable @Min(1) int id,
-      @PathVariable String name,
+      @PathVariable @NotBlank String cName,
+      @PathVariable @NotBlank String name,
       @RequestParam(defaultValue = "0") @Min(0) int page,
       @RequestParam(defaultValue = "5") @Min(1) int size,
       @RequestParam(defaultValue = "startDate")
@@ -111,7 +112,7 @@ public class ExpeditionController {
 
     return ResponseEntity.ok(
         departureService.getExpeditionDepartures(
-            id,
+            cName,
             name,
             page,
             size,
