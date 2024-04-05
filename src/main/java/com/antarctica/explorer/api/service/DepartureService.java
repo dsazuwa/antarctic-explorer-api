@@ -42,7 +42,7 @@ public class DepartureService {
             website));
   }
 
-  public DeparturesResponse findExpeditionDepartures(
+  public DeparturesResponse getExpeditionDepartures(
       int cruiseLineId, String name, int page, int size, String sortField, Sort.Direction dir) {
 
     Page<Map<String, Object>> result =

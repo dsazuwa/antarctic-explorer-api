@@ -60,12 +60,17 @@ utility.
 ___
 
 ## Upcoming Features
-- [ ] Use Spring [Task Execution](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.task-execution-and-scheduling) and [Messaging](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging.kafka) to handle executing long running scrapping tasks
-- [ ] Implement PostgreSQL full text search and expose endpoint for searching expeditions
+
+- [ ] Use
+  Spring [Task Execution](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.task-execution-and-scheduling)
+  and [Messaging](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging.kafka)
+  to handle executing long running scrapping tasks
+- [ ] Implement PostgreSQL full text search and expose endpoint for searching
+  expeditions
 - [ ] Scrape
-  - [ ] Quark Expeditions
-  - [ ] Ponant
-  - [ ] Viking Expeditions
+    - [ ] Quark Expeditions
+    - [ ] Ponant
+    - [ ] Viking Expeditions
 
 ___
 
@@ -93,19 +98,19 @@ Get expeditions with pagination and optional filtering
 
 **Parameters**
 
-|           Name |    Default    |   Type   | Description                                                                                                                       |
-|---------------:|:-------------:|:--------:|-----------------------------------------------------------------------------------------------------------------------------------|
-|         `page` |       0       | Integer  | The page index for pagination, where indexing starts from 0. Must not be negative.                                                |
-|         `size` |       6       | Integer  | The size of the page. Must be greater than 0.                                                                                     |
-|         `sort` | `nearestDate` |  String  | The field upon which to sort expeditions by. <br/><br/> Supported values: `name`, `cruiseLine`, `startingPrice` or `nearestDate`. |
-|          `dir` |     `asc`     |  String  | The sort direction. <br/><br/> Supported values: `asc` or `desc`. Any value other than  `desc` will coalesce to `asc`.            |
-|    `startDate` |       x       |   Date   | The earliest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                             |
-|      `endDate` |       x       |   Date   | The latest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                               |
-|  `cruiseLines` |       x       | String[] | An array of cruise lines to filter expeditions by.                                                                                |
-| `duration.min` |       x       | Integer  | The minimum number of days an expedition can last.                                                                                |
-| `duration.max` |       x       | Integer  | The maximum number of days an expedition can last.                                                                                |
-| `capacity.min` |       x       | Integer  | The minimum vessel capacity an expedition can have.                                                                               |
-| `capacity.max` |       x       | Integer  | The maximum vessel capacity an expedition can have.                                                                               |
+|           Name |    Default    |   Type   | Description                                                                                                            |
+|---------------:|:-------------:|:--------:|------------------------------------------------------------------------------------------------------------------------|
+|         `page` |       0       | Integer  | The index for pagination, where indexing starts at 0. Must not be negative.                                            |
+|         `size` |       6       | Integer  | The size of the page. Must be greater than 0.                                                                          |
+|         `sort` | `nearestDate` |  String  | The field to sort expeditions on. <br/><br/> Supported values: `name`, `cruiseLine`, `startingPrice` or `nearestDate`. |
+|          `dir` |     `asc`     |  String  | The sort direction. <br/><br/> Supported values: `asc` or `desc`. Any value other than  `desc` will coalesce to `asc`. |
+|    `startDate` |       x       |   Date   | The earliest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                  |
+|      `endDate` |       x       |   Date   | The latest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                    |
+|  `cruiseLines` |       x       | String[] | An array of cruise lines to filter expeditions by.                                                                     |
+| `duration.min` |       x       | Integer  | The minimum number of days an expedition can last.                                                                     |
+| `duration.max` |       x       | Integer  | The maximum number of days an expedition can last.                                                                     |
+| `capacity.min` |       x       | Integer  | The minimum vessel capacity an expedition can have.                                                                    |
+| `capacity.max` |       x       | Integer  | The maximum vessel capacity an expedition can have.                                                                    |
 
 <details>
   <summary>Response</summary>
@@ -141,55 +146,49 @@ ___
 
 ### GET /api/cruise-lines/{id}/expeditions/{name}
 
-Get data for the expedition with the provided id.
+Get data for the expedition with the provided name.
 
 #### Parameters
 
-|           Name |    Default    |   Type   | Description                                                                                                                       |
-|---------------:|:-------------:|:--------:|-----------------------------------------------------------------------------------------------------------------------------------|
-|         `page` |       0       | Integer  | The page index for pagination, where indexing starts from 0. Must not be negative.                                                |
-|         `size` |       6       | Integer  | The size of the page. Must be greater than 0.                                                                                     |
-|         `sort` | `nearestDate` |  String  | The field upon which to sort expeditions by. <br/><br/> Supported values: `name`, `cruiseLine`, `startingPrice` or `nearestDate`. |
-|          `dir` |     `asc`     |  String  | The sort direction. <br/><br/> Supported values: `asc` or `desc`. Any value other than  `desc` will coalesce to `asc`.            |
-|    `startDate` |       x       |   Date   | The earliest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                             |
-|      `endDate` |       x       |   Date   | The latest date an expedition can depart. <br/><br/> The string must be in the `yyyy-MM-dd` format.                               |
-|  `cruiseLines` |       x       | String[] | An array of cruise lines to filter expeditions by.                                                                                |
-| `duration.min` |       x       | Integer  | The minimum number of days an expedition can last.                                                                                |
-| `duration.max` |       x       | Integer  | The maximum number of days an expedition can last.                                                                                |
-| `capacity.min` |       x       | Integer  | The minimum vessel capacity an expedition can have.                                                                               |
-| `capacity.max` |       x       | Integer  | The maximum vessel capacity an expedition can have.                                                                               |
+|   Name |   Default   |  Type   | Description                                                                                                            |
+|-------:|:-----------:|:-------:|------------------------------------------------------------------------------------------------------------------------|
+| `page` |      0      | Integer | The index for departures' pagination, where indexing starts at 0. Must not be negative.                                |
+| `size` |      5      | Integer | The size of the departures' page. Must be greater than 0.                                                              |
+| `sort` | `startDate` | String  | The field to sort departures on. <br/><br/> Supported values: `startDate` or `price`.                                  |
+|  `dir` |    `asc`    | String  | The sort direction. <br/><br/> Supported values: `asc` or `desc`. Any value other than  `desc` will coalesce to `asc`. |
 
 <details>
   <summary>Response</summary>
 
   ```js
-      {
-         id: number;
-         name: string;
-         description: string[];
-         highlights: string[];
-         duration: string;
-         startingPrice: number;
-         website: string;
-         photoUrl: string;
-         cruiseLine: {
+{
+    expedition: {
+        id: number;
+        name: string;
+        description: string[];
+        highlights: string[];
+        duration: string;
+        startingPrice: number;
+        website: string;
+        photoUrl: string;
+        cruiseLine: {
             id: number;
             name: string;
             logo: string;
-         };
-         gallery: {
+        };
+        gallery: {
             alt: string | null;
             url: string;
-         }[];
-         vessels: {
+        }[];
+        vessels: {
             name: string;
             description: string[];
             cabins: number;
             capacity: number;
             photoUrl: string;
             website: string;
-         }[];
-         itineraries: {
+        }[];
+        itineraries: {
             id: number;
             name: string;
             startPort: string;
@@ -201,33 +200,55 @@ Get data for the expedition with the provided id.
                header: string;
                content: string[];
             }[];
-         }[];
-         departures: {
+        }[];
+        departures: {
             startDate: Date;
             endDate: Date;
-         }[];
-         extensions: {
+        }[];
+        extensions: {
             name: string;
             startingPrice: number;
             duration: number;
             website: string;
             photoUrl: string;
-         }[];
-         otherExpeditions: {
+        }[];
+        otherExpeditions: {
             id: number;
             name: string;
             duration: string;
             nearestDate: Date;
             startingPrice: number;
             photoUrl: string;
-         }[];
-      }
+        }[];
+    },
+        
+    departures: {
+        data: {
+            id: number;
+            name: string;
+            itinerary: string;
+            vessel: string | null;
+            departingFrom: string | null;
+            arrivingAt: string | null;
+            duration: string;
+            startDate: Date;
+            endDate: Date;
+            startingPrice: number;
+            discountedPrice: number | null;
+            website: string;
+        }[];
+        itemsPerPage: number;
+        totalItems: number;
+        totalPages: number;
+        currentPage: number;
+    }
+}
   ```
 
 </details>
 
 <details>
-  <summary>Response Details</summary>
+  <summary>Expedition Response Details</summary>
 
 | Field            | Type     | Description                                     |
 |------------------|----------|-------------------------------------------------|
@@ -253,15 +274,15 @@ ___
 
 ### GET /api/cruise-lines/{id}/expeditions/{name}/departures
 
-Get departures for the expedition with the provided id
+Get departures for the expedition with the provided name
 
 **Parameters**
 
 |   Name |   Default   |  Type   | Description                                                                                                            |
 |-------:|:-----------:|:-------:|------------------------------------------------------------------------------------------------------------------------|
-| `page` |      0      | Integer | The page index for pagination, where indexing starts from 0. Must not be negative.                                     |
+| `page` |      0      | Integer | The index for pagination, where indexing starts at 0. Must not be negative.                                            |
 | `size` |      5      | Integer | The size of the page. Must be greater than 0.                                                                          |
-| `sort` | `startDate` | String  | The field upon which to sort expeditions by. <br/><br/> Supported values: `startDate` or `price`.                      |
+| `sort` | `startDate` | String  | The field to sort departures on. <br/><br/> Supported values: `startDate` or `price`.                                  |
 |  `dir` |    `asc`    | String  | The sort direction. <br/><br/> Supported values: `asc` or `desc`. Any value other than  `desc` will coalesce to `asc`. |
 
 <details>
@@ -269,24 +290,24 @@ Get departures for the expedition with the provided id
 
  ```js
 {
-   data: {
-      id: number;
-      name: string;
-      itinerary: string;
-      vessel: string | null;
-      departingFrom: string | null;
-      arrivingAt: string | null;
-      duration: string;
-      startDate: Date;
-      endDate: Date;
-      startingPrice: number;
-      discountedPrice: number | null;
-      website: string;
-   }[];
-   itemsPerPage: number;
-   totalItems: number;
-   totalPages: number;
-   currentPage: number;
+    data: {
+        id: number;
+        name: string;
+        itinerary: string;
+        vessel: string | null;
+        departingFrom: string | null;
+        arrivingAt: string | null;
+        duration: string;
+        startDate: Date;
+        endDate: Date;
+        startingPrice: number;
+        discountedPrice: number | null;
+        website: string;
+    }[];
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
 }
 ```
 

@@ -1,6 +1,7 @@
 package com.antarctica.explorer.api.controller;
 
 import com.antarctica.explorer.api.response.DeparturesResponse;
+import com.antarctica.explorer.api.response.ExpeditionDTO;
 import com.antarctica.explorer.api.response.ExpeditionResponse;
 import com.antarctica.explorer.api.response.ExpeditionsResponse;
 import com.antarctica.explorer.api.service.DepartureService;
@@ -69,14 +70,32 @@ public class ExpeditionController {
   }
 
   @GetMapping("/cruise-lines/{id}/expeditions/{name}")
-  public ResponseEntity<ExpeditionResponse> getExpedition(
-      @PathVariable @Min(1) int id, @PathVariable String name) {
-    ExpeditionResponse expedition = expeditionService.getByCruiseLineAndName(id, name);
+  public ResponseEntity<ExpeditionDTO> getExpedition(
+      @PathVariable @Min(1) int id,
+      @PathVariable String name,
+      @RequestParam(defaultValue = "0") @Min(0) int page,
+      @RequestParam(defaultValue = "5") @Min(1) int size,
+      @RequestParam(defaultValue = "startDate")
+          @Pattern(regexp = "startDate|price", message = "must be one of 'startDate' or 'price'.")
+          String sort,
+      @RequestParam(defaultValue = "asc") String dir) {
 
-    if (expedition != null) return ResponseEntity.ok(expedition);
-    else
+    ExpeditionResponse expedition = expeditionService.getExpedition(id, name);
+
+    if (expedition == null)
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Expedition (" + name + ") not found.");
+
+    DeparturesResponse departures =
+        departureService.getExpeditionDepartures(
+            id,
+            name,
+            page,
+            size,
+            sort,
+            dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC);
+
+    return ResponseEntity.ok(new ExpeditionDTO(expedition, departures));
   }
 
   @GetMapping("/cruise-lines/{id}/expeditions/{name}/departures")
@@ -91,7 +110,7 @@ public class ExpeditionController {
       @RequestParam(defaultValue = "asc") String dir) {
 
     return ResponseEntity.ok(
-        departureService.findExpeditionDepartures(
+        departureService.getExpeditionDepartures(
             id,
             name,
             page,
