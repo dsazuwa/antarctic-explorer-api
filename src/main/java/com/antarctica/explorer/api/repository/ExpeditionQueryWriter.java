@@ -3,11 +3,13 @@ package com.antarctica.explorer.api.repository;
 import com.google.common.base.CaseFormat;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.QueryRewriter;
+import org.springframework.lang.NonNull;
 
 public class ExpeditionQueryWriter implements QueryRewriter {
 
+  @NonNull
   @Override
-  public String rewrite(String query, Sort sort) {
+  public String rewrite(@NonNull String query, Sort sort) {
     for (Sort.Order order : sort) {
       String property = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, order.getProperty());
       query = query.replaceAll(order.getProperty(), property);
