@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: antarctica-explorer
+name: antarctic-explorer
 
 services:
   db:
@@ -19,7 +19,7 @@ services:
        - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   api:
-    container_name: antarctica-explorer-api
+    container_name: antarctic-explorer-api
     build:
       context: .
       dockerfile: Dockerfile

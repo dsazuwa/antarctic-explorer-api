@@ -9,10 +9,10 @@
         <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.antarctica.explorer</groupId>
+    <groupId>com.antarctic.explorer</groupId>
     <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Antarctica Explorer API</name>
+    <name>Antarctic Explorer API</name>
     <description>An API designed to facilitate exploration, expedition planning,
         and data retrieval for Antarctica, providing details on routes,
         activities, and logistics for adventurous journeys

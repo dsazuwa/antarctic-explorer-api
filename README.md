@@ -1,4 +1,4 @@
-# Antarctica Explorer Api
+# Antarctic Explorer Api
 
 This application scrapes information related to Antarctica expeditions from
 various cruise line websites and exposes endpoints for accessing the scraped
@@ -55,7 +55,7 @@ utility.
   options.
 
    ```bash
-   docker exec antarctica-explorer-db-1 pg_dump -d <DB_NAME> -U <DB_USER> -a --encoding utf8 -f postgresql/seed.sql
+   docker exec antarctic-explorer-db-1 pg_dump -d <DB_NAME> -U <DB_USER> -a --encoding utf8 -f postgresql/seed.sql
 
 ___
 

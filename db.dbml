@@ -1,4 +1,4 @@
-TABLE antarctica.cruise_lines {
+TABLE antarctic.cruise_lines {
   cruise_line_id SERIAL
   name VARCHAR(50) [NOT NULL]
   website VARCHAR(255) [NOT NULL]
@@ -8,7 +8,7 @@ TABLE antarctica.cruise_lines {
   PRIMARY KEY (cruise_line_id)
 }
 
-TABLE antarctica.expeditions {
+TABLE antarctic.expeditions {
   cruise_line_id INTEGER [NOT NULL]
   expedition_id SERIAL
   website TEXT
@@ -22,18 +22,18 @@ TABLE antarctica.expeditions {
   photo_url TEXT
   PRIMARY KEY (expedition_id)
 }
-ref: antarctica.expeditions.cruise_line_id > antarctica.cruise_lines.cruise_line_id
+ref: antarctic.expeditions.cruise_line_id > antarctic.cruise_lines.cruise_line_id
 
-TABLE antarctica.gallery {
+TABLE antarctic.gallery {
   photo_id SERIAL
   expedition_id INTEGER [NOT NULL]
   photo_url TEXT [NOT NULL]
   alt TEXT
   PRIMARY KEY (photo_id)
 }
-ref: antarctica.gallery.expedition_id > antarctica.expeditions.expedition_id
+ref: antarctic.gallery.expedition_id > antarctic.expeditions.expedition_id
 
-TABLE antarctica.vessels {
+TABLE antarctic.vessels {
   cruise_line_id INTEGER [NOT NULL]
   vessel_id SERIAL
   name VARCHAR [NOT NULL]
@@ -44,9 +44,9 @@ TABLE antarctica.vessels {
   photo_url TEXT [NOT NULL]
   PRIMARY KEY (cruise_id)
 }
-ref: antarctica.vessels.cruise_line_id > antarctica.cruise_lines.cruise_line_id
+ref: antarctic.vessels.cruise_line_id > antarctic.cruise_lines.cruise_line_id
 
-TABLE antarctica.itineraries {
+TABLE antarctic.itineraries {
   itinerary_id SERIAL
   expedition_id INTEGER [NOT NULL]
   name VARCHAR(255)
@@ -56,9 +56,9 @@ TABLE antarctica.itineraries {
   map_url TEXT
   PRIMARY KEY (itinerary_id)
 }
-ref: antarctica.itineraries.expedition_id > antarctica.expeditions.expedition_id
+ref: antarctic.itineraries.expedition_id > antarctic.expeditions.expedition_id
 
-TABLE antarctica.itinerary_details {
+TABLE antarctic.itinerary_details {
   detail_id SERIAL
   itinerary_id INTEGER [NOT NULL]
   day VARCHAR(10) [NOT NULL]
@@ -66,9 +66,9 @@ TABLE antarctica.itinerary_details {
   content TEXT[] [NOT NULL]
   PRIMARY KEY (detail_id)
 }
-ref: antarctica.itinerary_details.itinerary_id > antarctica.itineraries.itinerary_id
+ref: antarctic.itinerary_details.itinerary_id > antarctic.itineraries.itinerary_id
 
-TABLE antarctica.departures {
+TABLE antarctic.departures {
   departure_id SERIAL
   expedition_id INTEGER [NOT NULL]
   vessel_id INTEGER [NOT NULL]
@@ -81,11 +81,11 @@ TABLE antarctica.departures {
   website TEXT
   PRIMARY KEY (departure_id)
 }
-ref: antarctica.departures.expedition_id > antarctica.expeditions.expedition_id
-ref: antarctica.departures.vessel_id > antarctica.vessels.vessel_id
-ref: antarctica.departures.itinerary_id > antarctica.itineraries.itinerary_id
+ref: antarctic.departures.expedition_id > antarctic.expeditions.expedition_id
+ref: antarctic.departures.vessel_id > antarctic.vessels.vessel_id
+ref: antarctic.departures.itinerary_id > antarctic.itineraries.itinerary_id
 
-TABLE antarctica.extensions {
+TABLE antarctic.extensions {
   extension_id SERIAL
   cruise_line_id INTEGER [NOT NULL]
   name VARCHAR [NOT NULL]
@@ -95,11 +95,11 @@ TABLE antarctica.extensions {
   website TEXT
   PRIMARY KEY (extension_id)
 }
-ref: antarctica.extensions.cruise_line_id > antarctica.cruise_lines.cruise_line_id
+ref: antarctic.extensions.cruise_line_id > antarctic.cruise_lines.cruise_line_id
 
-TABLE antarctica.expeditions_extensions {
+TABLE antarctic.expeditions_extensions {
   extension_id INTEGER [NOT NULL]
   expedition_id INTEGER [NOT NULL]
 }
-ref: antarctica.expeditions_extensions.expedition_id > antarctica.expeditions.expedition_id
-ref: antarctica.expeditions_extensions.extension_id > antarctica.extensions.extension_id
+ref: antarctic.expeditions_extensions.expedition_id > antarctic.expeditions.expedition_id
+ref: antarctic.expeditions_extensions.extension_id > antarctic.extensions.extension_id
