@@ -68,7 +68,7 @@ public class LindbladScraper extends Scraper {
   }
 
   private void acceptCookie() {
-    String cookieSelector = "button.sc-baf605bd-1.flHA-dN";
+    String cookieSelector = "button.sc-baf605bd-1.hOSsqd";
 
     waitForPresenceOfElement(cookieSelector);
     WebElement acceptCookieButton = findElement(cookieSelector);
@@ -285,7 +285,7 @@ public class LindbladScraper extends Scraper {
   }
 
   private void scrapeDepartures(Document doc, Expedition expedition) {
-    String selector = "ol.sc-92502399-0.DfNNS > li";
+    String selector = "ol.sc-260e3791-0.cLZKIs > li";
 
     int year = 0;
     for (Element element : doc.select(selector)) {
