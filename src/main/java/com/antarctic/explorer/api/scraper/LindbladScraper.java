@@ -313,6 +313,10 @@ public class LindbladScraper extends Scraper {
             .map(x -> LocalDate.parse(x + ", " + year, formatter))
             .toArray(LocalDate[]::new);
 
+    LocalDate startDate = dates[0];
+    LocalDate endDate = dates[1];
+    if (endDate.isBefore(startDate)) endDate = endDate.plusYears(1);
+
     String website = cruiseLine.getWebsite() + element.select(linkSelector).attr("href");
 
     String vesselName = element.select(vesselSelector).text();
@@ -330,8 +334,8 @@ public class LindbladScraper extends Scraper {
         vessel,
         itinerary.get(0),
         null,
-        dates[0],
-        dates[1],
+        endDate,
+        startDate,
         prices[0],
         prices[1],
         website);

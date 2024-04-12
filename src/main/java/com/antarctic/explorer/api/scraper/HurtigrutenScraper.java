@@ -311,8 +311,13 @@ public class HurtigrutenScraper extends Scraper {
     Optional<Vessel> vessel = vesselService.findByName(vesselName);
     if (vessel.isEmpty()) return;
 
-    String startDate = doc.select(startSelector).text() + " " + year;
-    String endDate = doc.select(endSelector).get(1).text().replace("Returning ", "") + " " + year;
+    LocalDate startDate = LocalDate.parse(doc.select(startSelector).text() + " " + year, formatter);
+    LocalDate endDate =
+        LocalDate.parse(
+            doc.select(endSelector).get(1).text().replace("Returning ", "") + " " + year,
+            formatter);
+
+    if (endDate.isBefore(startDate)) endDate = endDate.plusYears(1);
 
     BigDecimal[] prices = extractPrices(doc, startingPriceSelector, discountedPriceSelector);
 
@@ -321,8 +326,8 @@ public class HurtigrutenScraper extends Scraper {
         vessel.get(),
         itinerary,
         null,
-        LocalDate.parse(startDate, formatter),
-        LocalDate.parse(endDate, formatter),
+        startDate,
+        endDate,
         prices[0],
         prices[1],
         expedition.getWebsite());
