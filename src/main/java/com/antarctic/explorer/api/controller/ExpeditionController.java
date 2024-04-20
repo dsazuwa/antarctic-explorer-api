@@ -3,10 +3,10 @@ package com.antarctic.explorer.api.controller;
 import com.antarctic.explorer.api.response.DeparturesResponse;
 import com.antarctic.explorer.api.response.ExpeditionDTO;
 import com.antarctic.explorer.api.response.ExpeditionResponse;
-import com.antarctic.explorer.api.service.DepartureService;
-import com.antarctic.explorer.api.service.ExpeditionService;
 import com.antarctic.explorer.api.response.ExpeditionsResponse;
+import com.antarctic.explorer.api.service.DepartureService;
 import com.antarctic.explorer.api.service.ExpeditionFilter;
+import com.antarctic.explorer.api.service.ExpeditionService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -71,32 +71,16 @@ public class ExpeditionController {
   }
 
   @GetMapping("/cruise-lines/{cName}/expeditions/{name}")
-  public ResponseEntity<ExpeditionDTO> getExpedition(
-      @PathVariable @NotBlank String cName,
-      @PathVariable @NotBlank String name,
-      @RequestParam(defaultValue = "0") @Min(0) int page,
-      @RequestParam(defaultValue = "5") @Min(1) int size,
-      @RequestParam(defaultValue = "startDate")
-          @Pattern(regexp = "startDate|price", message = "must be one of 'startDate' or 'price'.")
-          String sort,
-      @RequestParam(defaultValue = "asc") String dir) {
+  public ResponseEntity<ExpeditionResponse> getExpedition(
+      @PathVariable @NotBlank String cName, @PathVariable @NotBlank String name) {
 
-    ExpeditionResponse expedition = expeditionService.getExpedition(cName, name);
+    ExpeditionDTO expedition = expeditionService.getExpedition(cName, name);
 
     if (expedition == null)
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Expedition (" + name + ") not found.");
 
-    DeparturesResponse departures =
-        departureService.getExpeditionDepartures(
-            cName,
-            name,
-            page,
-            size,
-            sort,
-            dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC);
-
-    return ResponseEntity.ok(new ExpeditionDTO(expedition, departures));
+    return ResponseEntity.ok(new ExpeditionResponse(expedition));
   }
 
   @GetMapping("/cruise-lines/{cName}/expeditions/{name}/departures")

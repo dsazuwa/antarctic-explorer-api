@@ -221,27 +221,6 @@ Get data for the expedition with the provided name.
             photoUrl: string;
         }[];
     },
-        
-    departures: {
-        data: {
-            id: number;
-            name: string;
-            itinerary: string;
-            vessel: string | null;
-            departingFrom: string | null;
-            arrivingAt: string | null;
-            duration: string;
-            startDate: Date;
-            endDate: Date;
-            startingPrice: number;
-            discountedPrice: number | null;
-            website: string;
-        }[];
-        itemsPerPage: number;
-        totalItems: number;
-        totalPages: number;
-        currentPage: number;
-    }
 }
   ```
 
@@ -264,7 +243,6 @@ Get data for the expedition with the provided name.
 | gallery          | object[] | Images for the highlight carousel.              |
 | vessels          | object[] | Vessels used in this expedition.                |
 | itineraries      | object[] | Details of all itineraries for this expedition. |
-| departures       | object[] | Future departures.                              |
 | extensions       | object[] | Optional trip extensions.                       |
 | otherExpeditions | object[] | Information on 3 other similar expeditions.     |
 

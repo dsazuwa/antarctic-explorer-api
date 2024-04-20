@@ -5,7 +5,7 @@ import com.antarctic.explorer.api.model.Expedition;
 import com.antarctic.explorer.api.model.Gallery;
 import com.antarctic.explorer.api.repository.ExpeditionRepository;
 import com.antarctic.explorer.api.repository.GalleryRepository;
-import com.antarctic.explorer.api.response.ExpeditionResponse;
+import com.antarctic.explorer.api.response.ExpeditionDTO;
 import com.antarctic.explorer.api.response.ExpeditionsResponse;
 import java.math.BigDecimal;
 import java.util.Map;
@@ -79,9 +79,9 @@ public class ExpeditionService {
         photoUrl);
   }
 
-  public ExpeditionResponse getExpedition(String cName, String name) {
+  public ExpeditionDTO getExpedition(String cName, String name) {
     Map<String, Object> obj = expeditionRepository.getByCruiseLineAndName(cName, name);
-    return (!obj.isEmpty()) ? new ExpeditionResponse(obj) : null;
+    return (!obj.isEmpty()) ? new ExpeditionDTO(obj) : null;
   }
 
   public ExpeditionsResponse findAll(

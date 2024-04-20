@@ -6,7 +6,7 @@ import java.util.Map;
 
 public record ExpeditionsDTO(
     int id,
-    ExpeditionResponse.CruiseLine cruiseLine,
+    ExpeditionDTO.CruiseLine cruiseLine,
     String name,
     String duration,
     BigDecimal startingPrice,
@@ -15,7 +15,7 @@ public record ExpeditionsDTO(
   public ExpeditionsDTO(Map<String, Object> resultMap) {
     this(
         (Integer) resultMap.get("id"),
-        ExpeditionResponse.mapCruiseLine((String) resultMap.get("cruise_line_obj")),
+        ExpeditionDTO.mapCruiseLine((String) resultMap.get("cruise_line_obj")),
         (String) resultMap.get("name"),
         (String) resultMap.get("duration"),
         (BigDecimal) resultMap.get("starting_price"),
