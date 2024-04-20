@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.IntStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,6 +20,8 @@ public class AuroraScraper extends Scraper {
   private static final String CURRENT_PAGE_SELECTOR = "div.wp-pagenavi > span.current";
   private static final String NEXT_PAGE_SELECTOR = "div.wp-pagenavi > a.nextpostslink";
   private static final String PORT_SELECTOR = "div.inner-content > div.details > dl.clearfix > dd";
+
+  private final HashMap<String, String> shipMap;
 
   public AuroraScraper(
       CruiseLineService cruiseLineService,
@@ -42,6 +43,21 @@ public class AuroraScraper extends Scraper {
             null,
             "https://www.aurora-expeditions.com/find-an-expedition/?search&destinations%5B0%5D=antarctica-cruises&destinations%5B1%5D=antarctic-peninsula&destinations%5B2%5D=weddell-sea&destinations%5B3%5D=south-georgia-island&destinations%5B4%5D=falkland-islands-malvinas&destinations%5B5%5D=antarctic-circle&destinations%5B6%5D=patagonia&departDates&voyage_types%5B0%5D=expedition",
             "https://res.cloudinary.com/dcdakh7gh/image/upload/v1710007648/antarctica-explorer/AuroraLogo.png"));
+
+    shipMap =
+        new HashMap<>() {
+          {
+            put(
+                "Greg Mortimer",
+                "https://upload.wikimedia.org/wikipedia/commons/6/6f/Greg_Mortimer_IMO_9834648_P_Antarctica_03-01-2020.jpg");
+            put(
+                "Sylvia Earle",
+                "https://www.auroraexpeditions.com.au/wp-content/uploads/2020/01/Sylvia-Earle-in-Antarctica-scaled.jpg");
+            put(
+                "Douglas Mawson",
+                "https://www.usatoday.com/gcdn/authoring/authoring-images/2024/04/02/USAT/73179841007-douglas-mawson-starboard-render.jpg");
+          }
+        };
   }
 
   @Override
@@ -239,11 +255,12 @@ public class AuroraScraper extends Scraper {
 
     Elements descriptionElements = doc.select(descriptionSelector);
     String[] description =
-        IntStream.range(0, descriptionElements.size())
-            .filter(i -> i < 3)
-            .mapToObj(i -> descriptionElements.get(i).text())
+        descriptionElements.stream()
+            .map(Element::text)
+            .map(String::trim)
             .filter(text -> !text.isEmpty())
-            .toArray((String[]::new));
+            .limit(2)
+            .toArray(String[]::new);
 
     int capacity =
         Integer.parseInt(
@@ -253,10 +270,7 @@ public class AuroraScraper extends Scraper {
         Integer.parseInt(
             Objects.requireNonNull(doc.select(detailSelector).get(1)).text().replaceAll("\\D", ""));
 
-    String photoUrl =
-        name.equalsIgnoreCase("Greg Mortimer")
-            ? "https://upload.wikimedia.org/wikipedia/commons/6/6f/Greg_Mortimer_IMO_9834648_P_Antarctica_03-01-2020.jpg"
-            : "https://www.auroraexpeditions.com.au/wp-content/uploads/2020/01/Sylvia-Earle-in-Antarctica-scaled.jpg";
+    String photoUrl = shipMap.getOrDefault(name, shipMap.get("Greg Mortimer"));
 
     return vesselService.saveIfNotExist(
         cruiseLine, name, description, capacity, cabins, website, photoUrl);
