@@ -149,26 +149,30 @@ public class AuroraScraper extends Scraper {
     String imgSelector = "a > div";
     String linkSelector = "a";
 
-    WebElement toursSection = findElement(By.id("content-tours"));
-    List<WebElement> tours = findElements(toursSection, extensionSelector);
+    try {
+      WebElement toursSection = findElement(By.id("content-tours"));
+      List<WebElement> tours = findElements(toursSection, extensionSelector);
 
-    for (WebElement webElement : tours) {
-      Element element = Jsoup.parse(webElement.getAttribute("innerHTML"));
-      String name = element.select(nameSelector).text();
-      BigDecimal startingPrice = extractPrice(element, priceSelector);
+      for (WebElement webElement : tours) {
+        Element element = Jsoup.parse(webElement.getAttribute("innerHTML"));
+        String name = element.select(nameSelector).text();
+        BigDecimal startingPrice = extractPrice(element, priceSelector);
 
-      String[] parts = element.select(durationSelector).text().split(" / ");
-      String durationString = parts[0].replaceAll("[^0-9]", "");
-      int duration = Integer.parseInt(durationString);
+        String[] parts = element.select(durationSelector).text().split(" / ");
+        String durationString = parts[0].replaceAll("[^0-9]", "");
+        int duration = Integer.parseInt(durationString);
 
-      String photoUrl = extractPhotoUrl(element, imgSelector, "style", "url('", "')");
-      String website = element.select(linkSelector).attr("href");
+        String photoUrl = extractPhotoUrl(element, imgSelector, "style", "url('", "')");
+        String website = element.select(linkSelector).attr("href");
 
-      Extension extension =
-          extensionService.saveExtension(
-              cruiseLine, name, startingPrice, duration, photoUrl, website);
+        Extension extension =
+            extensionService.saveExtension(
+                cruiseLine, name, startingPrice, duration, photoUrl, website);
 
-      extensionService.saveExpeditionExtension(extension, expedition);
+        extensionService.saveExpeditionExtension(extension, expedition);
+      }
+    } catch (NoSuchElementException e) {
+      return;
     }
   }
 
